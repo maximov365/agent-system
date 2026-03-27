@@ -22,6 +22,8 @@ Generator → Spec Reviewer → Gatekeeper → Reviser → (repeat until accepte
 
 ## Quick start
 
+Full onboarding guide: [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
+
 1. Edit `project.config.yaml` with your project details
 2. Run `python setup.py` to render all templates
 3. Start working — Claude/Cursor will follow the agent workflow automatically
