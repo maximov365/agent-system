@@ -1,6 +1,6 @@
 # Claude Code Project Instructions
 
-**Project:** Unfolda — a web-based SaaS service that transforms EPUB books into structured formats for reading and understanding in a foreign language.
+**Project:** {{ project.name }}
 
 ---
 
@@ -123,8 +123,6 @@ Detailed implementation, architecture, testing, and safety rules are in `.cursor
 # Language
 
 All repository artifacts (code, documentation, prompts, comments) must be written in English.
-
-User-facing strings must go through the i18n layer — do not hardcode them.
 
 Conversational responses to the user may follow the user's language.
 

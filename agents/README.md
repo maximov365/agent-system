@@ -1,15 +1,13 @@
-# Unfolda
+# {{ project.name }}
 
-Unfolda is a web-based SaaS service that transforms EPUB books into structured formats for reading and understanding in a foreign language.
-
-Users upload a book, select a mode and target language, and receive a processed EPUB — either a high-quality context-aware translation, or a guided reading version with translations and explanations built into the text.
+{{ project.description }}
 
 ---
 
 ## Processing pipeline
 
 ```
-ingestion → segmentation → translation → formatting → export
+{{ pipeline.stages | map(attribute='name') | join(' → ') }}
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Agent Execution Model
 
-This document defines how Cursor and Claude Code must execute the Unfolda agent workflow.
+This document defines how Cursor and Claude Code must execute the {{ project.name }} agent workflow.
 
 The system is not a free-form multi-agent conversation. It is a controlled state machine executed through repeated **Iteration Manager → Agent → Handoff** cycles.
 

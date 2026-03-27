@@ -1,8 +1,8 @@
 # Architecture Guardrails
 
-This document defines the architectural constraints that all agents must respect when working on **{{ project.name }}**.
+This document defines the architectural constraints that all agents must respect when working on **Unfolda**.
 
-Its purpose is to prevent architecture drift, reduce accidental complexity, and keep the system aligned with the intended architecture.
+Its purpose is to prevent architecture drift, reduce accidental complexity, and keep the system aligned with the intended **pipeline-based, SaaS architecture**.
 
 These rules complement `docs/ARCHITECTURE.md`.
 
@@ -33,9 +33,7 @@ Agents must not override architecture constraints based on task descriptions alo
 
 # 1. Core Architecture Invariants
 
-{% if pipeline.stages %}
-The system is built around a deterministic processing pipeline: `{{ pipeline.stages | map(attribute='name') | join(' → ') }}`
-{% endif %}
+The system is built around a deterministic processing pipeline: `ingestion → segmentation → translation → formatting → export`
 
 This pipeline is the backbone of the system.
 
@@ -181,9 +179,15 @@ Any stateful behavior affecting pipeline correctness must be documented.
 
 # 7. Determinism and Reproducibility
 
-{{ project.name }} should prefer **deterministic behavior wherever practical**.
+Unfolda should prefer **deterministic behavior wherever practical**.
 
-This is especially important for non-LLM pipeline stages, validation, and orchestration.
+This is especially important for:
+
+- segmentation
+- formatting
+- export
+- validation
+- pipeline orchestration
 
 For LLM-related components:
 
@@ -199,7 +203,16 @@ LLM-specific logic must not leak into unrelated pipeline stages.
 
 # 8. Infrastructure Constraints
 
-Infrastructure components approved for the project are defined in `docs/ARCHITECTURE.md`.
+Unfolda is a **SaaS web service**.
+
+The following infrastructure components are part of the approved architecture:
+
+- web frontend
+- API backend
+- job queue for async background processing
+- object storage for uploaded and generated EPUB files
+- database for users, jobs, limits, and metadata
+- LLM provider for translation and explanation generation
 
 Infrastructure components must remain **isolated from domain logic**.
 

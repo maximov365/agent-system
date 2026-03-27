@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Render agent Jinja2 templates using values from project.config.yaml.
+Render Jinja2 templates across the repository using project.config.yaml.
 
 Usage:
-    python setup.py              # render all agent templates
+    python setup.py              # render all templates
     python setup.py --check      # dry-run — preview without writing
     python setup.py --restore    # restore original Jinja2 templates
 
-First run saves originals to agents/.templates/ for safe re-rendering.
+First run saves originals to .templates/ for safe re-rendering.
 """
 
 import argparse
@@ -28,10 +28,19 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / "project.config.yaml"
-AGENTS_DIR = ROOT / "agents"
-TEMPLATES_DIR = AGENTS_DIR / ".templates"
+TEMPLATES_DIR = ROOT / ".templates"
 
-JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}")
+JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}|\{%.+?%\}")
+
+TEMPLATE_GLOBS = [
+    "agents/*.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "docs/AGENT_HANDOFF_CONTRACT.md",
+    "docs/AGENT_EXECUTION_MODEL.md",
+    "docs/TASK_BACKLOG_AUTOMATION.md",
+    "docs/ARCHITECTURE_GUARDRAILS.md",
+]
 
 
 def load_config() -> dict:
@@ -56,26 +65,43 @@ def extract_variables(text: str) -> list[str]:
     return JINJA_VAR_RE.findall(text)
 
 
+def collect_template_paths() -> list[Path]:
+    """Resolve all glob patterns to actual files."""
+    paths = []
+    for pattern in TEMPLATE_GLOBS:
+        paths.extend(ROOT.glob(pattern))
+    return sorted(set(paths))
+
+
+def template_backup_path(source: Path) -> Path:
+    """Map a source file to its backup location inside .templates/."""
+    return TEMPLATES_DIR / source.relative_to(ROOT)
+
+
 def discover_templates() -> list[tuple[Path, Path]]:
     """Return (template_source, output_target) pairs."""
     pairs = []
 
     if TEMPLATES_DIR.exists():
-        for tpl in sorted(TEMPLATES_DIR.glob("*.md")):
-            pairs.append((tpl, AGENTS_DIR / tpl.name))
+        for target in collect_template_paths():
+            backup = template_backup_path(target)
+            if backup.exists():
+                pairs.append((backup, target))
+            elif has_variables(target.read_text()):
+                pairs.append((target, target))
     else:
-        for md in sorted(AGENTS_DIR.glob("*.md")):
-            if has_variables(md.read_text()):
-                pairs.append((md, md))
+        for path in collect_template_paths():
+            if has_variables(path.read_text()):
+                pairs.append((path, path))
 
     return pairs
 
 
 def save_template(source: Path) -> None:
-    TEMPLATES_DIR.mkdir(exist_ok=True)
-    dest = TEMPLATES_DIR / source.name
-    if not dest.exists():
-        shutil.copy2(source, dest)
+    backup = template_backup_path(source)
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    if not backup.exists():
+        shutil.copy2(source, backup)
 
 
 def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
@@ -89,7 +115,8 @@ def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
     for source, target in pairs:
         source_text = source.read_text()
         variables = extract_variables(source_text)
-        entry = {"file": target.name, "variables": len(variables), "status": "ok"}
+        rel = target.relative_to(ROOT)
+        entry = {"file": str(rel), "variables": len(variables), "status": "ok"}
 
         try:
             rendered = render_text(source_text, config)
@@ -105,7 +132,7 @@ def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
             continue
 
         if not dry_run:
-            if source.parent != TEMPLATES_DIR:
+            if source.parent == target.parent:
                 save_template(source)
             target.write_text(rendered)
 
@@ -119,9 +146,12 @@ def cmd_restore() -> list[str]:
         return []
 
     restored = []
-    for tpl in sorted(TEMPLATES_DIR.glob("*.md")):
-        shutil.copy2(tpl, AGENTS_DIR / tpl.name)
-        restored.append(tpl.name)
+    for backup in sorted(TEMPLATES_DIR.rglob("*.md")):
+        rel = backup.relative_to(TEMPLATES_DIR)
+        target = ROOT / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(backup, target)
+        restored.append(str(rel))
     return restored
 
 
@@ -142,13 +172,13 @@ def print_results(results: list[dict], dry_run: bool) -> None:
             print(f"  ✗ {r['file']}: {r['error']}", file=sys.stderr)
 
     if not dry_run and ok:
-        print(f"\nTemplates preserved in {TEMPLATES_DIR.relative_to(ROOT)}/")
+        print(f"\nTemplates preserved in .templates/")
         print("Run `python setup.py --restore` to get Jinja2 templates back.")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Render agent templates from project.config.yaml",
+        description="Render project templates from project.config.yaml",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="dry-run: preview without writing")

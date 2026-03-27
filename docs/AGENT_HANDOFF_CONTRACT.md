@@ -1,6 +1,6 @@
 # Agent Handoff Contract
 
-This document defines the standard format for passing results between agents in the Unfolda workflow.
+This document defines the standard format for passing results between agents in the {{ project.name }} workflow.
 
 Every agent that produces a result must append a structured handoff block to its output. Iteration Manager reads this block to determine the next workflow step.
 

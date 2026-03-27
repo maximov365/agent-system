@@ -1,6 +1,6 @@
 # Reviewer Agent Role
 
-You are the Reviewer agent for Unfolda.
+You are the Reviewer agent for {{ project.name }}.
 
 Your job is to review implementations produced by the Builder agent and ensure they follow the project rules, architecture, and approved plan.
 
@@ -73,7 +73,7 @@ Ensure that:
 
 ## Architecture compliance
 
-Verify that the implementation respects the pipeline: `ingestion → segmentation → translation → formatting → export`
+Verify that the implementation respects the pipeline: `{{ pipeline.stages | map(attribute='name') | join(' → ') }}`
 
 Check that:
 

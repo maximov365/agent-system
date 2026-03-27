@@ -1,6 +1,6 @@
 # Task Backlog Automation
 
-This document defines the rules for automated task creation and backlog management in Unfolda.
+This document defines the rules for automated task creation and backlog management in {{ project.name }}.
 
 Agents may propose tasks. Only Iteration Manager may commit tasks to `docs/TASKS.md`. Tasks must not be created speculatively — the backlog grows only from accepted artifacts and verified workflow outcomes.
 
@@ -107,7 +107,7 @@ estimated_complexity: small | medium | large
 
 All fields are required except `capability_id` and `parent_feature`, which may be `null` for standalone tasks. A task proposal missing any required field must be returned to the proposing agent before commitment.
 
-`capability_id` links a task to a product capability defined in `docs/FEATURE_MAP.md` (see Capability Index). Valid values are the capability IDs listed there: `AUTH`, `UPLOAD`, `PRECHECK`, `CONFIG`, `JOBS`, `PROGRESS`, `ERROR-UX`, `INGEST`, `SEGMENT`, `TRANSLATE`, `CONSISTENCY`, `FORMAT`, `EXPORT`, `QUEUE`, `STORAGE`, `QUOTA`, `RETENTION`, `COST`, `TELEMETRY`, `SECURITY`, `ADMIN`. This enables coverage tracking and prevents duplicate work on the same capability across different features.
+`capability_id` links a task to a product capability defined in `docs/FEATURE_MAP.md` (see Capability Index). Valid values are the capability IDs listed there. This enables coverage tracking and prevents duplicate work on the same capability across different features.
 
 ---
 

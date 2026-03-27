@@ -21,21 +21,19 @@ Earlier steps (Discovery, Product, Analytics Architect) are used to clarify scop
 
 # Project
 
-**Unfolda**
+**{{ project.name }}**
 
-Unfolda is a **web-based SaaS service** that transforms EPUB books into structured formats for reading and understanding in a foreign language.
+{{ project.description }}
 
-Users upload a book, select a mode and target language, and receive a processed EPUB — either a high-quality context-aware translation, or a guided reading version with translations and explanations built into the text.
-
-The system processes each book through a pipeline: ingestion → segmentation → translation → formatting → export
-
+{% if pipeline.stages %}
+The system processes work through a pipeline: {{ pipeline.stages | map(attribute='name') | join(' → ') }}
+{% endif %}
 The project prioritizes:
 
 - deterministic pipelines
 - clear architecture boundaries
 - minimal dependencies
 - predictable AI behavior
-- async background processing
 - measurable product outcomes
 
 ---
@@ -396,7 +394,6 @@ If a feature affects:
 - user actions
 - feature adoption
 - pipeline success
-- translation accuracy
 - output quality
 - operational performance
 
