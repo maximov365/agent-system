@@ -1,0 +1,631 @@
+# ============================================================================
+# Unfolda — Project Configuration
+# All product-specific content extracted from the agent system.
+# Agents reference this file instead of hardcoding domain knowledge.
+# ============================================================================
+
+project:
+  name: "Unfolda"
+  description: |-
+    Unfolda is a web-based SaaS service that transforms EPUB books into structured formats for reading and understanding in a foreign language.
+
+    Users upload a book, select a mode and target language, and receive a processed EPUB — either a high-quality context-aware translation, or a guided reading version with translations and explanations built into the text.
+  positioning: |
+    Upload an EPUB book → get it back translated and explained.
+    Not a dictionary. Not a machine translator.
+    A tool that makes foreign books readable.
+  core_metaphor: |
+    Unfold = develop the folded meaning.
+    A book in a foreign language is folded — the meaning is there but
+    compressed and inaccessible. Unfolda unfolds it: not just
+    word-for-word, but sense-for-sense.
+  ux_copy_examples:
+    empty_state: "Your books will appear here as you unfold them."
+    error: "We couldn't unfold this file."
+    onboarding: "Upload a book. We'll unfold the rest."
+
+# ----------------------------------------------------------------------------
+# Target users
+# ----------------------------------------------------------------------------
+
+target_users:
+  - segment: "Language learners"
+    need: "Read real books as part of language practice"
+  - segment: "Expats and immigrants"
+    need: "Understand books in the language of their new country"
+  - segment: "Original-text readers"
+    need: "Read books in the original language with comprehension support"
+  - segment: "Quick-translation users"
+    need: "Get a high-quality, context-aware book translation for personal use"
+
+# ----------------------------------------------------------------------------
+# Product modes
+# ----------------------------------------------------------------------------
+
+product_modes:
+  translate:
+    description: |
+      Full AI translation of the book with genre and tone awareness,
+      consistent names/titles/gender, and preserved formatting.
+      The user gets a high-quality translated EPUB that reads naturally.
+
+  guided:
+    description: |
+      Each paragraph is transformed into a 4-block reading structure:
+        1. Original text
+        2. Translation
+        3. Explanations (idioms, cultural references, non-obvious meaning)
+        4. Original text (shown again for reinforced comprehension)
+    notes: |
+      Translation and explanation generation may run as separate internal
+      passes. Guided Mode is more expensive and slower than Translate Mode.
+
+# ----------------------------------------------------------------------------
+# Translation options
+# ----------------------------------------------------------------------------
+
+translation_options:
+  mode:
+    values: ["translate", "guided"]
+  target_language:
+    source: "supported_languages"
+  source_language:
+    detection: "auto"
+    user_override: true
+  translation_style:
+    values: ["literal", "natural"]
+    literal: "Preserves author's sentence structure and word choices"
+    natural: "Rephrases for fluency in the target language"
+  user_language_level:
+    values: ["A1", "A2", "B1", "B2", "C1"]
+    A1_A2: "Simpler vocabulary, more detailed explanations"
+    B1_B2: "Moderate vocabulary, standard explanations"
+    C1: "Advanced vocabulary, minimal explanations unless culturally significant"
+  explanation_depth:
+    values: ["minimal", "standard", "detailed"]
+    applies_to: "guided mode only"
+
+# ----------------------------------------------------------------------------
+# Supported languages (MVP)
+# ----------------------------------------------------------------------------
+
+supported_languages:
+  - { code: "en", name: "English" }
+  - { code: "ru", name: "Russian" }
+  - { code: "sr", name: "Serbian" }
+  - { code: "de", name: "German" }
+  - { code: "fr", name: "French" }
+  - { code: "es", name: "Spanish" }
+  - { code: "it", name: "Italian" }
+  - { code: "pt", name: "Portuguese" }
+  - { code: "zh", name: "Chinese (Simplified)" }
+  - { code: "ja", name: "Japanese" }
+  - { code: "ko", name: "Korean" }
+  - { code: "tr", name: "Turkish" }
+  - { code: "nl", name: "Dutch" }
+  - { code: "pl", name: "Polish" }
+
+language_pair_tiers:
+  supported: "Validated and quality-tested for MVP — available without warning"
+  experimental: "May work but not quality-validated — shown with quality warning"
+  unsupported: "Not available in MVP — not selectable"
+
+source_language_confidence:
+  high: { threshold: ">=90%", ux: "Auto-fill; user can override" }
+  medium: { threshold: "60-89%", ux: "Yellow warning; editable; user should confirm" }
+  low: { threshold: "<60%", ux: "Explicit user confirmation required" }
+
+# ----------------------------------------------------------------------------
+# Quality tiers (FEAT-QUALITY-TIERS)
+# ----------------------------------------------------------------------------
+
+quality_tiers:
+  express:
+    credit_multiplier: 0.5
+    default_model_env: "TRANSLATION_MODEL_EXPRESS"
+    default_model_slug: "claude-haiku-4-5-20251001"
+  standard:
+    credit_multiplier: 1.0
+    default_model_env: "TRANSLATION_MODEL_STANDARD"
+    default_model_slug: "claude-sonnet-4-5-20251001"
+  premium:
+    credit_multiplier: 2.5
+    default_model_env: "TRANSLATION_MODEL_PREMIUM"
+    default_model_slug: "claude-opus-4-5-20251001"
+
+# ----------------------------------------------------------------------------
+# Processing pipeline
+# ----------------------------------------------------------------------------
+
+pipeline:
+  stages:
+    - name: ingestion
+      description: "Parse EPUB, extract text and structure, detect source language"
+      llm_allowed: false
+    - name: segmentation
+      description: "Split text into paragraph-level processing units with batch-planning metadata"
+      llm_allowed: false
+    - name: translation
+      description: "AI-powered translation and explanation generation (only LLM-enabled stage)"
+      llm_allowed: true
+    - name: formatting
+      description: "Assemble translated segments into mode-specific reading structure"
+      llm_allowed: false
+    - name: export
+      description: "Produce the final EPUB file with metadata and disclaimer"
+      llm_allowed: false
+
+  non_pipeline_boundary:
+    pre_submission_analysis:
+      description: |
+        Lightweight read-only EPUB inspection between upload and job
+        confirmation. Extracts source-language preview, word-count
+        estimate, and structural signals. NOT a pipeline stage.
+      must_not:
+        - "Produce canonical pipeline artifacts"
+        - "Invoke LLMs"
+        - "Replace ingestion"
+        - "Mutate document-processing state"
+
+# ----------------------------------------------------------------------------
+# Pipeline data contracts (summary)
+# ----------------------------------------------------------------------------
+
+pipeline_contracts:
+  version: "0.4"
+  representations:
+    - name: "UploadedSourceArtifact"
+      fields: ["artifact_id", "source_type=epub", "storage_key", "mime_type"]
+    - name: "PreSubmissionAnalysis"
+      fields: ["artifact_id", "source_language_preview", "estimated_word_count", "structural_signals", "early_eligibility_flags", "estimated_credit_inputs"]
+    - name: "NormalizedDocument"
+      fields: ["document_id", "source_type=epub", "title", "author", "text", "detected_language", "detection_confidence", "source_word_count", "chapter_refs[]", "structural_refs[]", "metadata"]
+    - name: "SegmentCollection"
+      fields: ["document_id", "mode", "segments[]", "batch_planning"]
+    - name: "Segment"
+      fields: ["id", "paragraph_id", "chapter_ref", "structural_ref", "original_text", "token_estimate"]
+    - name: "TranslatedSegmentCollection"
+      fields: ["document_id", "mode", "translated_segments[]"]
+    - name: "TranslatedSegment"
+      fields: ["id", "paragraph_id", "chapter_ref", "structural_ref", "original_text", "translated_text", "explanations"]
+    - name: "FormattedDocument"
+      fields: ["document_id", "mode", "formatted_blocks[]"]
+    - name: "FormattedBlock"
+      fields: ["paragraph_id", "chapter_ref", "original", "translation", "explanations", "original_repeat"]
+    - name: "ExportedEpub"
+      fields: ["file", "metadata.title", "metadata.author", "metadata.language", "metadata.description", "metadata.disclaimer_page"]
+  segment_id_formula: "hash(document_id + chapter_ref + paragraph_index)"
+
+# ----------------------------------------------------------------------------
+# Domain rules
+# ----------------------------------------------------------------------------
+
+domain_rules:
+  llm_rules: |
+    - Only the translation stage may invoke LLMs — no other stage directly or indirectly
+    - Never hardcode model names — use config constants
+    - Prompts must live in prompts/ directory
+    - Prompt assets organized: prompts/translation/, prompts/guided_explanations/, prompts/system/, prompts/templates/
+    - Each prompt definition includes: prompt_id, prompt_version, target_stage, model_family_compatibility
+    - Provider and model selection from configuration, not hardcoded
+    - Retries must be explicit and bounded
+    - Provider payloads scoped to current batch + required bounded context only
+    - Prefer deterministic or low-temperature settings for non-creative stages
+    - Log token usage at debug level for cost visibility
+
+  pipeline_principles: |
+    - Pipeline stages must remain conceptually distinct and independently testable
+    - Each stage has explicit inputs and outputs; stage contracts are stable interfaces
+    - Stages must not bypass or collapse the pipeline order
+    - No hidden cross-stage dependencies or side effects
+    - Domain logic must remain separate from infrastructure
+    - Stages treat incoming data as immutable — produce new structures
+    - Errors raised at stage boundaries, never silently swallowed
+    - Error messages must not leak sensitive input content
+    - Pipeline version changes when stage order, contracts, segmentation logic, prompt strategy, formatting, or export structure changes
+
+  privacy_rules: |
+    - ABSOLUTE RULE: raw book text must NEVER appear in logs, traces, analytics payloads, error payloads, admin views, or telemetry events
+    - No PII in analytics events unless explicitly approved
+    - Provider payloads contain only current batch text + bounded context
+    - Signed URLs must be object-scoped, short-lived, and purpose-specific
+    - Support/admin tooling defaults to metadata-only views
+    - Exceptional raw-content access: time-bounded, purpose-limited, audited
+    - Provider config should disable training on customer content where available
+
+  epub_rules: |
+    - MVP supports EPUB input only
+    - Max upload size: 50 MB
+    - DRM-protected EPUBs rejected with clear message — never circumvent copy protection
+    - Malformed EPUBs: attempt recovery for minor issues; reject severely broken files
+    - Zip bomb detection: expansion ratio ≤ 100:1
+    - Max file count inside EPUB: ≤ 10,000 entries
+    - Max HTML/XHTML files: ≤ 1,000 content documents
+    - Max chapter count: ≤ 500 spine items
+    - Parser timeout: ≤ 30 seconds for structure validation
+    - Total uncompressed size: ≤ 200 MB
+    - Output EPUB must feel like a proper book, not a raw text dump
+    - Output preserves: spine order, chapter structure, images, footnotes, links, CSS
+
+  output_metadata: |
+    - Title: original title + mode/language suffix (e.g. "Il Nome della Rosa — Guided, EN")
+    - Author: original author preserved
+    - Language: set to target language
+    - Description: note indicating AI-generated content and mode used
+    - Disclaimer page: inserted at the beginning of the book
+
+# ----------------------------------------------------------------------------
+# Consistency memory
+# ----------------------------------------------------------------------------
+
+consistency_memory:
+  scope: "job"
+  reuse_across_books: false
+  components:
+    - "terminology_map"
+    - "named_entity_registry"
+    - "rolling_chapter_context_summary"
+    - "unresolved_ambiguity_notes"
+  notes: |
+    Job-scoped, explicit, inspectable.
+    Not exposed as user-editable glossary in MVP.
+    May be persisted as structured artifact for resumability.
+    Follows job retention window for cleanup.
+
+# ----------------------------------------------------------------------------
+# Translation batch strategy
+# ----------------------------------------------------------------------------
+
+translation_batches:
+  description: |
+    Primary resumable unit for long-book processing.
+    Chapter-scoped, token-bounded internal batches.
+    Paragraph-visible output assembled from batches.
+  target_tokens_per_request: "30-60% of effective model context window"
+  constraints:
+    - "max_tokens_per_request"
+    - "target_tokens_per_request"
+    - "paragraph boundary integrity"
+  supported_book_range: "50,000 — 100,000 words"
+
+# ----------------------------------------------------------------------------
+# Credits system
+# ----------------------------------------------------------------------------
+
+credits:
+  unit: "abstract (not raw words)"
+  conversion: "source word count × mode × settings × admin-configurable multipliers"
+  guided_mode_costs_more: true
+  lifecycle:
+    - "Initial grant on registration (admin-configurable, default 100)"
+    - "Estimated cost shown before job confirmation"
+    - "Reserved on job submission"
+    - "Consumed on successful completion"
+    - "Refunded on failure or cancellation"
+  idempotent_per: "job_run"
+  user_visible: true
+  transaction_types: ["grant", "reservation", "consumption", "refund", "admin_adjustment"]
+  payment_integration: "post-MVP (designed for future Stripe addition)"
+
+# ----------------------------------------------------------------------------
+# Job lifecycle
+# ----------------------------------------------------------------------------
+
+job_lifecycle:
+  active_states: ["validating", "queued", "processing"]
+  terminal_states: ["completed", "failed", "cancelled", "expired"]
+  one_active_job_per_user: true
+  cancelled_distinct_from_failed: true
+  completion_policy: "strict all-or-nothing — no partial output"
+
+  job_run:
+    states: ["created", "leased", "processing", "completed", "failed", "cancelled"]
+    one_active_per_job: true
+    version_markers:
+      - "pipeline_version"
+      - "prompt_version"
+      - "provider_configuration_version"
+      - "model_alias"
+
+  translation_batch:
+    states: ["pending", "in_progress", "completed", "failed", "skipped"]
+
+# ----------------------------------------------------------------------------
+# Cost control (internal, separate from user credits)
+# ----------------------------------------------------------------------------
+
+cost_control:
+  layers:
+    - "Pre-run cost estimation"
+    - "Hard caps (per-job, per-user period, per-retry budget)"
+    - "Batch-level token accounting"
+    - "Prompt budget discipline"
+    - "Bounded retry budgets"
+  accounting_entity: "cost_ledger_entry"
+  exceeds_threshold_behavior: "Fail safely with clear policy reason"
+
+# ----------------------------------------------------------------------------
+# Failure taxonomy
+# ----------------------------------------------------------------------------
+
+failure_taxonomy:
+  provider_transient: { retryable: true, max_retries: 3, backoff: "exponential with jitter" }
+  provider_rate_limited: { retryable: true, max_retries: 5, backoff: "rate-limit-aware" }
+  provider_timeout: { retryable: true, max_retries: 3, backoff: "exponential with jitter" }
+  provider_malformed_response: { retryable: true, max_retries: 1, backoff: "immediate" }
+  content_deterministic: { retryable: false }
+  input_corrupt: { retryable: false }
+  policy_reject: { retryable: false }
+  internal_bug: { retryable: false }
+  infra_transient: { retryable: true, max_retries: 3, backoff: "exponential with jitter" }
+  infra_persistent: { retryable: false }
+
+# ----------------------------------------------------------------------------
+# Cancellation policy (per pipeline stage)
+# ----------------------------------------------------------------------------
+
+cancellation_policy:
+  ingestion: { cancellable: true, checkpoint: "before start or during if no significant work committed" }
+  segmentation: { cancellable: true, checkpoint: "before start; between chapters if chunked" }
+  translation: { cancellable: true, checkpoint: "before next provider call; NEVER mid-provider-call" }
+  formatting: { cancellable: "finish-fast", note: "deterministic and fast — run to completion" }
+  export: { cancellable: "finish-fast", note: "deterministic and fast — run to completion" }
+
+# ----------------------------------------------------------------------------
+# Timeline events
+# ----------------------------------------------------------------------------
+
+timeline_events:
+  - "job_created"
+  - "job_validated"
+  - "job_queued"
+  - "credit_reserved"
+  - "job_run_created"
+  - "job_run_leased"
+  - "job_processing_started"
+  - "batch_started"
+  - "batch_completed"
+  - "batch_failed"
+  - "retry_scheduled"
+  - "cancel_requested"
+  - "cancellation_acknowledged"
+  - "cancelled_at_safe_checkpoint"
+  - "job_cancelled"
+  - "credit_consumed"
+  - "credit_refunded"
+  - "job_completed"
+  - "job_failed"
+  - "cleanup_started"
+  - "cleanup_completed"
+  - "job_expired"
+
+# ----------------------------------------------------------------------------
+# Product analytics events
+# ----------------------------------------------------------------------------
+
+product_analytics_events:
+  - { event: "user_registered", trigger: "First Google login" }
+  - { event: "user_signed_in", trigger: "Subsequent login" }
+  - { event: "upload_started", trigger: "User initiates file upload" }
+  - { event: "upload_completed", trigger: "File successfully uploaded and validated" }
+  - { event: "upload_failed", trigger: "Validation fails" }
+  - { event: "config_viewed", trigger: "User reaches the config screen" }
+  - { event: "config_changed", trigger: "User modifies a config option" }
+  - { event: "job_submitted", trigger: "User confirms and submits" }
+  - { event: "job_submission_blocked", trigger: "Insufficient credits or policy reject" }
+  - { event: "job_completed", trigger: "Job finishes successfully" }
+  - { event: "job_failed", trigger: "Job reaches failed state" }
+  - { event: "job_cancelled", trigger: "Job cancelled by user" }
+  - { event: "job_tier_selected", trigger: "Job with quality_tier enqueued" }
+  - { event: "download_started", trigger: "User clicks download" }
+  - { event: "download_completed", trigger: "Signed URL served" }
+  - { event: "retry_initiated", trigger: "User clicks retry" }
+  - { event: "credit_history_viewed", trigger: "User opens credit history" }
+  - { event: "page_viewed", trigger: "User navigates to a screen" }
+
+analytics_by_default: true
+
+# ----------------------------------------------------------------------------
+# Canonical data entities
+# ----------------------------------------------------------------------------
+
+canonical_entities:
+  - "user"
+  - "user_credit_account"
+  - "credit_transaction"
+  - "job"
+  - "job_run"
+  - "document"
+  - "artifact"
+  - "translation_batch"
+  - "job_event"
+  - "cost_ledger_entry"
+
+artifact_classes:
+  - "source_epub"
+  - "output_epub"
+  - "translation_batch_artifact"
+  - "consistency_memory_snapshot"
+
+storage_key_pattern: "users/{user_id}/jobs/{job_id}/{artifact_type}/{artifact_id}"
+
+idempotency_boundary: "job_run_id + batch_index + pipeline_version + input_hash"
+
+# ----------------------------------------------------------------------------
+# Technology stack
+# ----------------------------------------------------------------------------
+
+tech_stack:
+  web: "Next.js with TypeScript"
+  api: "FastAPI (Python)"
+  workers: "Python workers (same codebase as API)"
+  database: "PostgreSQL (canonical state)"
+  queue_broker: "Redis (non-canonical, signaling only)"
+  object_storage: "S3-compatible with signed URLs"
+  llm_provider: "Single-provider adapter (Anthropic for MVP)"
+  auth: "Google OAuth via NextAuth.js → JWT (HS256) → FastAPI"
+  jwt_library: "PyJWT (not python-jose)"
+
+# ----------------------------------------------------------------------------
+# Retention & storage policy
+# ----------------------------------------------------------------------------
+
+retention:
+  uploaded_epub: "Deleted after terminal state + retention window"
+  generated_epub: "Deleted after retention window expires (multiple downloads allowed)"
+  intermediate_artifacts: "Follow job retention window"
+  long_term: "Metadata only — no book content"
+  retention_window_env: "RETENTION_WINDOW_DAYS"
+  retention_window_default: 30
+
+# ----------------------------------------------------------------------------
+# Quality gates (MVP launch)
+# ----------------------------------------------------------------------------
+
+quality_gates:
+  language_detection_accuracy: ">=95%"
+  structural_preservation: ">=98% pass rate"
+  paragraph_completeness: ">=99%"
+  hallucination_rate: "<=1%"
+  reader_compatibility: ">=95% (Apple Books, Moon Reader, KOReader)"
+  retry_recovery: ">=90% for provider-transient failures"
+  credit_accuracy: ">=95% of jobs (reserved vs consumed ±5%)"
+  end_to_end_success: ">=90% for typical 50k-100k word books"
+
+# ----------------------------------------------------------------------------
+# Fingerprinting policy
+# ----------------------------------------------------------------------------
+
+fingerprints:
+  source_epub: { algorithm: "SHA-256", purpose: "Detect re-uploads, verify integrity" }
+  normalized_document: { algorithm: "SHA-256 of text+structure", purpose: "Detect INGEST changes, reproducibility" }
+  output_epub: { algorithm: "SHA-256", purpose: "Verify delivery integrity" }
+  translation_batch: { algorithm: "SHA-256 per batch", purpose: "Corruption detection, resumability" }
+
+# ----------------------------------------------------------------------------
+# Brand identity
+# ----------------------------------------------------------------------------
+
+brand:
+  colors:
+    primary: { name: "Deep Navy", hex: "#1a1f36", usage: "Original text, headings, borders, primary actions" }
+    accent: { name: "Warm Amber", hex: "#e8a849", usage: "Translation layer, highlights, interactive states" }
+    background: { name: "Cream", hex: "#faf6ef", usage: "Page background, card surfaces" }
+    error: { hex: "#c0392b", usage: "Blocking errors" }
+  color_story: "Navy = source text. Amber = translation. The palette is the product metaphor made visible."
+  typography:
+    headings: { family: "Satoshi", weight: "Medium 500" }
+    body: { family: "Inter", weight: "Regular 400" }
+  tone:
+    - "Calm — Never urgent. Never pushy. The reader is in control."
+    - "Clear — Say what it does. No marketing fluff."
+    - "Literate — Respect the reader. They love books."
+    - "Honest — Show estimates as estimates. Show limitations."
+  design_principles:
+    - "Calm, not loud. Whitespace is content."
+    - "Clear, not clever. Labels describe what a thing does."
+    - "Book-first. The book cover and title are the hero."
+    - "Two colors tell the story. Navy for source, amber for translation."
+    - "Generous line length. 60-75ch for body text."
+    - "No dark patterns."
+  buttons:
+    primary: "navy fill + cream text"
+    secondary: "amber fill + navy text"
+    destructive: "red outline only (no fill)"
+  progress_colors:
+    active: "amber"
+    completed: "navy"
+    pending: "grey"
+  spacing:
+    base_unit: "4px"
+    component_padding: "16px"
+    page_margin_mobile: "24px"
+    page_margin_desktop: "48px"
+
+# ----------------------------------------------------------------------------
+# Environment variables (Unfolda-specific)
+# ----------------------------------------------------------------------------
+
+env_vars:
+  auth:
+    - { name: "GOOGLE_CLIENT_ID", purpose: "Google OAuth client ID" }
+    - { name: "GOOGLE_CLIENT_SECRET", purpose: "Google OAuth client secret" }
+    - { name: "NEXTAUTH_SECRET", purpose: "Shared JWT signing secret (Next.js + FastAPI)" }
+    - { name: "NEXTAUTH_URL", purpose: "NextAuth.js base URL" }
+    - { name: "BACKEND_URL", purpose: "FastAPI backend URL" }
+  admin:
+    - { name: "ADMIN_EMAILS", purpose: "Comma-separated admin email allowlist" }
+    - { name: "INITIAL_CREDIT_GRANT", purpose: "Credits granted on registration", default: 100 }
+  storage:
+    - { name: "S3_BUCKET_NAME", purpose: "Object storage bucket" }
+    - { name: "S3_ENDPOINT_URL", purpose: "S3-compatible endpoint" }
+    - { name: "AWS_ACCESS_KEY_ID", purpose: "Storage credentials" }
+    - { name: "AWS_SECRET_ACCESS_KEY", purpose: "Storage credentials" }
+    - { name: "AWS_REGION", purpose: "Storage region" }
+  retention:
+    - { name: "RETENTION_WINDOW_DAYS", purpose: "File retention window", default: 30 }
+  translation:
+    - { name: "TRANSLATION_MODEL", purpose: "Default translation model (legacy fallback)" }
+    - { name: "TRANSLATION_MODEL_EXPRESS", purpose: "Express tier model" }
+    - { name: "TRANSLATION_MODEL_STANDARD", purpose: "Standard tier model" }
+    - { name: "TRANSLATION_MODEL_PREMIUM", purpose: "Premium tier model" }
+
+# ----------------------------------------------------------------------------
+# Legal content references
+# ----------------------------------------------------------------------------
+
+legal:
+  tos_key_clauses:
+    - "Service: AI-assisted EPUB translation using large language models"
+    - "User retains all rights to uploaded files; grants limited processing licence"
+    - "User warrants rights to upload the source file"
+    - "Files deleted after RETENTION_WINDOW_DAYS (default 30)"
+    - "Credits are consumable virtual currency; no refunds except as required by law"
+    - "Service provided 'as is'; no warranty on translation quality"
+  privacy_key_clauses:
+    - "Data collected: Google account email/name, EPUB content (processing only), job config/metadata"
+    - "Third parties: Google (OAuth), Anthropic (LLM processing)"
+    - "No advertising or analytics SDKs"
+    - "User data never sold or shared for marketing"
+    - "Right to deletion — contact support"
+  copyright_policy:
+    - "Terms acceptance on first login"
+    - "DRM rejection at upload validation"
+    - "Disclaimer page injected in output EPUB"
+    - "Abuse detection: manual/admin-driven for MVP"
+
+# ----------------------------------------------------------------------------
+# Output docs
+# ----------------------------------------------------------------------------
+
+output_docs:
+  has_brand_guide: true
+  brand_guide_path: "docs/BRAND.md"
+  custom_docs:
+    - { name: "PRD.md", description: "Product requirements document" }
+    - { name: "ARCHITECTURE.md", description: "System architecture" }
+    - { name: "ARCHITECTURE_GUARDRAILS.md", description: "Architectural constraints" }
+    - { name: "PIPELINE_CONTRACTS.md", description: "Stage input/output contracts" }
+    - { name: "DECISIONS.md", description: "Accepted technical decisions" }
+    - { name: "TASKS.md", description: "Task tracking with lifecycle statuses" }
+    - { name: "FEATURES.md", description: "Feature specifications per capability" }
+    - { name: "FEATURE_MAP.md", description: "Capability blocks, dependency map, capability index" }
+    - { name: "ARCH_DISCOVERY.md", description: "Pre-architecture discovery recommendations" }
+
+# ----------------------------------------------------------------------------
+# MVP non-goals (explicit exclusions)
+# ----------------------------------------------------------------------------
+
+mvp_non_goals:
+  - "Non-EPUB input formats (TXT, PDF)"
+  - "Non-EPUB output formats (MOBI, PDF)"
+  - "Payment provider integration (Stripe)"
+  - "User-editable glossaries or prompt customization"
+  - "Native mobile app (iOS / Android)"
+  - "Batch upload (multiple books at once)"
+  - "Social login providers other than Google"
+  - "Multi-provider LLM routing"
+  - "Persistent cross-book glossary"
+  - "Built-in reading client"
+  - "Full distributed tracing stack"
+  - "Heavy workflow orchestration platform"

@@ -1,0 +1,332 @@
+# Agent Execution Model
+
+This document defines how Cursor and Claude Code must execute the Unfolda agent workflow.
+
+The system is not a free-form multi-agent conversation. It is a controlled state machine executed through repeated **Iteration Manager → Agent → Handoff** cycles.
+
+---
+
+## Core principle
+
+Every execution cycle follows the same structure:
+
+```
+User request or upstream result
+        ↓
+  Iteration Manager
+  (routing decision)
+        ↓
+  One specialist agent
+  (produces output + handoff block)
+        ↓
+  Iteration Manager
+  (reads handoff, decides next step)
+        ↓
+       ...
+```
+
+No specialist agent may invoke another specialist agent directly. No execution cycle may select more than one next agent. No routing decision may be based on prose — only on the structured handoff block.
+
+---
+
+## Rule 1: Iteration Manager is always the entry point
+
+Neither Cursor nor Claude Code may invoke a specialist agent directly as the first step.
+
+All execution begins with Iteration Manager, regardless of:
+- a new user request
+- a continuation of an existing workflow
+- a result returned by a previous agent
+- an incomplete workflow from a prior session
+
+**The first action of every execution cycle is always: read the request or incoming result as Iteration Manager.**
+
+---
+
+## Rule 2: One agent per cycle
+
+On each execution cycle, Iteration Manager selects exactly one next agent and one `next_action`.
+
+No agent chaining is allowed inside a single response. The sequence is:
+
+1. Iteration Manager reads the input (user request or handoff block)
+2. Iteration Manager produces a single JSON routing decision
+3. One specialist agent is invoked
+4. That agent produces its native output and appends a handoff block
+5. Control returns to Iteration Manager for the next cycle
+
+If a workflow requires five sequential agent invocations, it takes five separate cycles — not one.
+
+---
+
+## Rule 3: Handoff-driven routing
+
+The runtime must ignore prose suggestions from agents and use only the structured handoff block for routing.
+
+Iteration Manager reads three fields from the handoff block to make its routing decision:
+
+| Field | Used for |
+|---|---|
+| `handoff.status` | Maps to transition table in `agents/iteration-manager.md` |
+| `handoff.next_recommended_agent` | Default routing suggestion (may be overridden) |
+| `handoff.workflow_state` | Current state; used to enforce sequencing rules and limits |
+
+Iteration Manager may accept the `next_recommended_agent`, override it based on workflow state, escalate to the user, or mark the workflow complete.
+
+---
+
+## Execution modes
+
+### Mode 1 — Initial routing
+
+**Trigger:** A new user request arrives with no prior handoff block.
+
+**Execution:**
+1. Iteration Manager classifies the request (see request types in `agents/iteration-manager.md`)
+2. Iteration Manager initialises `workflow_state` (see state initialisation rules)
+3. Iteration Manager produces an `initial_routing` JSON output selecting the first agent
+4. The selected agent is invoked
+
+**Output:** `initial_routing` JSON block from Iteration Manager.
+
+### Mode 2 — Stage execution
+
+**Trigger:** Iteration Manager has selected a specialist agent.
+
+**Execution:**
+1. The specialist agent is invoked with the context package (see below)
+2. The agent produces its native output (prose, JSON, revised artifact, etc.)
+3. The agent appends a handoff block as defined in `docs/AGENT_HANDOFF_CONTRACT.md`
+4. Control returns to Iteration Manager
+
+**Output:** Agent's native output followed by a handoff block.
+
+When the specialist agent is Builder, the handoff block must declare whether analytics instrumentation was introduced or modified. Builder must indicate this by setting `next_recommended_agent` to `Analytics Validator` if instrumentation was changed or introduced, or to `Reviewer` if no instrumentation changes were made. Iteration Manager uses this field to determine whether Analytics Validator must run before Reviewer.
+
+### Mode 3 — Transition routing
+
+**Trigger:** A specialist agent has completed and returned a handoff block.
+
+**Execution:**
+1. Iteration Manager reads the handoff block
+2. Iteration Manager updates `workflow_state` based on field update rules
+3. Iteration Manager checks stop conditions (see below)
+4. Iteration Manager produces a `stage_transition` JSON output selecting the next agent or completing the workflow
+
+**Output:** `stage_transition` JSON block from Iteration Manager.
+
+---
+
+## Context package
+
+Every specialist agent invocation must include the following context. Agents must not be invoked on a bare request without this package.
+
+**Required for every agent call:**
+
+| Context item | Source |
+|---|---|
+| Current user request or upstream result | User input or previous agent output |
+| Current `workflow_state` | From the latest handoff block |
+| Latest handoff block | From the previous agent |
+| Agent role file | `agents/<agent-name>.md` |
+| `AGENTS.md` | Workflow rules and routing definitions |
+| `.cursor/rules.md` | Execution policy |
+| `CLAUDE.md` | Entry contract and default behavior |
+
+**Additional context loaded by the agent itself** (as defined in each agent's Inputs section):
+
+- `docs/PRD.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ARCHITECTURE_GUARDRAILS.md`
+- `docs/PIPELINE_CONTRACTS.md`
+- `docs/DECISIONS.md`
+- `docs/TASKS.md`
+- The artifact under work (if applicable)
+- Any relevant prior outputs (analytics spec, architect plan, etc.)
+
+The agent role file is the highest-priority instruction in its invocation context. If the role file conflicts with any other context item, the role file takes precedence — except for `AGENTS.md`, which defines the system contract and overrides all other instructions.
+
+---
+
+## Workflow persistence
+
+The runtime must persist the latest `workflow_state` and the latest handoff block between execution cycles.
+
+Persistence may be implemented via:
+
+- conversation state in the runtime (preferred for short workflows)
+- status entries in `docs/TASKS.md` (preferred for long-running workflows)
+- a dedicated workflow state file in the repository
+
+On the next execution cycle, Iteration Manager must reconstruct the workflow context from the persisted state before making a routing decision.
+
+Without persisted state, the workflow must not continue — Iteration Manager must treat it as `insufficient_context` and escalate to the user.
+
+---
+
+## Parallel workflow rule
+
+Only one active workflow may exist per `task_id`.
+
+If Iteration Manager detects multiple concurrent workflows attempting to modify the same task, it must escalate to the user rather than proceed.
+
+Parallel workflows for different `task_id` values are allowed.
+
+---
+
+## Quality loop execution
+
+The quality iteration loop is controlled exclusively by Iteration Manager. Spec Reviewer, Reviser, and Gatekeeper never invoke each other directly.
+
+**Loop trigger conditions** (Iteration Manager decides):
+- A new feature specification was produced by Product
+- An implementation plan was produced by Architect and affects multiple modules
+- Architectural risk is detected
+- Artifact clarity is insufficient for Builder to proceed
+
+**Loop execution sequence:**
+
+```
+Iteration Manager detects quality_loop_required = true
+        ↓
+Invoke Spec Reviewer (iteration = 1)
+        ↓
+Spec Reviewer returns JSON + handoff
+        ↓
+Iteration Manager invokes Gatekeeper
+        ↓
+  Gatekeeper returns decision
+        ↓
+  ┌─────────────────────────────────────────┐
+  │ accept  → exit loop, resume main flow   │
+  │ iterate → invoke Reviser                │
+  │ escalate → stop, request user input     │
+  └─────────────────────────────────────────┘
+        ↓ (if iterate)
+Reviser returns revised artifact + handoff
+        ↓
+Iteration Manager invokes Spec Reviewer (iteration = n+1)
+        ↓
+       ... (repeat until accept, escalate, or iteration 3)
+```
+
+**Loop rules:**
+- Maximum 3 iterations
+- Stop immediately on Gatekeeper `accept` or `escalate`
+- Do not restart the loop after acceptance
+- Do not re-trigger the loop for the same artifact unless it meaningfully changes
+- If the artifact changes substantially, reset `quality_loop_iteration` to 1
+- `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff
+
+---
+
+## Analytics loop execution
+
+The analytics instrumentation flow is controlled by Iteration Manager. Analytics Architect and Analytics Validator never invoke each other or other agents directly.
+
+**Trigger conditions:**
+- Feature has measurable outcomes (user behavior, observability, pipeline success)
+- `product_spec_accepted` is `true` (Product spec has passed the quality loop)
+- No analytics specification already exists for this feature
+
+**Analytics flow sequence:**
+
+```
+Iteration Manager detects analytics_required = true
+        ↓
+Invoke Analytics Architect
+        ↓
+Analytics Architect produces Analytics Specification + handoff
+        ↓
+Invoke Architect (incorporates instrumentation in implementation plan)
+        ↓
+Invoke Builder (implements instrumentation as part of approved plan)
+        ↓
+  Did Builder change or introduce instrumentation?
+  ┌─────────────────────────────────────────┐
+  │ yes → invoke Analytics Validator        │
+  │ no  → invoke Reviewer directly          │
+  └─────────────────────────────────────────┘
+        ↓ (if Analytics Validator)
+  Analytics Validator returns verdict + handoff
+        ↓
+  ┌─────────────────────────────────────────┐
+  │ validation_passed → invoke Reviewer     │
+  │ validation_failed → invoke Builder      │
+  │ escalate → stop, request user input     │
+  └─────────────────────────────────────────┘
+```
+
+**Analytics loop rules:**
+- Analytics Architect runs at most once per feature specification unless the spec changes substantially
+- Analytics Validator runs only when Builder changed or introduced instrumentation
+- `analytics_used` is set to `true` in `workflow_state` when Analytics Architect is invoked and must not revert to `false` for the same task
+
+---
+
+## Stop conditions
+
+Iteration Manager must stop execution and surface the reason to the user when any of the following occurs:
+
+| Condition | Trigger |
+|---|---|
+| Invalid handoff block | `workflow_state` missing, unknown `status`, invalid enum, wrong format |
+| Escalation returned | Any agent sets `status: escalate` |
+| Workflow complete | Reviewer returned `approved` and all completion conditions are met |
+| Quality loop iteration limit | `quality_loop_iteration` reached 3 without Gatekeeper acceptance |
+| Builder cycle limit | `builder_cycle_count` reached 2 (Reviewer returned `CHANGES REQUIRED` twice) |
+| Missing `workflow_state` | Handoff block present but `workflow_state` field absent |
+| Forbidden stage regression | `current_stage` moved backwards outside of allowed correction cycles |
+| No meaningful progress | Two consecutive quality loop iterations did not change the set of `must_fix` issues |
+| Conflict with source of truth | Task or artifact contradicts `docs/PRD.md`, `docs/ARCHITECTURE.md`, or `docs/DECISIONS.md` |
+| Architecture change required | Implementation would change pipeline boundaries or require new infrastructure |
+| Insufficient context | Repository context is insufficient to make a correct routing decision |
+
+On stop: Iteration Manager must produce a `stage_transition` output with `next_action: escalate_to_user` and a specific `escalation_reason`. It must not attempt to continue or infer a workaround.
+
+---
+
+## Cursor execution behavior
+
+- Cursor always opens in Iteration Manager mode
+- On each user message, Cursor invokes Iteration Manager first — never a specialist agent directly
+- When Iteration Manager selects a specialist agent, Cursor loads `agents/<name>.md` as the active role
+- The specialist agent produces its output and appends a handoff block
+- After the agent response, Cursor returns to Iteration Manager mode for the next routing decision
+- Cursor treats the conversation as an interactive runtime — each turn is one execution cycle
+- Cursor must not "stay in" a specialist role across multiple turns without returning to Iteration Manager
+
+---
+
+## Claude Code execution behavior
+
+- Claude Code defaults to Iteration Manager as defined in `CLAUDE.md`
+- When Iteration Manager selects a specialist agent, Claude Code switches to the corresponding `agents/<name>.md` role file
+- The specialist agent produces its output and appends a handoff block
+- After completing the agent's work, Claude Code returns to Iteration Manager mode for the next routing decision
+- Claude Code must not continue acting as a specialist agent after the handoff block is appended
+- Claude Code must not chain specialist agents in a single response
+
+---
+
+## Handoff block requirement
+
+Every agent output must end with a handoff block. The handoff block must be:
+
+- The **last element** of the agent output — nothing may follow it
+- Present **exactly once** — not duplicated
+- Structured as defined in `docs/AGENT_HANDOFF_CONTRACT.md`
+
+If an agent output does not contain a valid handoff block, Iteration Manager must treat it as `insufficient_context` and escalate to the user rather than attempt to infer the next step.
+
+---
+
+## Related documents
+
+| Document | Purpose |
+|---|---|
+| `agents/iteration-manager.md` | Full routing logic, state tracking, transition tables |
+| `docs/AGENT_HANDOFF_CONTRACT.md` | Handoff block format, allowed statuses, validation rules |
+| `AGENTS.md` | Agent roles, workflow definitions, routing rules |
+| `CLAUDE.md` | Entry contract for Claude Code |
+| `.cursor/rules.md` | Execution policy for Cursor |
