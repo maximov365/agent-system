@@ -159,7 +159,7 @@ Status values are fixed. No agent may invent new values.
 
 ## Blocking issues
 
-When `status` is `escalate`, `changes_required`, `revise`, or `validation_failed`, populate `blocking_issues` with structured entries. Leave the array empty for all other statuses.
+When `status` is `escalate`, `changes_required`, `revise`, `validation_failed`, or `security_failed`, populate `blocking_issues` with structured entries. Leave the array empty for all other statuses.
 
 ```json
 "blocking_issues": [
@@ -273,7 +273,7 @@ Each agent receives the current `workflow_state` from the previous handoff and u
     "artifact_type": "code",
     "artifact_path": ["src/pipeline.py", "tests/test_pipeline.py"],
     "status": "produced | escalate",
-    "next_recommended_agent": "Analytics Validator | Reviewer",
+    "next_recommended_agent": "Analytics Validator | Security Reviewer",
     "next_recommended_reason": "<one sentence: instrumentation changed or not>",
     "blocking_issues": [],
     "workflow_state": { ... }
@@ -330,7 +330,7 @@ Appended after the native JSON output block.
     "artifact_type": "<same as reviewed artifact>",
     "artifact_path": "<same as reviewed artifact>",
     "status": "accepted | revise | escalate",
-    "next_recommended_agent": "Architect | Analytics Architect | Builder | null",
+    "next_recommended_agent": "Reviser | Architect | Analytics Architect | Builder | null",
     "next_recommended_reason": "<one sentence>",
     "blocking_issues": [],
     "workflow_state": { ... }
@@ -349,7 +349,7 @@ Appended after the native JSON output block.
     "artifact_type": "code",
     "artifact_path": ["src/pipeline.py", "src/events.py"],
     "status": "validation_passed | validation_failed | escalate",
-    "next_recommended_agent": "Reviewer | Builder | null",
+    "next_recommended_agent": "Security Reviewer | Builder | null",
     "next_recommended_reason": "<one sentence>",
     "blocking_issues": [],
     "workflow_state": { ... }

@@ -11,7 +11,7 @@ The system supports both:
 
 All production code implementation must follow the:
 
-Architect → Builder → Reviewer
+Architect → Builder → Security Reviewer → Reviewer
 
 cycle.
 
@@ -520,6 +520,7 @@ AGENTS.md                        # Workflow rules (this file)
 README.md                        # Project overview and setup guide
 project.config.yaml              # Project configuration for template rendering
 setup.py                         # Renders Jinja2 templates from config
+sync.py                          # Syncs framework files to downstream projects
 requirements.txt                 # Python dependencies for setup.py
 
 agents/
@@ -553,6 +554,7 @@ docs/
   AGENT_HANDOFF_CONTRACT.md      # Standard format for passing results between agents
   AGENT_EXECUTION_MODEL.md       # How Cursor and Claude Code execute the agent workflow
   TASK_BACKLOG_AUTOMATION.md     # Rules for automated task creation and backlog management
+  ONBOARDING.md                  # Onboarding guide for new and existing projects
   features/                      # Individual feature spec files
   plans/                         # Implementation plan files
   reviews/                       # Review output files

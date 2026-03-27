@@ -70,7 +70,7 @@ State fields:
 | `analytics_used` | bool | Whether Analytics Architect was invoked for this feature |
 | `product_spec_accepted` | bool | Whether Product's feature specification has passed the quality loop |
 
-`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product or its quality loop is active; `analytics` while Analytics Architect is active; `architecture` while Architect or its quality loop is active; `implementation` while Builder or Analytics Validator is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
+`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product or its quality loop is active; `analytics` while Analytics Architect is active; `architecture` while Architect or its quality loop is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
 
 **State lifecycle rules:**
 
@@ -132,7 +132,7 @@ Classify every incoming request before selecting an agent.
 | Accepted feature specification with measurable outcomes and no analytics spec exists (`product_spec_accepted: true`) | `Analytics Architect` |
 | Task exists and is ready for planning; analytics spec exists or is not required | `Architect` |
 | Approved Architect plan exists; no remaining discovery or specification needed | `Builder` |
-| Builder completed implementation; Analytics Architect was not used | `Reviewer` |
+| Builder completed implementation; Analytics Architect was not used | `Security Reviewer` |
 | Builder completed implementation; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
 | Non-code artifact needs quality review | `Spec Reviewer` (via quality loop) |
 
@@ -144,6 +144,7 @@ If the request is ambiguous:
 - Task already exists → `Architect`
 
 Never route directly to `Builder` unless an approved Architect plan exists.
+Never skip `Security Reviewer` for code changes.
 Never skip `Reviewer` for code changes.
 Never skip `Analytics Architect` when the feature introduces measurable outcomes and no analytics spec exists.
 `Analytics Architect` must run only after `Product` has produced a feature specification and that specification has passed the quality loop (`product_spec_accepted: true`) — never before.
@@ -167,10 +168,13 @@ After each agent completes, determine the next step based on the agent's output 
 | `Architect` | Implementation plan produced | → Quality loop (invoke `Spec Reviewer`) |
 | `Architect` → Quality loop | Gatekeeper `accept` | → `Builder` |
 | `Builder` | Implementation complete; instrumentation changed | → `Analytics Validator` |
-| `Builder` | Implementation complete; no instrumentation changes | → `Reviewer` |
-| `Analytics Validator` | `accept` | → `Reviewer` |
+| `Builder` | Implementation complete; no instrumentation changes | → `Security Reviewer` |
+| `Analytics Validator` | `accept` | → `Security Reviewer` |
 | `Analytics Validator` | `revise` | → `Builder` (instrumentation fixes required) |
 | `Analytics Validator` | `escalate` | → Escalate to user |
+| `Security Reviewer` | `security_passed` | → `Reviewer` |
+| `Security Reviewer` | `security_failed` | → `Builder` (security fixes required) |
+| `Security Reviewer` | `escalate` | → Escalate to user |
 | `Reviewer` | `APPROVED` or `APPROVED WITH MINOR CHANGES` | → Confirm workflow completion |
 | `Reviewer` | `CHANGES REQUIRED` | → `Builder` (corrections required) |
 
@@ -241,6 +245,7 @@ Stop the workflow and escalate to the user when:
 - A new external dependency, provider, or infrastructure component is required
 - Gatekeeper returns `escalate`
 - Analytics Validator returns `escalate`
+- Security Reviewer returns `escalate`
 - Reviewer returns `CHANGES REQUIRED` and `builder_cycle_count` has reached `3`
 - No meaningful progress across two consecutive quality loop iterations
 - Repository context is insufficient to determine the correct next step
@@ -319,7 +324,7 @@ Rules for specific fields:
 ## Principles
 
 - **Route first, act never.** Iteration Manager classifies and sequences. It never produces workflow artifacts (specifications, plans, code).
-- **Enforce sequencing strictly.** No Builder without an approved plan. No Reviewer skip. No Analytics Architect skip when required.
+- **Enforce sequencing strictly.** No Builder without an approved plan. No Security Reviewer or Reviewer skip for code changes. No Analytics Architect skip when required.
 - **Prefer the simplest route.** Do not add stages that are not required. Trivial non-product changes do not need a full workflow.
 - **Escalate over guessing.** When routing is genuinely ambiguous and assumptions would change the workflow significantly, escalate rather than guess.
 - **Loop control is not content review.** Iteration Manager reads Gatekeeper output and applies policy — it does not evaluate artifact quality independently.

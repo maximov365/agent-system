@@ -241,14 +241,22 @@ Invoke Builder (implements instrumentation as part of approved plan)
   Did Builder change or introduce instrumentation?
   ┌─────────────────────────────────────────┐
   │ yes → invoke Analytics Validator        │
-  │ no  → invoke Reviewer directly          │
+  │ no  → invoke Security Reviewer          │
   └─────────────────────────────────────────┘
         ↓ (if Analytics Validator)
   Analytics Validator returns verdict + handoff
         ↓
   ┌─────────────────────────────────────────┐
-  │ validation_passed → invoke Reviewer     │
-  │ validation_failed → invoke Builder      │
+  │ validation_passed → invoke Security Reviewer │
+  │ validation_failed → invoke Builder           │
+  │ escalate → stop, request user input          │
+  └─────────────────────────────────────────┘
+        ↓
+  Security Reviewer returns verdict + handoff
+        ↓
+  ┌─────────────────────────────────────────┐
+  │ security_passed → invoke Reviewer       │
+  │ security_failed → invoke Builder        │
   │ escalate → stop, request user input     │
   └─────────────────────────────────────────┘
 ```

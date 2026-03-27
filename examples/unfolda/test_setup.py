@@ -84,6 +84,9 @@ CONTENT_ASSERTIONS = {
     "agents/iteration-manager.md": [
         "You are the Iteration Manager for Unfolda.",
     ],
+    "agents/security-reviewer.md": [
+        "You are the Security Reviewer agent for Unfolda.",
+    ],
     "CLAUDE.md": [
         "Unfolda",
     ],
@@ -95,6 +98,7 @@ CONTENT_ASSERTIONS = {
 
 # Files that must exist after rendering (relative to ROOT).
 EXPECTED_FILES = [
+    "agents/README.md",
     "agents/discovery.md",
     "agents/product.md",
     "agents/analytics-architect.md",
@@ -106,6 +110,7 @@ EXPECTED_FILES = [
     "agents/reviser.md",
     "agents/gatekeeper.md",
     "agents/iteration-manager.md",
+    "agents/security-reviewer.md",
     "CLAUDE.md",
     "AGENTS.md",
     ".cursor/rules.md",

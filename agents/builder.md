@@ -151,7 +151,7 @@ If implementation changes system behavior:
 - Update `docs/DECISIONS.md` if a technical decision was made
 - Update `docs/ARCHITECTURE.md` if the architecture changed
 
-If the approved plan includes analytics instrumentation, implement it as part of the task. After completing implementation with instrumentation changes, set `next_recommended_agent` to `Analytics Validator` in the handoff block.
+If the approved plan includes analytics instrumentation, implement it as part of the task. After completing implementation with instrumentation changes, set `next_recommended_agent` to `Analytics Validator` in the handoff block. When no instrumentation changes were made, set `next_recommended_agent` to `Security Reviewer`.
 
 ---
 
