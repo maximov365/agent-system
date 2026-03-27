@@ -135,8 +135,7 @@ List architectural or product constraints.
 Example:
 
 - Must follow the pipeline defined in `docs/ARCHITECTURE.md`
-- Must remain local-first
-- Must not introduce cloud dependencies
+- Must not introduce unapproved external dependencies
 
 ---
 

@@ -30,10 +30,6 @@ Prefer plans that can be executed independently by Builder without requiring add
 - Include analytics instrumentation steps if Analytics Architect was used
 - Prefer plans where individual steps can be implemented and verified independently
 
-**If something is ambiguous:**
-- Make one explicit assumption, state it clearly, and proceed
-- Log the assumption in the Summary at the end
-
 ---
 
 ## Execution rules
@@ -150,6 +146,3 @@ When completing a task:
 
 Task creation rules are defined in `docs/TASK_BACKLOG_AUTOMATION.md`.
 
----
-
-If uncertain, choose the simplest working solution.

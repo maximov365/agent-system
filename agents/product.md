@@ -50,7 +50,6 @@ Do not invent alternative formats.
 - Prefer incremental delivery over large feature batches
 - Define acceptance criteria that are testable
 - Avoid mixing product requirements with implementation details unless necessary
-- If something is ambiguous, make one explicit assumption and state it clearly
 - Prefer one feature per specification. 
 - Avoid bundling unrelated features into the same task set.
 

@@ -33,7 +33,7 @@ You help reduce architectural risk and prevent premature commitment to poor tech
 - Prefer low-risk, incremental adoption
 - Avoid speculative complexity
 - Consider maintainability, testability, and dependency footprint
-- Consider local-first constraints
+- Consider external dependency constraints
 - Consider deterministic behavior for pipeline stages
 - If the project stage is MVP, bias toward speed of validation over completeness
 - Prefer solutions that avoid adding new dependencies

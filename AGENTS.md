@@ -173,6 +173,8 @@ To support autonomous product iteration, the system introduces orchestration rol
 
 ## Iteration Manager
 
+Defined in: `agents/iteration-manager.md`
+
 Coordinates the workflow.
 
 Responsibilities:
@@ -189,6 +191,8 @@ Iteration Manager **does not produce artifacts itself**.
 ---
 
 ## Spec Reviewer
+
+Defined in: `agents/spec-reviewer.md`
 
 Used for reviewing **non-code artifacts** such as:
 
@@ -210,6 +214,8 @@ Responsibilities:
 
 ## Reviser
 
+Defined in: `agents/reviser.md`
+
 Used within the quality iteration loop to improve non-code artifacts based on Spec Reviewer feedback.
 
 Responsibilities:
@@ -224,6 +230,8 @@ Reviser **does not produce original artifacts** and **does not change product sc
 ---
 
 ## Gatekeeper
+
+Defined in: `agents/gatekeeper.md`
 
 Final decision-maker for iteration loops.
 
@@ -330,7 +338,7 @@ Standard workflow for internal technical changes (refactors, configuration, depe
 
 Discovery → Architect → Builder → Reviewer
 
-Earlier stages (Discovery, Product) are optional depending on the request. Analytics Architect and Analytics Validator are **required together** — if one is used, the other must also be used. Analytics Validator runs only when the Builder changed or introduced analytics instrumentation.
+Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped.
 
 All code changes must go through the **Reviewer** step. Iteration Manager confirms workflow completion after Reviewer approval.
 
@@ -464,6 +472,7 @@ These rules apply to every specialist agent:
 - If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
 - Every agent output must end with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
 - Agents must not invoke other agents directly. Control always returns to Iteration Manager.
+- Builder review cycles (Builder → Reviewer → Builder fix) are limited to a maximum of **3 iterations**. If Reviewer does not approve after 3 cycles, escalate to the user.
 
 ---
 

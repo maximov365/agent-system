@@ -88,7 +88,7 @@ Every task committed to `docs/TASKS.md` must include the following fields.
 
 ```
 task_id:              <prefix>-<number>       # Assigned by Iteration Manager at commit time
-title:                <short imperative title> # e.g. "Implement segment translation retry"
+title:                <short imperative title> # e.g. "Implement pipeline retry logic"
 type:                 feature | implementation | analytics | fix | follow_up
 status:               planned                  # Always starts as planned
 priority:             high | medium | low

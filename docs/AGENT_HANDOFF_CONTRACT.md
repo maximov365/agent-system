@@ -48,7 +48,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 `artifact_path` must follow these rules depending on artifact type:
 
 - **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`) — repository-relative path to the file, e.g. `docs/features/FEAT-42.md`
-- **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/translation.py", "tests/test_translation.py"]`
+- **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
 
@@ -70,7 +70,7 @@ Convention:
 | `implementation_plan` | `ARCH-<number>` | `ARCH-42` |
 | `analytics_spec` | `AN-<number>` | `AN-42` |
 | `task_breakdown` | `TASK-<number>` | `TASK-42` |
-| Other | Short descriptive label | `"translation-retry-design"` |
+| Other | Short descriptive label | `"retry-strategy-design"` |
 
 `AN-<number>` is reserved exclusively for analytics specification artifacts. Analytics implementation tasks use `ATASK-<number>` as defined in `docs/TASK_BACKLOG_AUTOMATION.md`.
 

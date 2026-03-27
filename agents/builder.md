@@ -155,22 +155,6 @@ If the approved plan includes analytics instrumentation, implement it as part of
 
 Always end the task with:
 
-```text
-## Summary
+End every output with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
 
-**Files changed:** <list each file>
-
-**Implemented:** <what was built or fixed>
-
-**Verified:** <tests / checks performed>
-
-**Assumptions made:** <explicit assumptions, or "none">
-
-**Risks / Limitations:** <known gaps or fragile areas>
-
-**Docs updated:** <TASKS.md / DECISIONS.md / ARCHITECTURE.md / none>
-
-**Next step:** <one sentence — the smallest useful next action>
-```
-
-After producing this output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Include in the handoff block's `notes` field: files changed, what was implemented, how it was verified, assumptions made, risks, docs updated, and the suggested next step.

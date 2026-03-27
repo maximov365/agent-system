@@ -58,9 +58,10 @@ If Builder made no changes to instrumentation, Analytics Validator is skipped.
 Before validating, read:
 
 1. `docs/ARCHITECTURE.md`
-2. `docs/PIPELINE_CONTRACTS.md`
-3. The Analytics Specification produced by Analytics Architect
-4. The files changed by Builder (implementation scope)
+2. `docs/ARCHITECTURE_GUARDRAILS.md`
+3. `docs/PIPELINE_CONTRACTS.md`
+4. The Analytics Specification produced by Analytics Architect
+5. The files changed by Builder (implementation scope)
 
 The Analytics Specification is the source of truth. Validate against it exactly — do not apply independent judgment about what events "should" look like.
 
@@ -152,7 +153,7 @@ Blocking issues that prevent acceptance. Builder must resolve before Reviewer pr
 Non-blocking issues that reduce quality but do not prevent acceptance.
 
 - Optional field absent when it would improve traceability (e.g. `request_id`, `pipeline_run_id`)
-- Missing recommended correlation identifiers (`request_id`, `pipeline_run_id`, `segment_id`) when they are available in the execution context
+- Missing recommended correlation identifiers (`request_id`, `pipeline_run_id`, `item_id`) when they are available in the execution context
 - Event name deviates from `<object>_<action>` naming convention
 - Minor value inconsistency that does not affect metric computability
 

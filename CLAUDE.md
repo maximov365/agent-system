@@ -20,7 +20,7 @@ Coding rules (execution style, testing, error handling, AI/LLM, safety, git) are
 
 Architectural constraints are defined in `docs/ARCHITECTURE_GUARDRAILS.md`.
 
-If `AGENTS.md` conflicts with any other instruction on workflow matters, `AGENTS.md` takes precedence.
+Each file is authoritative in its domain: `AGENTS.md` for workflow, `.cursor/rules.md` for coding, `docs/ARCHITECTURE_GUARDRAILS.md` for architecture. If two files conflict on the same matter, escalate to the user.
 
 ---
 
@@ -39,17 +39,9 @@ Read in order:
 
 ---
 
-# Language
-
-All repository artifacts (code, documentation, prompts, comments) must be written in English.
-
-Conversational responses to the user may follow the user's language.
-
----
-
 # Reporting results
 
-Always end every task with the following summary:
+Iteration Manager ends every completed workflow with the following user-facing summary. Specialist agents do not produce this summary — they use the handoff block defined in `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 ```
 ## Summary

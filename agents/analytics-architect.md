@@ -64,10 +64,11 @@ Before producing the specification, read:
 
 1. `docs/PRD.md`
 2. `docs/ARCHITECTURE.md`
-3. `docs/PIPELINE_CONTRACTS.md`
-4. `docs/DECISIONS.md`
-5. The feature specification or task description
-6. Any existing analytics specifications for related features
+3. `docs/ARCHITECTURE_GUARDRAILS.md`
+4. `docs/PIPELINE_CONTRACTS.md`
+5. `docs/DECISIONS.md`
+6. The feature specification or task description
+7. Any existing analytics specifications for related features
 
 ---
 
@@ -113,11 +114,11 @@ For each event, define:
 
 Properties must use explicit types: `string`, `int`, `float`, `bool`, `ISO8601`, `enum[...]`.
 
-Events should include correlation identifiers when available — `request_id`, `pipeline_run_id`, `segment_id` — to enable tracing across pipeline stages.
+Events should include correlation identifiers when available — `request_id`, `pipeline_run_id`, `item_id` — to enable tracing across pipeline stages.
 
 Do not include derived metrics (ratios, averages) in event payloads — those are computed in the analytics layer.
 Do not include PII (user email, IP address, raw input text) unless explicitly approved.
-Do not include raw document content or full text segments unless explicitly required for debugging and approved.
+Do not include raw content or full data payloads unless explicitly required for debugging and approved.
 
 Example:
 
@@ -254,7 +255,7 @@ Define only events that answer a specific measurement question. Every event must
 
 Event names must follow the pattern `<object>_<action>` or `<object>_<state>` in snake_case.
 
-Examples: `translation_requested`, `segment_translated`, `segment_translation_failed`
+Examples: `item_processed`, `pipeline_started`, `stage_failed`
 
 Avoid vague names such as `event_triggered` or `operation_completed`.
 
@@ -269,7 +270,7 @@ Optional but recommended for pipeline traceability:
 
 - `request_id` — identifies the top-level user request
 - `pipeline_run_id` — identifies the specific pipeline execution
-- `segment_id` — identifies the segment being processed
+- `item_id` — identifies the item being processed
 
 ### Deterministic events
 

@@ -114,7 +114,7 @@ Prefer extending existing modules over parallel implementations unless separatio
 
 - Were any new dependencies introduced?
 - If yes, are they justified?
-- Do they fit the local-first constraints?
+- Do they fit the project's architectural constraints?
 - Do they create lock-in or broad project impact?
 - Was a related architectural decision recorded if needed?
 
@@ -136,7 +136,7 @@ If state is implicit or cross-stage mutation exists, the change is architectural
 # 7. Determinism
 
 - Does the change preserve deterministic behavior where required?
-- Has non-deterministic behavior appeared in segmentation, formatting, validation, export, or orchestration?
+- Has non-deterministic behavior appeared in any pipeline stage, validation, or orchestration?
 
 If LLM logic is involved:
 
@@ -149,14 +149,13 @@ If deterministic stages become non-deterministic without approval, stop and esca
 
 ---
 
-# 8. Local-First Constraints
+# 8. External Dependencies and Services
 
-- Does the change preserve local-first behavior?
 - Has a new external API or cloud dependency been introduced?
 - If yes, is it explicitly approved and isolated?
 - Has experimentation been clearly separated from core behavior?
 
-If local-first assumptions are weakened silently, the change must not proceed.
+If new external dependencies are introduced without approval, the change must not proceed.
 
 ---
 
@@ -214,7 +213,7 @@ A non-trivial change should be approved only if:
 - no hidden coupling or hidden state was introduced
 - dependencies remain justified
 - deterministic behavior remains intact where required
-- local-first assumptions remain true
+- no unapproved external dependencies were introduced
 - error handling is correct at stage boundaries
 - test coverage for affected stages is preserved
 - relevant architecture decisions are documented

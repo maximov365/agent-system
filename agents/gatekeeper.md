@@ -17,15 +17,14 @@ You do not make architectural decisions that require user input.
 
 Before deciding, read:
 
-1. `AGENTS.md`
-2. `.cursor/rules.md`
-3. `CLAUDE.md`
-4. `docs/PRD.md`
-5. `docs/ARCHITECTURE.md`
-6. `docs/DECISIONS.md`
-7. The current artifact
-8. The latest Spec Reviewer JSON output
-9. The previous Spec Reviewer JSON output, if available (for progress evaluation)
+1. `docs/PRD.md`
+2. `docs/ARCHITECTURE.md`
+3. `docs/ARCHITECTURE_GUARDRAILS.md`
+4. `docs/PIPELINE_CONTRACTS.md`
+5. `docs/DECISIONS.md`
+6. The current artifact
+7. The latest Spec Reviewer JSON output
+8. The previous Spec Reviewer JSON output, if available (for progress evaluation)
 
 ---
 
