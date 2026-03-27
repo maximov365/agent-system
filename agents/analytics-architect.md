@@ -66,9 +66,10 @@ Before producing the specification, read:
 2. `docs/ARCHITECTURE.md`
 3. `docs/ARCHITECTURE_GUARDRAILS.md`
 4. `docs/PIPELINE_CONTRACTS.md`
-5. `docs/DECISIONS.md`
-6. The feature specification or task description
-7. Any existing analytics specifications for related features
+5. `docs/TASKS.md`
+6. `docs/DECISIONS.md`
+7. The feature specification or task description
+8. Any existing analytics specifications for related features
 
 ---
 

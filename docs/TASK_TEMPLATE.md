@@ -175,6 +175,28 @@ Any extra context useful for Product, Architect, or Builder.
 Example:
 > This task introduces a new input format, so it should remain minimal and deterministic.
 
+# Field mapping to backlog schema
+
+When Iteration Manager commits a task to `docs/TASKS.md`, template sections map to the backlog schema defined in `docs/TASK_BACKLOG_AUTOMATION.md`:
+
+| Template section | Backlog field |
+|---|---|
+| `<Short task title>` (header) | `title` |
+| Task ID | `task_id` (assigned by Iteration Manager) |
+| Status | `status` |
+| Priority | `priority` |
+| Complexity | `estimated_complexity` |
+| Goal | `description` |
+| Acceptance Criteria | `acceptance_criteria` |
+| Dependencies | `dependencies` |
+| Pipeline stage | `capability_id` (via `docs/FEATURE_MAP.md`) |
+| Created by | `source_agent` |
+| _(from handoff block)_ | `source_artifact` |
+| _(from feature context)_ | `parent_feature` |
+| _(inferred by Iteration Manager)_ | `type` |
+
+---
+
 # Task Size Guidelines
 
 Tasks should be small enough to be implemented in a single Builder step whenever possible.

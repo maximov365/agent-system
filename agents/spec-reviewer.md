@@ -136,7 +136,7 @@ The `iteration` value is provided by the Iteration Manager and must be echoed un
 
 ## Output format
 
-Always respond with a single JSON block. Do not add prose before or after it.
+Always respond with a single JSON block followed by a handoff block. No other prose before or after.
 
 Use the closest matching `artifact_type` if the artifact does not exactly match one of the predefined categories. Do not invent new category names.
 

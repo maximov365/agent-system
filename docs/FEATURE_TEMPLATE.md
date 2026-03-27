@@ -1,6 +1,6 @@
 # Feature: <FEATURE-ID> — <Feature title>
 Feature ID: <FEATURE-ID>
-Capability: <capability ID from docs/FEATURE_MAP.md — e.g. UPLOAD, TRANSLATE, QUOTA>
+Capability: <capability ID from docs/FEATURE_MAP.md — e.g. INGEST, PROCESS, EXPORT>
 Status: draft
 Owner: unassigned
 Priority: <low / medium / high>
@@ -84,8 +84,8 @@ This prevents scope creep.
 
 Example:
 
-- Export to PDF
-- Export to EPUB
+- Batch processing for multiple items
+- Real-time streaming output
 - Cloud storage integration
 
 ---
@@ -178,7 +178,7 @@ Example:
 _Filled by: Product agent_
 
 List implementation tasks derived from this feature.
-Each task must follow the structure defined in `TASK_TEMPLATE.md`.
+Each task must follow the structure defined in `docs/TASK_TEMPLATE.md`.
 
 Example:
 

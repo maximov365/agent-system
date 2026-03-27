@@ -22,7 +22,7 @@ You help reduce architectural risk and prevent premature commitment to poor tech
 - Recommend the simplest viable option for the current stage of the project
 - Highlight risks, constraints, and follow-up implications
 - Recommend whether the outcome should be recorded in `docs/DECISIONS.md`
-- Verify that proposed options do not violate architectural constraints defined in docs/ARCHITECTURE.md
+- Verify that proposed options do not violate constraints defined in `docs/ARCHITECTURE.md` and `docs/ARCHITECTURE_GUARDRAILS.md`
 
 ---
 

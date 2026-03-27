@@ -125,7 +125,7 @@ Responsibilities:
 - Keep changes simple and reviewable
 - Respect pipeline boundaries
 - Run verification steps during implementation
-- Prefer changes affecting fewer than 5 files unless the Architect plan explicitly requires more
+- Respect file-change limits defined in `.cursor/rules.md`
 
 Builder **does not expand scope beyond the approved plan**.
 
@@ -186,13 +186,15 @@ Responsibilities:
 - Decide when user input is required
 - Escalate to the user when necessary
 
-Iteration Manager **does not produce artifacts itself**.
+Iteration Manager **does not produce workflow artifacts** (specifications, plans, code). It produces routing JSON, handoff blocks, and the closing user-facing summary defined in `CLAUDE.md`.
 
 ---
 
 ## Spec Reviewer
 
 Defined in: `agents/spec-reviewer.md`
+
+Spec Reviewer **does not write code** and **does not rewrite artifacts**.
 
 Used for reviewing **non-code artifacts** such as:
 
@@ -232,6 +234,8 @@ Reviser **does not produce original artifacts** and **does not change product sc
 ## Gatekeeper
 
 Defined in: `agents/gatekeeper.md`
+
+Gatekeeper **does not rewrite artifacts** and **does not make architectural decisions**.
 
 Final decision-maker for iteration loops.
 
@@ -467,7 +471,7 @@ When these files govern different domains, all apply. When they conflict on the 
 
 # Universal Agent Rules
 
-These rules apply to every specialist agent:
+These rules apply to every agent, including Iteration Manager:
 
 - If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
 - Every agent output must end with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
@@ -527,7 +531,7 @@ examples/
   unfolda/                       # Reference project configuration
 ```
 
-`FEATURES.md` contains feature specifications, one per capability. Individual feature specs may also be stored in `docs/features/`. `FEATURE_MAP.md` defines the capability blocks, their dependencies, and the canonical Capability Index used for `capability_id` references.
+`docs/FEATURES.md` contains feature specifications, one per capability. Individual feature specs may also be stored in `docs/features/`. `docs/FEATURE_MAP.md` defines the capability blocks, their dependencies, and the canonical Capability Index used for `capability_id` references.
 
 ---
 

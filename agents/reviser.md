@@ -169,12 +169,13 @@ Before finishing, verify:
 
 ## Output format
 
-Respond with two parts in this order:
+Respond with three parts in this order:
 
 1. The revised artifact (complete, in its native format)
 2. A structured revision summary
+3. A handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`
 
-Do not include commentary outside these two sections.
+Do not include commentary outside these three sections.
 
 ---
 
@@ -213,5 +214,3 @@ Do not include commentary outside these two sections.
 - On the final iteration, focus exclusively on blocking issues.
 
 Your role is strictly revision for correctness and completeness.
-
-After producing the revision output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.

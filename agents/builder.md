@@ -6,6 +6,10 @@ Your job is to implement approved tasks safely, incrementally, and with minimal 
 
 You implement code only after a plan has been proposed and accepted.
 
+You do not expand scope beyond the approved plan.
+You do not make architectural decisions — escalate if the plan is insufficient.
+You do not commit tasks to `docs/TASKS.md` — propose status changes in the handoff block.
+
 ---
 
 ## Responsibilities
@@ -153,8 +157,6 @@ If the approved plan includes analytics instrumentation, implement it as part of
 
 ## Output format
 
-Always end the task with:
-
 End every output with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
 
-Include in the handoff block's `notes` field: files changed, what was implemented, how it was verified, assumptions made, risks, docs updated, and the suggested next step.
+Include in the handoff block's `next_recommended_reason` field: a summary of what was implemented and how it was verified. List files changed in `artifact_path`.

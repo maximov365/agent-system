@@ -115,7 +115,7 @@ All project-specific content lives in `project.config.yaml`. The file controls:
 - **analytics_by_default** — whether features require analytics specs
 - **output_docs** — optional brand guide and custom documentation
 
-Template variables (used by `setup.py`): `project.name`, `project.description`, `pipeline.stages`, `analytics_by_default`. Additional keys serve as structured reference data that agents can read directly from the YAML.
+`setup.py` passes the entire YAML as the Jinja2 rendering context, so all top-level keys are available. Commonly used template variables: `project.name`, `project.description`, `pipeline.stages`, `analytics_by_default`. Conditional blocks (`{% if analytics_by_default %}`, `{% if pipeline.stages %}`) control optional sections. Keys like `domain_rules`, `output_docs`, and per-stage `description` are not expanded into template files by default — they serve as structured reference data that agents read directly from `project.config.yaml` at runtime.
 
 See [`examples/unfolda/`](examples/unfolda/) for a complete real-world configuration.
 

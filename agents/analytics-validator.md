@@ -197,7 +197,7 @@ Set `verdict: escalate`. Do not suggest a workaround — escalation suspends the
 
 ## Output format
 
-Always respond with a single JSON block. Do not add prose before or after it.
+Always respond with a single JSON block followed by a handoff block. No other prose before or after.
 
 ```json
 {

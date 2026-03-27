@@ -91,7 +91,7 @@ Every agent appends the following JSON block at the end of its output, after its
   "handoff": {
     "agent": "<agent name>",
     "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | code | none",
-    "artifact_path": "<path or title of the produced or reviewed artifact, or null>",
+    "artifact_path": "<path or title; JSON array of paths when artifact_type is code>",
     "status": "<see Allowed statuses>",
     "next_recommended_agent": "<agent name, or null>",
     "next_recommended_reason": "<one sentence, or null>",
@@ -266,7 +266,7 @@ Each agent receives the current `workflow_state` from the previous handoff and u
   "handoff": {
     "agent": "Builder",
     "artifact_type": "code",
-    "artifact_path": "<list of files changed>",
+    "artifact_path": ["src/pipeline.py", "tests/test_pipeline.py"],
     "status": "produced | escalate",
     "next_recommended_agent": "Analytics Validator | Reviewer",
     "next_recommended_reason": "<one sentence: instrumentation changed or not>",
@@ -342,7 +342,7 @@ Appended after the native JSON output block.
   "handoff": {
     "agent": "Analytics Validator",
     "artifact_type": "code",
-    "artifact_path": "<files containing instrumentation>",
+    "artifact_path": ["src/pipeline.py", "src/events.py"],
     "status": "validation_passed | validation_failed | escalate",
     "next_recommended_agent": "Reviewer | Builder | null",
     "next_recommended_reason": "<one sentence>",
@@ -361,7 +361,7 @@ Appended after the native review output.
   "handoff": {
     "agent": "Reviewer",
     "artifact_type": "code",
-    "artifact_path": "<files reviewed>",
+    "artifact_path": ["src/pipeline.py", "tests/test_pipeline.py"],
     "status": "approved | changes_required | escalate",
     "next_recommended_agent": "null | Builder",
     "next_recommended_reason": "<one sentence, or null if approved>",

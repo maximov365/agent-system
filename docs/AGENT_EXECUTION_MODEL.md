@@ -110,7 +110,7 @@ When the specialist agent is Builder, the handoff block must declare whether ana
 **Execution:**
 1. Iteration Manager reads the handoff block
 2. Iteration Manager updates `workflow_state` based on field update rules
-3. Iteration Manager checks stop conditions (see below)
+3. Iteration Manager checks termination conditions (see below)
 4. Iteration Manager produces a `stage_transition` JSON output selecting the next agent or completing the workflow
 
 **Output:** `stage_transition` JSON block from Iteration Manager.
@@ -144,7 +144,7 @@ Every specialist agent invocation must include the following context. Agents mus
 - The artifact under work (if applicable)
 - Any relevant prior outputs (analytics spec, architect plan, etc.)
 
-The agent role file is the highest-priority instruction in its invocation context, except for `AGENTS.md` which defines the system workflow contract. See the Precedence section in `AGENTS.md` for conflict resolution rules.
+Priority within an agent invocation: `AGENTS.md` governs workflow, `.cursor/rules.md` governs coding, and `docs/ARCHITECTURE_GUARDRAILS.md` governs architecture. The agent role file is the highest-priority instruction for agent-specific behavior. See the Precedence section in `AGENTS.md` for full conflict resolution rules.
 
 ---
 
@@ -258,24 +258,31 @@ Invoke Builder (implements instrumentation as part of approved plan)
 
 ---
 
-## Stop conditions
+## Termination conditions
 
-Iteration Manager must stop execution and surface the reason to the user when any of the following occurs:
+### Successful completion
+
+| Condition | Trigger | Action |
+|---|---|---|
+| Workflow complete | Reviewer returned `approved` and all completion conditions are met | `next_action: complete_workflow` |
+
+### Error and escalation stops
+
+Iteration Manager must stop execution and escalate when any of the following occurs:
 
 | Condition | Trigger |
 |---|---|
 | Invalid handoff block | `workflow_state` missing, unknown `status`, invalid enum, wrong format |
 | Escalation returned | Any agent sets `status: escalate` |
-| Workflow complete | Reviewer returned `approved` and all completion conditions are met |
 | Quality loop iteration limit | `quality_loop_iteration` reached 3 without Gatekeeper acceptance |
-| Builder cycle limit | `builder_cycle_count` reached 2 (Reviewer returned `CHANGES REQUIRED` twice) |
+| Builder cycle limit | `builder_cycle_count` reached 3 (Reviewer returned `CHANGES REQUIRED` three times) |
 | Missing `workflow_state` | Handoff block present but `workflow_state` field absent |
 | Forbidden stage regression | `current_stage` moved backwards outside of allowed correction cycles |
 | No meaningful progress | Two consecutive quality loop iterations did not change the set of `must_fix` issues |
 | Conflict with source of truth | See escalation conditions in `AGENTS.md` — Iteration Rules section |
 | Insufficient context | Repository context is insufficient to make a correct routing decision |
 
-On stop: Iteration Manager must produce a `stage_transition` output with `next_action: escalate_to_user` and a specific `escalation_reason`. It must not attempt to continue or infer a workaround.
+On escalation: Iteration Manager must produce a `stage_transition` output with `next_action: escalate_to_user` and a specific `escalation_reason`. It must not attempt to continue or infer a workaround.
 
 ---
 

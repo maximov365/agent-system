@@ -4,6 +4,7 @@ This file defines **coding rules** for implementation and review.
 
 Workflow rules, agent routing, escalation, and quality loops are in `AGENTS.md`.
 Architectural constraints are in `docs/ARCHITECTURE_GUARDRAILS.md`.
+Conflict resolution rules are in the Precedence section of `AGENTS.md`.
 
 ---
 
@@ -78,7 +79,7 @@ Design principles:
 
 ## Testing rules
 
-- Place tests in `tests/` mirroring the source structure
+- Place tests in `tests/` (when present) mirroring the source structure
 - Mock external I/O (filesystem, network, APIs) in unit tests
 - Add focused tests for non-trivial logic when feasible
 - Run the smallest relevant test during iteration
@@ -101,7 +102,7 @@ Design principles:
 ## AI / LLM rules
 
 - Do not change prompt templates without explicit instruction
-- If prompt templates exist, keep them in `prompts/`
+- If prompt templates exist, keep them in `prompts/` (when present)
 - Never hardcode model names — use config constants
 - Log token usage at debug level for cost visibility
 - Do not add new models or providers without explicit approval

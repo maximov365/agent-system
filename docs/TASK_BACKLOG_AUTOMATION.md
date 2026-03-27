@@ -84,7 +84,7 @@ Iteration Manager must not commit a task if the proposal is:
 
 ## Task schema
 
-Every task committed to `docs/TASKS.md` must include the following fields.
+Every task committed to `docs/TASKS.md` must include the following fields. `docs/TASK_TEMPLATE.md` provides a long-form prose template for task proposals; the schema below defines the structured fields that Iteration Manager extracts when committing to the backlog. `docs/TASKS.md` uses a summary table; the full schema is the source of truth for required fields.
 
 ```
 task_id:              <prefix>-<number>       # Assigned by Iteration Manager at commit time
@@ -113,7 +113,7 @@ All fields are required except `capability_id` and `parent_feature`, which may b
 
 ## Task ID convention
 
-Task IDs use prefixes that are intentionally distinct from artifact IDs defined in `docs/AGENT_HANDOFF_CONTRACT.md` to prevent collision.
+Task IDs use the same prefixes as artifact IDs defined in `docs/AGENT_HANDOFF_CONTRACT.md`. A `FEAT-42` task ID and a `FEAT-42` artifact ID refer to the same feature — the task tracks the work, the artifact ID tracks the specification document. The only namespace split is for analytics: `AN-*` is reserved for specification artifacts, while `ATASK-*` is used for analytics implementation tasks.
 
 | Task type | ID format | Example |
 |---|---|---|

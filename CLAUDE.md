@@ -14,28 +14,26 @@ Claude must never start implementing code directly in response to a user request
 
 # Rules
 
-Workflow rules, agent routing, quality loops, escalation conditions, and task lifecycle are defined in `AGENTS.md`.
-
-Coding rules (execution style, testing, error handling, AI/LLM, safety, git) are defined in `.cursor/rules.md`.
-
-Architectural constraints are defined in `docs/ARCHITECTURE_GUARDRAILS.md`.
-
-Each file is authoritative in its domain: `AGENTS.md` for workflow, `.cursor/rules.md` for coding, `docs/ARCHITECTURE_GUARDRAILS.md` for architecture. If two files conflict on the same matter, escalate to the user.
+Rule ownership and conflict resolution are defined in the Precedence section of `AGENTS.md`.
 
 ---
 
 # Before starting any task
 
 Read in order:
-1. `docs/PRD.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/ARCHITECTURE_GUARDRAILS.md`
-4. `docs/PIPELINE_CONTRACTS.md`
-5. `docs/TASKS.md`
-6. `docs/DECISIONS.md`
+1. `AGENTS.md`
+2. `docs/PRD.md`
+3. `docs/ARCHITECTURE.md`
+4. `docs/ARCHITECTURE_GUARDRAILS.md`
+5. `docs/PIPELINE_CONTRACTS.md`
+6. `docs/TASKS.md`
+7. `docs/DECISIONS.md`
+
+**For tasks involving code, also read:**
+8. `.cursor/rules.md`
 
 **For UI, frontend, or design tasks, also read:**
-7. `docs/BRAND.md`
+9. `docs/BRAND.md`
 
 ---
 
