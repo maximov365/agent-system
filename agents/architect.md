@@ -19,6 +19,7 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 - Identify acceptance criteria, non-goals, dependencies, and risks
 - List files to modify or create, with reasons
 - Highlight architectural implications
+- If Designer has produced an approved design for this feature, use it as the visual reference for the implementation plan
 - If Analytics Architect has produced a specification for this feature, incorporate instrumentation steps into the implementation plan
 
 If the task requires decomposition into subtasks, Architect may propose them in the plan output. Proposed subtasks must map to specific plan steps and must not introduce new scope. Iteration Manager commits subtasks to `docs/TASKS.md` — Architect does not write to it directly.

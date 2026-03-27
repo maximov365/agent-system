@@ -15,7 +15,7 @@ Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 
 cycle. Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic.
 
-Earlier steps (Discovery, Product, Analytics Architect) are used to clarify scope, product design, and measurement before implementation.
+Earlier steps (Discovery, Product, Designer, Analytics Architect) are used to clarify scope, product design, visual direction, and measurement before implementation.
 
 ---
 
@@ -48,11 +48,14 @@ Defined in: `agents/discovery.md`
 
 Responsibilities:
 
-- Explore technical options
+- Explore technical options and market references
 - Compare realistic approaches
+- Research competitors and analogous products (when relevant)
 - Identify trade-offs and risks
 - Recommend the simplest viable direction
 - Suggest whether the decision should be recorded in `docs/DECISIONS.md`
+
+Discovery operates in two modes: **Technical Discovery** (how to build) and **Market & Competitive Discovery** (what others do, best practices). Both can be combined.
 
 Discovery **does not write production code**.
 
@@ -71,6 +74,23 @@ Responsibilities:
 - Recommend the next smallest useful task
 
 Product **does not write production code**.
+
+---
+
+## Designer
+
+Defined in: `agents/designer.md`
+
+Responsibilities:
+
+- Create UI mockups and visual prototypes for features
+- Present designs to the user for review
+- Iterate based on user feedback
+- Produce a finalized design artifact for Architect
+
+Designer **does not write production code** and **does not define product scope**.
+
+Designer is optional. It runs **after the Product specification is accepted and before Analytics Architect or Architect**, when the feature has a user-facing UI component that needs visual design.
 
 ---
 
@@ -296,6 +316,8 @@ Choose the first agent based on the nature of the request.
 - the right approach is unclear
 - the decision may affect architecture or dependencies
 - an existing decision in `docs/DECISIONS.md` may need to be revisited
+- market research, competitive analysis, or reference gathering is needed
+- the user wants to understand how others solve a similar problem
 
 ---
 
@@ -306,6 +328,16 @@ Choose the first agent based on the nature of the request.
 - the feature must be turned into implementation-ready tasks
 - acceptance criteria or non-goals are missing
 - the task is not yet in `docs/TASKS.md`
+
+---
+
+## Use Designer when:
+
+- the accepted Product specification includes a user-facing UI component
+- visual design decisions need user input before implementation
+- the user explicitly requests mockups or design review
+
+Skip Designer when the feature is backend-only, API-only, has no visual component, or the UI change is trivial.
 
 ---
 
@@ -380,8 +412,9 @@ Security Reviewer runs for all code changes. It is skipped only for non-code cha
 
 If the request is ambiguous:
 
-- use Discovery if the uncertainty is technical
+- use Discovery if the uncertainty is technical or requires market research
 - use Product if the uncertainty is about feature scope
+- use Designer if the uncertainty is about visual design for an accepted spec
 - use Architect if the task already exists
 
 Never start with Builder unless an implementation step is approved.
@@ -396,13 +429,13 @@ Never skip Reviewer for code changes.
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
 Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 
-Brackets indicate optional steps. Earlier stages (Discovery, Product) are optional depending on the request. Test Strategist is optional — invoked when the task has non-trivial testable logic. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
+Brackets indicate optional steps. Designer runs only for features with user-facing UI. Test Strategist runs only for tasks with non-trivial testable logic. Earlier stages (Discovery, Product) are optional depending on the request. Test Strategist is optional — invoked when the task has non-trivial testable logic. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
 All code changes must go through **Security Reviewer** and **Reviewer**. Iteration Manager confirms workflow completion after Reviewer approval.
 
@@ -555,6 +588,7 @@ agents/
   README.md                      # Agent directory overview
   discovery.md
   product.md
+  designer.md
   analytics-architect.md
   architect.md
   test-strategist.md

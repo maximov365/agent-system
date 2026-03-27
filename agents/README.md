@@ -18,7 +18,7 @@ This repository uses a structured multi-agent workflow for AI-assisted developme
 
 **Full workflow for features with measurable outcomes:**
 
-Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 
 **Lightweight workflow for internal technical changes:**
 
@@ -61,8 +61,9 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | Agent | Role |
 |---|---|
 | Iteration Manager | Workflow orchestrator — routes requests, manages transitions, controls quality loops |
-| Discovery | Explores technical options before specification begins |
+| Discovery | Explores technical and market options before specification begins |
 | Product | Turns ideas into feature specifications and task breakdowns |
+| Designer | Creates UI mockups and iterates with user feedback (optional) |
 | Analytics Architect | Defines analytics events, metrics, and instrumentation requirements |
 | Architect | Plans implementation before coding begins |
 | Test Strategist | Defines test strategy before implementation (optional) |

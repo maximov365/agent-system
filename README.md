@@ -9,7 +9,7 @@ The system enables predictable, safe, and increasingly autonomous product develo
 All work flows through a controlled pipeline of specialized agents:
 
 ```
-Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 ```
 
 Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
@@ -54,6 +54,7 @@ agents/
   README.md                  # Agent directory overview
   discovery.md               # Explore technical options
   product.md                 # Define features and tasks
+  designer.md                # UI mockups and visual prototypes
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
   test-strategist.md         # Define test strategy
@@ -98,8 +99,9 @@ examples/
 | Agent | Role |
 |---|---|
 | **Iteration Manager** | Routes requests, manages transitions, controls quality loops |
-| **Discovery** | Explores technical options before specification |
+| **Discovery** | Explores technical and market options before specification |
 | **Product** | Turns ideas into feature specs and task breakdowns |
+| **Designer** | Creates UI mockups and iterates with user feedback (optional) |
 | **Analytics Architect** | Defines events, metrics, instrumentation |
 | **Architect** | Plans implementation before coding |
 | **Test Strategist** | Defines test strategy before implementation (optional) |

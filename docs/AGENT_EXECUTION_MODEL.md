@@ -228,6 +228,8 @@ The analytics instrumentation flow is controlled by Iteration Manager. Analytics
 **Analytics flow sequence:**
 
 ```
+  Optional: Invoke Designer (if feature has user-facing UI)
+        ↓ (Designer iterates with user until design is approved)
 Iteration Manager detects analytics_required = true
         ↓
 Invoke Analytics Architect

@@ -38,6 +38,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 | `design_note` | Design decision or exploration note |
 | `decision_note` | Technical decision record for `docs/DECISIONS.md` |
 | `analytics_spec` | Analytics specification produced by Analytics Architect |
+| `design` | UI mockups and design artifact produced by Designer |
 | `test_plan` | Test strategy produced by Test Strategist |
 | `code` | Production code, tests, or configuration changed by Builder |
 | `none` | No artifact produced (e.g. routing-only output from Iteration Manager) |
@@ -48,7 +49,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 
 `artifact_path` must follow these rules depending on artifact type:
 
-- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`) — repository-relative path to the file, e.g. `docs/features/FEAT-42.md`
+- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`) — repository-relative path to the file, e.g. `docs/features/FEAT-42.md`
 - **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -118,7 +119,7 @@ Status values are fixed. No agent may invent new values.
 
 | Status | Meaning | Produced by |
 |---|---|---|
-| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Analytics Architect, Architect, Reviser |
+| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser |
 | `accepted` | Artifact passed quality review | Gatekeeper (decision: accept) |
 | `revise` | Artifact has must_fix issues; send to Reviser | Spec Reviewer (verdict: revise), Gatekeeper (decision: iterate) |
 | `escalate` | Conflict or blocker requires user input | Any agent |
@@ -150,6 +151,7 @@ Status values are fixed. No agent may invent new values.
 | Security Reviewer | `verdict: fail` | `security_failed` |
 | Security Reviewer | `verdict: escalate` | `escalate` |
 | Builder | implementation complete | `produced` |
+| Designer | design approved by user | `produced` |
 | Test Strategist | test plan complete | `produced` |
 | Architect | plan complete | `produced` |
 | Product | spec complete | `produced` |
@@ -266,6 +268,23 @@ Each agent receives the current `workflow_state` from the previous handoff and u
 }
 ```
 
+### Designer
+
+```json
+{
+  "handoff": {
+    "agent": "Designer",
+    "artifact_type": "design",
+    "artifact_path": "<path to design artifact>",
+    "status": "produced | escalate",
+    "next_recommended_agent": "Analytics Architect | Architect",
+    "next_recommended_reason": "Design approved by user; ready for analytics specification or implementation planning.",
+    "blocking_issues": [],
+    "workflow_state": { ... }
+  }
+}
+```
+
 ### Test Strategist
 
 ```json
@@ -349,7 +368,7 @@ Appended after the native JSON output block.
     "artifact_type": "<same as reviewed artifact>",
     "artifact_path": "<same as reviewed artifact>",
     "status": "accepted | revise | escalate",
-    "next_recommended_agent": "Reviser | Test Strategist | Architect | Analytics Architect | Builder | null",
+    "next_recommended_agent": "Reviser | Designer | Test Strategist | Architect | Analytics Architect | Builder | null",
     "next_recommended_reason": "<one sentence>",
     "blocking_issues": [],
     "workflow_state": { ... }

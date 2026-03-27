@@ -70,7 +70,7 @@ State fields:
 | `analytics_used` | bool | Whether Analytics Architect was invoked for this feature |
 | `product_spec_accepted` | bool | Whether Product's feature specification has passed the quality loop |
 
-`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product or its quality loop is active; `analytics` while Analytics Architect is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
+`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product, its quality loop, or Designer is active; `analytics` while Analytics Architect is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
 
 **State lifecycle rules:**
 
@@ -127,8 +127,9 @@ Classify every incoming request before selecting an agent.
 
 | Condition | Start with |
 |---|---|
-| Technical uncertainty; multiple approaches; unclear architecture direction | `Discovery` |
+| Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
+| Accepted feature specification has user-facing UI and needs design review | `Designer` |
 | Accepted feature specification with measurable outcomes and no analytics spec exists (`product_spec_accepted: true`) | `Analytics Architect` |
 | Task exists and is ready for planning; analytics spec exists or is not required | `Architect` |
 | Approved Architect plan exists; task has non-trivial testable logic | `Test Strategist` |
@@ -140,8 +141,9 @@ Classify every incoming request before selecting an agent.
 ### Fallback rule
 
 If the request is ambiguous:
-- Technical uncertainty → `Discovery`
+- Technical or market uncertainty → `Discovery`
 - Scope uncertainty → `Product`
+- Visual design uncertainty for an accepted spec → `Designer`
 - Task already exists → `Architect`
 
 Never route directly to `Builder` unless an approved Architect plan exists.
@@ -164,7 +166,10 @@ After each agent completes, determine the next step based on the agent's output 
 |---|---|---|
 | `Discovery` | Recommendation produced | → `Product` (if feature scope needed) or → `Architect` (if task already exists) |
 | `Product` | Feature spec produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Product` → Quality loop | Gatekeeper `accept` | → `Analytics Architect` (if feature has measurable outcomes) or → `Architect` |
+| `Product` → Quality loop | Gatekeeper `accept`; feature has user-facing UI | → `Designer` |
+| `Product` → Quality loop | Gatekeeper `accept`; no UI; feature has measurable outcomes | → `Analytics Architect` |
+| `Product` → Quality loop | Gatekeeper `accept`; no UI; no analytics needed | → `Architect` |
+| `Designer` | Design approved by user | → `Analytics Architect` (if feature has measurable outcomes) or → `Architect` |
 | `Analytics Architect` | Analytics spec produced | → `Architect` |
 | `Architect` | Implementation plan produced | → Quality loop (invoke `Spec Reviewer`) |
 | `Architect` → Quality loop | Gatekeeper `accept`; task has non-trivial testable logic | → `Test Strategist` |
