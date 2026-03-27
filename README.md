@@ -119,6 +119,59 @@ All project-specific content lives in `project.config.yaml`. The file controls:
 
 See [`examples/unfolda/`](examples/unfolda/) for a complete real-world configuration.
 
+## New project setup
+
+1. Create a new repository for your project
+2. Copy `project.config.yaml` from this repo (or use `examples/unfolda/project.config.yaml` as a reference)
+3. Edit `project.config.yaml` with your project details — name, description, pipeline stages, domain rules
+4. Run sync to copy the framework files:
+
+```bash
+# From agent-system repo:
+python sync.py --target /path/to/your-project     # copy framework files
+```
+
+5. Install dependencies and render templates in the new project:
+
+```bash
+cd /path/to/your-project
+pip install jinja2 pyyaml
+python setup.py            # render templates with your config
+```
+
+6. Add your project-specific docs: `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, etc.
+7. Commit and start working
+
+## Upgrading a downstream project
+
+When `agent-system` improves, use `sync.py` to safely update any downstream project:
+
+```bash
+# 1. Preview changes
+python sync.py --target /path/to/project --diff
+
+# 2. Apply framework files (project-specific files are never touched)
+python sync.py --target /path/to/project
+
+# 3. In the target project: re-render templates with local config
+cd /path/to/project
+python setup.py --check    # verify rendering
+python setup.py            # render with local config
+
+# 4. Review and commit
+git diff
+git add -A && git commit -m "chore: upgrade agent framework to vX.Y.Z"
+```
+
+**Safety guarantees:**
+- `sync.py` only overwrites framework files (agent definitions, workflow rules, tooling)
+- Project-specific files (`docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, etc.) are never touched
+- `project.config.yaml` is never overwritten — your project identity is preserved
+- Use `--diff` to preview every change before applying
+- Every step is explicit and reversible (`git checkout` to undo)
+
+The framework version is tracked in `.agent-system-version` in each downstream project.
+
 ## Language
 
 - Repository artifacts (code, docs, prompts): English

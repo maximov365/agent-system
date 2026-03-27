@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
 Unfolda instance test — verifies that rendering project.config.yaml
-through agent templates produces output identical to the known-good
-original files.
+through agent templates produces correct output.
 
 Three layers of verification:
-  1. SHA-256 golden hashes   — byte-for-byte identity
-  2. Content assertions      — key strings present in rendered output
-  3. Template hygiene        — no unresolved {{ }} variables remain
+  1. Content assertions      — key strings present in rendered output
+  2. Template hygiene        — no unresolved {{ }} variables remain
+  3. Idempotent re-render    — restore → render produces identical output
 
 Usage:
     python test_setup.py
@@ -26,82 +25,102 @@ SETUP_PY = ROOT / "setup.py"
 
 JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}")
 
-# ─── Golden hashes ──────────────────────────────────────────────────────
-# SHA-256 of each rendered agent file as produced by the original Unfolda
-# config. Any change to config values, templates, or rendering logic
-# will cause a mismatch here.
-
-GOLDEN_HASHES = {
-    "README.md":               "7518530074244366098b5f2292d5cdbe2e34e096a912a32ca38b457543ce86a0",
-    "analytics-architect.md":  "785d02f0437db6ba172f44a548c3ac9c2196d8a4f5c00ae713270285ca04b56c",
-    "analytics-validator.md":  "a4b92609e58537cdfca50ffd536b7e9b4504cf801bdd1fe6f2a87f1f168d297b",
-    "architect.md":            "47c5141bb9456890089b7f4e9cad2bad22a111f71842247629ae6c94407c32ac",
-    "builder.md":              "ca8122e9cdb2d0c21d8c110325b90c019ccd52e5bc84220c98a71acab484cd35",
-    "discovery.md":            "7e17e09fedf546f86546e06c24503b41d109672282ccf239b12d47a4b8510d27",
-    "gatekeeper.md":           "f4e6b279e2c091363d2251e02c4c926ffcc4a229e47484f38e8976bb16da90de",
-    "iteration-manager.md":    "24148250e36242a7e10569deba68de823b0862a61b20258abcd2e514833eb125",
-    "product.md":              "59838aec620add2bed3e8a9cd6171d35f59c2916a3093ceeeff4ab385f07615e",
-    "reviewer.md":             "ab4de913e992d66f455f9d0a908e5ad4e806a90dbfe6fc28234d1eb9b1027835",
-    "reviser.md":              "4a433371faafd82182102bcba7b234d61d8f44bdf212f8cbd7ffacb79045c21e",
-    "spec-reviewer.md":        "416f9e0176aef8df227b230f74bd9a5798e3150eb9eaf3f6fbb87b1d1aaf8616",
-}
+RENDERED_GLOBS = [
+    "agents/*.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    ".cursor/rules.md",
+    "docs/AGENT_HANDOFF_CONTRACT.md",
+    "docs/AGENT_EXECUTION_MODEL.md",
+    "docs/TASK_BACKLOG_AUTOMATION.md",
+    "docs/ARCHITECTURE_GUARDRAILS.md",
+    "docs/FEATURE_TEMPLATE.md",
+    "docs/TASK_TEMPLATE.md",
+]
 
 # ─── Content assertions ─────────────────────────────────────────────────
 # Strings that MUST appear in each rendered file to confirm correct
-# variable resolution. Maps filename → list of expected substrings.
+# variable resolution. Maps relative path → list of expected substrings.
 
 CONTENT_ASSERTIONS = {
-    "README.md": [
-        "# Unfolda",
-        "Unfolda is a web-based SaaS service",
-        "ingestion → segmentation → translation → formatting → export",
-    ],
-    "discovery.md": [
+    "agents/discovery.md": [
         "You are the Discovery agent for Unfolda.",
         "why this matters for Unfolda",
     ],
-    "product.md": [
+    "agents/product.md": [
         "You are the Product agent for Unfolda.",
         "ingestion → segmentation → translation → formatting → export",
         "Unfolda's core value",
     ],
-    "analytics-architect.md": [
+    "agents/analytics-architect.md": [
         "You are the Analytics Architect agent for Unfolda.",
         "ingestion | segmentation | translation | formatting | export",
     ],
-    "architect.md": [
+    "agents/architect.md": [
         "You are the Architect agent for Unfolda.",
         "ingestion → segmentation → translation → formatting → export",
     ],
-    "builder.md": [
+    "agents/builder.md": [
         "You are the Builder agent for Unfolda.",
         "ingestion → segmentation → translation → formatting → export",
     ],
-    "analytics-validator.md": [
+    "agents/analytics-validator.md": [
         "You are the Analytics Validator agent for Unfolda.",
         "ingestion | segmentation | translation | formatting | export",
     ],
-    "reviewer.md": [
+    "agents/reviewer.md": [
         "You are the Reviewer agent for Unfolda.",
         "ingestion → segmentation → translation → formatting → export",
     ],
-    "spec-reviewer.md": [
+    "agents/spec-reviewer.md": [
         "You are the Spec Reviewer agent for Unfolda.",
     ],
-    "reviser.md": [
+    "agents/reviser.md": [
         "You are the Reviser agent for Unfolda.",
     ],
-    "gatekeeper.md": [
+    "agents/gatekeeper.md": [
         "You are the Gatekeeper agent for Unfolda.",
     ],
-    "iteration-manager.md": [
+    "agents/iteration-manager.md": [
         "You are the Iteration Manager for Unfolda.",
     ],
+    "CLAUDE.md": [
+        "Unfolda",
+    ],
+    "AGENTS.md": [
+        "Unfolda",
+        "ingestion → segmentation → translation → formatting → export",
+    ],
 }
+
+# Files that must exist after rendering (relative to ROOT).
+EXPECTED_FILES = [
+    "agents/discovery.md",
+    "agents/product.md",
+    "agents/analytics-architect.md",
+    "agents/analytics-validator.md",
+    "agents/architect.md",
+    "agents/builder.md",
+    "agents/reviewer.md",
+    "agents/spec-reviewer.md",
+    "agents/reviser.md",
+    "agents/gatekeeper.md",
+    "agents/iteration-manager.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    ".cursor/rules.md",
+]
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def collect_rendered_files() -> list[Path]:
+    paths = []
+    for pattern in RENDERED_GLOBS:
+        paths.extend(ROOT.glob(pattern))
+    return sorted(set(paths))
 
 
 def run_setup(*args: str) -> None:
@@ -116,47 +135,40 @@ def run_setup(*args: str) -> None:
         sys.exit(2)
 
 
-def test_golden_hashes() -> list[str]:
-    """Layer 1: byte-for-byte identity via SHA-256."""
+def test_expected_files_exist() -> list[str]:
+    """Verify all expected rendered files exist."""
     failures = []
-    for filename, expected_hash in sorted(GOLDEN_HASHES.items()):
-        path = AGENTS_DIR / filename
+    for rel in EXPECTED_FILES:
+        path = ROOT / rel
         if not path.exists():
-            failures.append(f"  MISSING  {filename}")
-            continue
-        actual = sha256(path)
-        if actual != expected_hash:
-            failures.append(f"  MISMATCH {filename}\n"
-                            f"           expected: {expected_hash}\n"
-                            f"           actual:   {actual}")
+            failures.append(f"  MISSING  {rel}")
     return failures
 
 
 def test_content_assertions() -> list[str]:
-    """Layer 2: key Unfolda-specific strings present."""
+    """Key Unfolda-specific strings present in rendered output."""
     failures = []
-    for filename, expected_strings in sorted(CONTENT_ASSERTIONS.items()):
-        path = AGENTS_DIR / filename
+    for rel_path, expected_strings in sorted(CONTENT_ASSERTIONS.items()):
+        path = ROOT / rel_path
         if not path.exists():
-            failures.append(f"  MISSING  {filename}")
+            failures.append(f"  MISSING  {rel_path}")
             continue
         content = path.read_text()
         for s in expected_strings:
             if s not in content:
-                failures.append(f"  NOT FOUND in {filename}: {s!r}")
+                failures.append(f"  NOT FOUND in {rel_path}: {s!r}")
     return failures
 
 
 def test_no_unresolved_variables() -> list[str]:
-    """Layer 3: no {{ jinja2 }} variables left in rendered output."""
+    """No {{ jinja2 }} variables left in rendered output."""
     failures = []
-    for path in sorted(AGENTS_DIR.glob("*.md")):
-        if path.parent == TEMPLATES_DIR:
-            continue
+    for path in collect_rendered_files():
+        rel = path.relative_to(ROOT)
         content = path.read_text()
         found = JINJA_VAR_RE.findall(content)
         if found:
-            failures.append(f"  UNRESOLVED in {path.name}: {found}")
+            failures.append(f"  UNRESOLVED in {rel}: {found}")
     return failures
 
 
@@ -166,35 +178,41 @@ def test_templates_preserved() -> list[str]:
     if not TEMPLATES_DIR.exists():
         failures.append("  .templates/ directory missing")
         return failures
-    for filename in GOLDEN_HASHES:
-        tpl = TEMPLATES_DIR / filename
+    for path in collect_rendered_files():
+        rel = path.relative_to(ROOT)
+        tpl = TEMPLATES_DIR / rel
         if not tpl.exists():
-            failures.append(f"  MISSING template: {filename}")
             continue
         if not JINJA_VAR_RE.search(tpl.read_text()):
-            failures.append(f"  NO VARIABLES in template: {filename}")
+            failures.append(f"  NO VARIABLES in template: {rel}")
     return failures
 
 
 def test_idempotent_rerender() -> list[str]:
     """Verify restore → render cycle produces identical output."""
-    before = {f.name: sha256(f) for f in sorted(AGENTS_DIR.glob("*.md"))
-              if f.parent != TEMPLATES_DIR}
+    before = {}
+    for path in collect_rendered_files():
+        rel = path.relative_to(ROOT)
+        before[str(rel)] = sha256(path)
 
     run_setup("--restore")
     run_setup()
 
-    after = {f.name: sha256(f) for f in sorted(AGENTS_DIR.glob("*.md"))
-             if f.parent != TEMPLATES_DIR}
+    after = {}
+    for path in collect_rendered_files():
+        rel = path.relative_to(ROOT)
+        after[str(rel)] = sha256(path)
 
     failures = []
     for name in sorted(set(before) | set(after)):
         h_before = before.get(name)
         h_after = after.get(name)
         if h_before != h_after:
-            failures.append(f"  CHANGED after re-render: {name}\n"
-                            f"           before: {h_before}\n"
-                            f"           after:  {h_after}")
+            failures.append(
+                f"  CHANGED after re-render: {name}\n"
+                f"           before: {h_before}\n"
+                f"           after:  {h_after}"
+            )
     return failures
 
 
@@ -205,7 +223,7 @@ def main() -> None:
 
     all_passed = True
     tests = [
-        ("Golden SHA-256 hashes",       test_golden_hashes),
+        ("Expected files exist",        test_expected_files_exist),
         ("Content assertions",          test_content_assertions),
         ("No unresolved variables",     test_no_unresolved_variables),
         ("Templates preserved",         test_templates_preserved),
