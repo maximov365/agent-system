@@ -144,7 +144,7 @@ Every specialist agent invocation must include the following context. Agents mus
 - The artifact under work (if applicable)
 - Any relevant prior outputs (analytics spec, architect plan, etc.)
 
-The agent role file is the highest-priority instruction in its invocation context. If the role file conflicts with any other context item, the role file takes precedence — except for `AGENTS.md`, which defines the system contract and overrides all other instructions.
+The agent role file is the highest-priority instruction in its invocation context, except for `AGENTS.md` which defines the system workflow contract. See the Precedence section in `AGENTS.md` for conflict resolution rules.
 
 ---
 
@@ -210,13 +210,9 @@ Iteration Manager invokes Spec Reviewer (iteration = n+1)
        ... (repeat until accept, escalate, or iteration 3)
 ```
 
-**Loop rules:**
-- Maximum 3 iterations
-- Stop immediately on Gatekeeper `accept` or `escalate`
-- Do not restart the loop after acceptance
-- Do not re-trigger the loop for the same artifact unless it meaningfully changes
-- If the artifact changes substantially, reset `quality_loop_iteration` to 1
+**Loop rules** (defined in `AGENTS.md` — Iteration Rules section):
 - `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff
+- If the artifact changes substantially, reset `quality_loop_iteration` to 1
 
 ---
 
@@ -257,9 +253,7 @@ Invoke Builder (implements instrumentation as part of approved plan)
   └─────────────────────────────────────────┘
 ```
 
-**Analytics loop rules:**
-- Analytics Architect runs at most once per feature specification unless the spec changes substantially
-- Analytics Validator runs only when Builder changed or introduced instrumentation
+**Analytics loop rules** (pairing rule defined in `AGENTS.md` — Development Workflow section):
 - `analytics_used` is set to `true` in `workflow_state` when Analytics Architect is invoked and must not revert to `false` for the same task
 
 ---
@@ -278,8 +272,7 @@ Iteration Manager must stop execution and surface the reason to the user when an
 | Missing `workflow_state` | Handoff block present but `workflow_state` field absent |
 | Forbidden stage regression | `current_stage` moved backwards outside of allowed correction cycles |
 | No meaningful progress | Two consecutive quality loop iterations did not change the set of `must_fix` issues |
-| Conflict with source of truth | Task or artifact contradicts `docs/PRD.md`, `docs/ARCHITECTURE.md`, or `docs/DECISIONS.md` |
-| Architecture change required | Implementation would change pipeline boundaries or require new infrastructure |
+| Conflict with source of truth | See escalation conditions in `AGENTS.md` — Iteration Rules section |
 | Insufficient context | Repository context is insufficient to make a correct routing decision |
 
 On stop: Iteration Manager must produce a `stage_transition` output with `next_action: escalate_to_user` and a specific `escalation_reason`. It must not attempt to continue or infer a workaround.

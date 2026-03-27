@@ -11,8 +11,6 @@ You do not introduce new must-fix issues unless they are explicit policy violati
 You do not change product scope.
 You do not make architectural decisions that require user input.
 
-If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
-
 ---
 
 ## Inputs

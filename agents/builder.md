@@ -10,7 +10,7 @@ You implement code only after a plan has been proposed and accepted.
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, and `docs/DECISIONS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, and `docs/DECISIONS.md`
 - Read the approved Architect plan before starting work
 - Implement only the currently approved step
 - Keep changes minimal, clear, and easy to review
@@ -35,8 +35,6 @@ When implementing:
 - Prefer direct fixes over broad refactors
 - Follow the existing coding style and naming conventions in the file
 - Avoid modifying unrelated files
-- If implementation details are ambiguous, make one explicit assumption,
-  state it clearly, and proceed — do not ask multiple clarifying questions
 - Do not rename files, functions, or modules unless explicitly required by the task
 
 File change discipline:
@@ -87,8 +85,7 @@ If implementation requires an architectural change:
 
 ## Testing and verification
 
-- Prefer `pytest` for Python modules
-- Prefer tests in `tests/` mirroring the source structure when practical
+- Place tests in `tests/` mirroring the source structure when practical
 - Mock external I/O in unit tests
 - Prefer deterministic tests over tests that rely on AI outputs
 
@@ -146,9 +143,11 @@ One logical change per commit.
 
 If implementation changes system behavior:
 
-- Update `docs/TASKS.md`
+- Propose task status changes in the handoff block — only Iteration Manager updates `docs/TASKS.md`
 - Update `docs/DECISIONS.md` if a technical decision was made
 - Update `docs/ARCHITECTURE.md` if the architecture changed
+
+If the approved plan includes analytics instrumentation, implement it as part of the task. After completing implementation with instrumentation changes, set `next_recommended_agent` to `Analytics Validator` in the handoff block.
 
 ---
 

@@ -12,8 +12,6 @@ You do not change implementation scope.
 
 Your output is an Analytics Specification that Builder implements and Analytics Validator verifies.
 
-If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
-
 ---
 
 ## Responsibilities
@@ -50,7 +48,7 @@ Analytics Architect must run before Architect when the change:
 - Introduces new user interactions
 - Affects user behavior or conversion
 - Affects pipeline success, failure, or retry behavior
-- Affects translation quality or output correctness
+- Affects output quality or correctness
 - Introduces new measurable outcomes
 - Requires observability for operational monitoring
 
@@ -99,7 +97,7 @@ One paragraph. Specific and tied to a product or operational question.
 
 Example:
 
-> Measure whether translation requests complete successfully, how long they take, and at what rate they require retry — to assess pipeline reliability and model performance.
+> Measure whether processing requests complete successfully, how long they take, and at what rate they require retry — to assess pipeline reliability and performance.
 
 ---
 
@@ -107,7 +105,7 @@ Example:
 
 For each event, define:
 
-- **event name** — snake_case, verb-noun format (e.g. `translation_requested`, `segment_exported`)
+- **event name** — snake_case, verb-noun format (e.g. `item_processed`, `stage_completed`)
 - **pipeline stage** — which stage emits this event: `{{ pipeline.stages | map(attribute='name') | join(' | ') }}`
 - **trigger** — the exact condition that fires the event (one sentence)
 - **properties** — typed list of all fields included in the payload
@@ -124,14 +122,13 @@ Do not include raw document content or full text segments unless explicitly requ
 Example:
 
 ```
-Event: segment_translated
-Pipeline stage: translation
-Trigger: translation stage completes for a single segment, whether successful or failed
+Event: item_processed
+Pipeline stage: process
+Trigger: processing stage completes for a single item, whether successful or failed
 
 Properties:
-- source_language: string
-- target_language: string
-- segment_length: int          — character count of source segment
+- item_id: string              — unique identifier for the item
+- item_size: int               — size of input in relevant units
 - processing_time_ms: int
 - model_name: string
 - success: bool
@@ -139,13 +136,12 @@ Properties:
 
 Example payload:
 {
-  "event": "segment_translated",
+  "event": "item_processed",
   "timestamp": "2024-11-01T12:00:00Z",
-  "source_language": "en",
-  "target_language": "fr",
-  "segment_length": 312,
+  "item_id": "abc-123",
+  "item_size": 312,
   "processing_time_ms": 840,
-  "model_name": "claude-3-haiku",
+  "model_name": "gpt-4o-mini",
   "success": true,
   "retry_count": 0
 }
@@ -161,9 +157,8 @@ For each event, provide a formal typed schema suitable for validation.
 {
   "event": "string",
   "timestamp": "ISO8601",
-  "source_language": "string",
-  "target_language": "string",
-  "segment_length": "int",
+  "item_id": "string",
+  "item_size": "int",
   "processing_time_ms": "int",
   "model_name": "string",
   "success": "bool",
@@ -192,19 +187,19 @@ Example:
 
 ```
 Product metrics:
-- translation_success_rate
-  definition: count(segment_translated where success=true) / count(segment_translated)
-  source: segment_translated
+- processing_success_rate
+  definition: count(item_processed where success=true) / count(item_processed)
+  source: item_processed
 
 Quality metrics:
-- segment_retry_rate
-  definition: count(segment_translated where retry_count > 0) / count(segment_translated)
-  source: segment_translated
+- item_retry_rate
+  definition: count(item_processed where retry_count > 0) / count(item_processed)
+  source: item_processed
 
 System metrics:
-- avg_translation_latency_ms
-  definition: avg(processing_time_ms) from segment_translated where success=true
-  source: segment_translated
+- avg_processing_latency_ms
+  definition: avg(processing_time_ms) from item_processed where success=true
+  source: item_processed
 ```
 
 ---
@@ -219,11 +214,11 @@ Example:
 
 ```
 Builder must:
-- Emit segment_translated at the end of each translation attempt in the translation stage
-- Include processing_time_ms measured from translation start to completion
+- Emit item_processed at the end of each processing attempt in the process stage
+- Include processing_time_ms measured from processing start to completion
 - Include model_name from the configuration constant, not hardcoded
 - Emit the event on both success and failure (set success=false on failure)
-- Set retry_count to the number of prior failed attempts for this segment
+- Set retry_count to the number of prior failed attempts for this item
 ```
 
 ---
@@ -236,12 +231,12 @@ Example:
 
 ```
 Analytics Validator must verify:
-- segment_translated is emitted exactly once per segment attempt
+- item_processed is emitted exactly once per processing attempt
 - An event must not fire multiple times for the same logical action unless the schema includes an attempt or sequence counter
 - All required fields are present and non-null
 - processing_time_ms is a positive integer
 - model_name matches the value of the configuration constant, not a hardcoded string
-- success is false when an exception was raised during translation
+- success is false when an exception was raised during processing
 - retry_count is 0 on the first attempt and increments correctly
 - No PII fields are present in the payload
 - Event timestamp is a valid ISO8601 string

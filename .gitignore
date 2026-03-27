@@ -7,8 +7,9 @@ __pycache__/
 .venv/
 *.egg-info/
 
-# IDE
-.cursor/
+# IDE (keep .cursor/rules.md tracked)
+.cursor/*
+!.cursor/rules.md
 .vscode/
 .idea/
 

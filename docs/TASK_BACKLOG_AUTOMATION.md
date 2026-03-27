@@ -92,7 +92,7 @@ title:                <short imperative title> # e.g. "Implement segment transla
 type:                 feature | implementation | analytics | fix | follow_up
 status:               planned                  # Always starts as planned
 priority:             high | medium | low
-capability_id:        <capability ID from docs/FEATURE_MAP.md> | null  # e.g. "UPLOAD", "TRANSLATE"
+capability_id:        <capability ID from docs/FEATURE_MAP.md> | null  # e.g. "INGEST", "EXPORT"
 parent_feature:       FEAT-<number> | null    # Feature this task belongs to
 source_agent:         <agent name>            # Agent that proposed the task
 source_artifact:      <artifact_id>           # Artifact that triggered the task

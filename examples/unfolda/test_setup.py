@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 AGENTS_DIR = ROOT / "agents"
-TEMPLATES_DIR = AGENTS_DIR / ".templates"
+TEMPLATES_DIR = ROOT / ".templates"
 SETUP_PY = ROOT / "setup.py"
 
 JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}")

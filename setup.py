@@ -36,10 +36,13 @@ TEMPLATE_GLOBS = [
     "agents/*.md",
     "CLAUDE.md",
     "AGENTS.md",
+    ".cursor/rules.md",
     "docs/AGENT_HANDOFF_CONTRACT.md",
     "docs/AGENT_EXECUTION_MODEL.md",
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
+    "docs/FEATURE_TEMPLATE.md",
+    "docs/TASK_TEMPLATE.md",
 ]
 
 

@@ -145,7 +145,7 @@ Responsibilities:
 
 Analytics Validator **does not modify implementation logic**.
 
-Analytics Validator runs **after Builder and before Reviewer** when the feature required Analytics Architect instrumentation.
+Analytics Validator runs **after Builder and before Reviewer** when Builder changed or introduced analytics instrumentation.
 
 ---
 
@@ -326,9 +326,9 @@ Standard workflow for features with measurable outcomes:
 
 Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Reviewer
 
-Standard workflow for features without measurable outcomes (internal refactors, configuration changes):
+Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
-Discovery → Product → Architect → Builder → Reviewer
+Discovery → Architect → Builder → Reviewer
 
 Earlier stages (Discovery, Product) are optional depending on the request. Analytics Architect and Analytics Validator are **required together** — if one is used, the other must also be used. Analytics Validator runs only when the Builder changed or introduced analytics instrumentation.
 
@@ -380,13 +380,18 @@ Stop earlier if:
 
 Escalate to the user when:
 
-- artifact conflicts with `docs/DECISIONS.md`
-- architecture or pipeline boundaries may change
-- a new dependency is required
-- repository context is insufficient
+- the task contradicts `docs/PRD.md` or `docs/ARCHITECTURE.md`
+- the task conflicts with a decision in `docs/DECISIONS.md`
+- implementation would change pipeline boundaries
+- a new external dependency or provider is required
+- a new infrastructure component is required
+- repository context is insufficient to proceed safely
+
+Do not make assumptions about these cases — escalate explicitly.
 
 ---
 
+{% if analytics_by_default %}
 # Analytics-by-Default Rule
 
 If a feature affects:
@@ -406,6 +411,7 @@ Analytics Architect must define:
 - instrumentation locations
 
 before Architect begins implementation planning. Analytics Validator must verify instrumentation before Reviewer approves the implementation.
+{% endif %}
 
 ---
 
@@ -415,16 +421,16 @@ Tasks are tracked in:
 
 `docs/TASKS.md`
 
-Typical lifecycle: planned → in progress → implemented → in review → approved → completed
+Typical lifecycle: planned → in_progress → implemented → in_review → approved → completed
 
 Tasks may also be set to `cancelled` by Iteration Manager with user confirmation when a task becomes obsolete, merged, or invalid. Tasks must not be deleted from `docs/TASKS.md`.
 
 Status transitions:
 
-- **planned → in progress**: Builder begins implementation
-- **in progress → implemented**: Builder completes implementation
-- **implemented → in review**: Reviewer begins validation
-- **in review → approved**: Reviewer approves
+- **planned → in_progress**: Builder begins implementation
+- **in_progress → implemented**: Builder completes implementation
+- **implemented → in_review**: Reviewer begins validation
+- **in_review → approved**: Reviewer approves
 - **approved → completed**: Iteration Manager confirms workflow closure or schedules follow-up tasks if Reviewer approved with minor changes
 
 Only Iteration Manager may commit new tasks to `docs/TASKS.md` or transition task status. Product and Architect may propose tasks in their output; Reviewer may propose non-blocking follow-up tasks. Automated task creation rules are defined in `docs/TASK_BACKLOG_AUTOMATION.md`.
@@ -439,10 +445,40 @@ Architecture updates must be reflected in:
 
 ---
 
+# Precedence
+
+`AGENTS.md` is the single source of truth for workflow rules (routing, agent roles, lifecycle, escalation, quality loops).
+
+`.cursor/rules.md` is the single source of truth for coding rules (execution style, testing, error handling, safety, git).
+
+`docs/ARCHITECTURE_GUARDRAILS.md` is the single source of truth for architectural constraints.
+
+When these files govern different domains, all apply. When they conflict on the same matter, escalate to the user.
+
+---
+
+# Universal Agent Rules
+
+These rules apply to every specialist agent:
+
+- If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
+- Every agent output must end with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+- Agents must not invoke other agents directly. Control always returns to Iteration Manager.
+
+---
+
 # Repository Structure
 
 ```
+CLAUDE.md                        # Entry point for Claude Code
+AGENTS.md                        # Workflow rules (this file)
+README.md                        # Project overview and setup guide
+project.config.yaml              # Project configuration for template rendering
+setup.py                         # Renders Jinja2 templates from config
+requirements.txt                 # Python dependencies for setup.py
+
 agents/
+  README.md                      # Agent directory overview
   discovery.md
   product.md
   analytics-architect.md
@@ -456,29 +492,33 @@ agents/
   iteration-manager.md
 
 docs/
-  PRD.md                    # Product requirements document
-  ARCHITECTURE.md           # Current system architecture
-  ARCHITECTURE_GUARDRAILS.md
-  ARCHITECTURE_CHECKLIST.md
-  PIPELINE_CONTRACTS.md
-  TASKS.md                  # Task tracking with lifecycle statuses
-  DECISIONS.md              # Significant technical decisions
-  FEATURES.md               # Feature specifications (one per capability)
-  FEATURE_MAP.md            # Capability blocks, dependency map, and capability index
-  FEATURE_TEMPLATE.md       # Template for new feature specifications
-  TASK_TEMPLATE.md          # Template for new tasks
-  AGENT_HANDOFF_CONTRACT.md # Standard format for passing results between agents
-  AGENT_EXECUTION_MODEL.md  # How Cursor and Claude Code execute the agent workflow
-  TASK_BACKLOG_AUTOMATION.md # Rules for automated task creation and backlog management
+  PRD.md                         # Product requirements document
+  ARCHITECTURE.md                # Current system architecture
+  ARCHITECTURE_GUARDRAILS.md     # Architectural constraints
+  ARCHITECTURE_CHECKLIST.md      # Review checklist for non-trivial changes
+  PIPELINE_CONTRACTS.md          # Stage-level input/output contracts
+  TASKS.md                       # Task tracking with lifecycle statuses
+  DECISIONS.md                   # Significant technical decisions
+  FEATURES.md                    # Feature specifications (one per capability)
+  FEATURE_MAP.md                 # Capability blocks and dependency map
+  FEATURE_TEMPLATE.md            # Template for new feature specifications
+  TASK_TEMPLATE.md               # Template for new tasks
+  BRAND.md                       # Brand guide (optional, for UI tasks)
+  AGENT_HANDOFF_CONTRACT.md      # Standard format for passing results between agents
+  AGENT_EXECUTION_MODEL.md       # How Cursor and Claude Code execute the agent workflow
+  TASK_BACKLOG_AUTOMATION.md     # Rules for automated task creation and backlog management
+  features/                      # Individual feature spec files
+  plans/                         # Implementation plan files
+  reviews/                       # Review output files
 
 .cursor/
-  rules.md
+  rules.md                       # Coding rules (execution, testing, safety, git)
 
-CLAUDE.md
-AGENTS.md
+examples/
+  unfolda/                       # Reference project configuration
 ```
 
-`FEATURES.md` contains feature specifications, one per capability. `FEATURE_MAP.md` defines the capability blocks, their dependencies, and the canonical Capability Index used for `capability_id` references. `FEATURE_TEMPLATE.md` is the template used by Product when creating new feature specifications.
+`FEATURES.md` contains feature specifications, one per capability. Individual feature specs may also be stored in `docs/features/`. `FEATURE_MAP.md` defines the capability blocks, their dependencies, and the canonical Capability Index used for `capability_id` references.
 
 ---
 

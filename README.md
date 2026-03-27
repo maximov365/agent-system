@@ -44,10 +44,12 @@ python setup.py            # render with new values
 ```
 project.config.yaml          # Your project configuration (name, pipeline, domain rules)
 setup.py                     # Renders Jinja2 templates from config
-CLAUDE.md                    # Entry point for Claude Code
-AGENTS.md                    # Agent roles, routing, workflows
+requirements.txt             # Python dependencies for setup.py
+CLAUDE.md                    # Entry point for Claude Code (bootstrap only)
+AGENTS.md                    # Workflow rules, agent roles, routing
 
 agents/
+  README.md                  # Agent directory overview
   discovery.md               # Explore technical options
   product.md                 # Define features and tasks
   analytics-architect.md     # Design observability
@@ -74,8 +76,14 @@ docs/
   FEATURE_TEMPLATE.md        # Template for new features
   TASK_TEMPLATE.md           # Template for new tasks
   AGENT_HANDOFF_CONTRACT.md  # Agent communication format
-  AGENT_EXECUTION_MODEL.md   # Execution rules
+  AGENT_EXECUTION_MODEL.md   # Execution mechanics
   TASK_BACKLOG_AUTOMATION.md # Backlog management rules
+  features/                  # Individual feature spec files
+  plans/                     # Implementation plan files
+  reviews/                   # Review output files
+
+.cursor/
+  rules.md                   # Coding rules (execution, testing, safety, git)
 
 examples/
   unfolda/                   # Reference project configuration
@@ -105,6 +113,9 @@ All project-specific content lives in `project.config.yaml`. The file controls:
 - **pipeline** — processing stages
 - **domain_rules** — LLM rules, pipeline principles
 - **analytics_by_default** — whether features require analytics specs
+- **output_docs** — optional brand guide and custom documentation
+
+Template variables (used by `setup.py`): `project.name`, `project.description`, `pipeline.stages`, `analytics_by_default`. Additional keys serve as structured reference data that agents can read directly from the YAML.
 
 See [`examples/unfolda/`](examples/unfolda/) for a complete real-world configuration.
 

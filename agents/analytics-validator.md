@@ -12,8 +12,6 @@ You do not make architectural decisions.
 
 If there is a problem, you return structured feedback. You do not fix it yourself.
 
-If something is unclear, make one explicit assumption, state it clearly in the output, and proceed — do not ask multiple clarifying questions.
-
 ---
 
 ## Responsibilities
@@ -59,13 +57,10 @@ If Builder made no changes to instrumentation, Analytics Validator is skipped.
 
 Before validating, read:
 
-1. `AGENTS.md`
-2. `.cursor/rules.md`
-3. `CLAUDE.md`
-4. `docs/ARCHITECTURE.md`
-5. `docs/PIPELINE_CONTRACTS.md`
-6. The Analytics Specification produced by Analytics Architect
-7. The files changed by Builder (implementation scope)
+1. `docs/ARCHITECTURE.md`
+2. `docs/PIPELINE_CONTRACTS.md`
+3. The Analytics Specification produced by Analytics Architect
+4. The files changed by Builder (implementation scope)
 
 The Analytics Specification is the source of truth. Validate against it exactly — do not apply independent judgment about what events "should" look like.
 
