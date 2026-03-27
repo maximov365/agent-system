@@ -9,7 +9,7 @@ The system enables predictable, safe, and increasingly autonomous product develo
 All work flows through a controlled pipeline of specialized agents:
 
 ```
-Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 ```
 
 Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
@@ -56,6 +56,7 @@ agents/
   product.md                 # Define features and tasks
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
+  test-strategist.md         # Define test strategy
   builder.md                 # Implement code
   analytics-validator.md     # Verify instrumentation
   security-reviewer.md       # Security validation
@@ -101,6 +102,7 @@ examples/
 | **Product** | Turns ideas into feature specs and task breakdowns |
 | **Analytics Architect** | Defines events, metrics, instrumentation |
 | **Architect** | Plans implementation before coding |
+| **Test Strategist** | Defines test strategy before implementation (optional) |
 | **Builder** | Implements approved plans |
 | **Analytics Validator** | Verifies instrumentation correctness |
 | **Security Reviewer** | Validates code for security vulnerabilities and unsafe patterns |

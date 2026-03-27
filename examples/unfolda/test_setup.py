@@ -87,6 +87,9 @@ CONTENT_ASSERTIONS = {
     "agents/security-reviewer.md": [
         "You are the Security Reviewer agent for Unfolda.",
     ],
+    "agents/test-strategist.md": [
+        "You are the Test Strategist agent for Unfolda.",
+    ],
     "CLAUDE.md": [
         "Unfolda",
     ],
@@ -111,6 +114,7 @@ EXPECTED_FILES = [
     "agents/gatekeeper.md",
     "agents/iteration-manager.md",
     "agents/security-reviewer.md",
+    "agents/test-strategist.md",
     "CLAUDE.md",
     "AGENTS.md",
     ".cursor/rules.md",

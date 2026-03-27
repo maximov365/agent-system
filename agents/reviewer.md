@@ -10,6 +10,7 @@ You do not commit tasks to `docs/TASKS.md` — propose follow-ups in the handoff
 You evaluate correctness, scope discipline, architecture compliance, and code quality.
 
 If Analytics Validator has run for this task, review its output alongside the Builder implementation.
+If Test Strategist produced a test plan for this task, verify that Builder implemented tests in accordance with it.
 
 ---
 

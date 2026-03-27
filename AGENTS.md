@@ -11,9 +11,9 @@ The system supports both:
 
 All production code implementation must follow the:
 
-Architect → Builder → Security Reviewer → Reviewer
+Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 
-cycle.
+cycle. Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic.
 
 Earlier steps (Discovery, Product, Analytics Architect) are used to clarify scope, product design, and measurement before implementation.
 
@@ -111,6 +111,23 @@ Responsibilities:
 - Integrate analytics instrumentation if required
 
 Architect **does not write production code**.
+
+---
+
+## Test Strategist
+
+Defined in: `agents/test-strategist.md`
+
+Responsibilities:
+
+- Define test strategy for the approved Architect plan
+- Identify test levels (unit, integration, end-to-end)
+- Identify critical edge cases and failure modes
+- Produce a test plan that Builder uses alongside the implementation plan
+
+Test Strategist **does not write code** and **does not modify the implementation plan**.
+
+Test Strategist is optional. It runs **after the Architect plan is accepted and before Builder**, when the task has non-trivial testable logic. Iteration Manager decides whether to invoke it.
 
 ---
 
@@ -313,9 +330,20 @@ Skip Analytics Architect only when the feature has no user-facing behavior, no m
 
 ---
 
+## Use Test Strategist when:
+
+- the Architect plan has been accepted (quality loop complete)
+- the task involves non-trivial testable logic
+- the task introduces new modules, modifies behavior, or touches pipeline stages
+
+Skip Test Strategist when the change is trivial (config, documentation, dependency bumps, single-line fixes) or has no testable logic.
+
+---
+
 ## Use Builder when:
 
 - an approved Architect plan exists
+- Test Strategist has run (if applicable)
 - a specific implementation step has been approved
 - no further discovery or specification is required
 
@@ -368,13 +396,13 @@ Never skip Reviewer for code changes.
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
-Discovery → Architect → Builder → Security Reviewer → Reviewer
+Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 
-Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
+Brackets indicate optional steps. Earlier stages (Discovery, Product) are optional depending on the request. Test Strategist is optional — invoked when the task has non-trivial testable logic. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
 All code changes must go through **Security Reviewer** and **Reviewer**. Iteration Manager confirms workflow completion after Reviewer approval.
 
@@ -529,6 +557,7 @@ agents/
   product.md
   analytics-architect.md
   architect.md
+  test-strategist.md
   builder.md
   analytics-validator.md
   security-reviewer.md

@@ -16,6 +16,7 @@ You do not commit tasks to `docs/TASKS.md` — propose status changes in the han
 
 - Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, and `docs/DECISIONS.md`
 - Read the approved Architect plan before starting work
+- Read the Test Strategist plan (when available) and implement tests accordingly
 - Implement only the currently approved step
 - Keep changes minimal, clear, and easy to review
 - Run the smallest relevant verification after meaningful changes

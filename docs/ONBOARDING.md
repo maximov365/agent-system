@@ -10,7 +10,7 @@ A structured workflow where every development task is handled by a specialized A
 
 **Without the system:** You send a feature request, the AI thinks about it and writes code immediately. There is no verification that the plan is sound, no review that the code is correct, no tracking of decisions.
 
-**With the system:** Requests are routed through a controlled pipeline. Discovery clarifies unknowns, Product defines scope, Architect plans, Builder implements, Security Reviewer checks for vulnerabilities, Reviewer validates. Each step is explicit and the output of one step is the input to the next.
+**With the system:** Requests are routed through a controlled pipeline. Discovery clarifies unknowns, Product defines scope, Architect plans, Test Strategist defines what to test, Builder implements, Security Reviewer checks for vulnerabilities, Reviewer validates. Each step is explicit and the output of one step is the input to the next.
 
 The key benefits:
 - Architectural discipline — code stays inside defined boundaries
@@ -54,16 +54,16 @@ Framework files are templates rendered with your project config. Project files a
 All code changes follow a structured pipeline. The full workflow for features with measurable outcomes:
 
 ```
-Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
 ```
 
 Internal technical changes (refactors, config, dependencies):
 
 ```
-Discovery → Architect → Builder → Security Reviewer → Reviewer
+Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 ```
 
-Security Reviewer runs for all code changes — it validates the implementation for security vulnerabilities before the general code review. Analytics Architect and Analytics Validator are paired: if one runs, the other must too.
+Brackets indicate optional steps. Test Strategist is invoked when the task has non-trivial testable logic. Security Reviewer runs for all code changes. Analytics Architect and Analytics Validator are paired: if one runs, the other must too.
 
 Non-code artifacts go through a quality iteration loop:
 
@@ -309,6 +309,7 @@ Quick reference for what to edit yourself vs what is managed by the framework:
 | `CLAUDE.md` | Framework |
 | `.cursor/rules.md` | Framework |
 | `setup.py` | Framework |
+| `requirements.txt` | Framework |
 | `docs/AGENT_HANDOFF_CONTRACT.md` | Framework |
 | `docs/AGENT_EXECUTION_MODEL.md` | Framework |
 | `docs/TASK_BACKLOG_AUTOMATION.md` | Framework |

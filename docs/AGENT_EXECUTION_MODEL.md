@@ -101,7 +101,7 @@ Iteration Manager may accept the `next_recommended_agent`, override it based on 
 
 **Output:** Agent's native output followed by a handoff block.
 
-When the specialist agent is Builder, the handoff block must declare whether analytics instrumentation was introduced or modified. Builder must indicate this by setting `next_recommended_agent` to `Analytics Validator` if instrumentation was changed or introduced, or to `Reviewer` if no instrumentation changes were made. Iteration Manager uses this field to determine whether Analytics Validator must run before Reviewer.
+When the specialist agent is Builder, the handoff block must declare whether analytics instrumentation was introduced or modified. Builder must indicate this by setting `next_recommended_agent` to `Analytics Validator` if instrumentation was changed or introduced, or to `Security Reviewer` if no instrumentation changes were made. Iteration Manager uses this field to determine whether Analytics Validator must run before Security Reviewer.
 
 ### Mode 3 — Transition routing
 
@@ -235,6 +235,8 @@ Invoke Analytics Architect
 Analytics Architect produces Analytics Specification + handoff
         ↓
 Invoke Architect (incorporates instrumentation in implementation plan)
+        ↓
+  Optional: Invoke Test Strategist (if task has non-trivial testable logic)
         ↓
 Invoke Builder (implements instrumentation as part of approved plan)
         ↓
