@@ -9,7 +9,7 @@ The system enables predictable, safe, and increasingly autonomous product develo
 All work flows through a controlled pipeline of specialized agents:
 
 ```
-Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Reviewer
+Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Security Reviewer → Reviewer
 ```
 
 Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
@@ -58,6 +58,7 @@ agents/
   architect.md               # Plan implementation
   builder.md                 # Implement code
   analytics-validator.md     # Verify instrumentation
+  security-reviewer.md       # Security validation
   reviewer.md                # Review implementation
   spec-reviewer.md           # Evaluate non-code artifacts
   reviser.md                 # Fix non-code artifacts
@@ -102,6 +103,7 @@ examples/
 | **Architect** | Plans implementation before coding |
 | **Builder** | Implements approved plans |
 | **Analytics Validator** | Verifies instrumentation correctness |
+| **Security Reviewer** | Validates code for security vulnerabilities and unsafe patterns |
 | **Reviewer** | Reviews code for correctness and architecture compliance |
 | **Spec Reviewer** | Evaluates non-code artifact quality |
 | **Reviser** | Fixes non-code artifacts based on review feedback |

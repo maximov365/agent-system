@@ -131,6 +131,25 @@ Builder **does not expand scope beyond the approved plan**.
 
 ---
 
+## Security Reviewer
+
+Defined in: `agents/security-reviewer.md`
+
+Responsibilities:
+
+- Check for common vulnerability patterns (injection, exposure, unsafe operations)
+- Verify input validation at system boundaries
+- Verify secrets handling
+- Verify authentication and authorization logic
+- Verify data exposure and dependency safety
+- Report all findings as structured output
+
+Security Reviewer **does not implement fixes** and **does not review architecture compliance or scope**.
+
+Security Reviewer runs **after Builder and before Reviewer** for all code changes.
+
+---
+
 ## Analytics Validator
 
 Defined in: `agents/analytics-validator.md`
@@ -145,7 +164,7 @@ Responsibilities:
 
 Analytics Validator **does not modify implementation logic**.
 
-Analytics Validator runs **after Builder and before Reviewer** when Builder changed or introduced analytics instrumentation.
+Analytics Validator runs **after Builder and before Security Reviewer** when Builder changed or introduced analytics instrumentation.
 
 ---
 
@@ -310,9 +329,20 @@ Skip Analytics Architect only when the feature has no user-facing behavior, no m
 
 ---
 
+## Use Security Reviewer when:
+
+- Builder has completed implementation
+- the change includes code (not purely documentation or non-code config)
+- security validation is needed before general code review
+
+Security Reviewer runs for all code changes. It is skipped only for non-code changes (documentation, configuration without secrets).
+
+---
+
 ## Use Reviewer when:
 
 - Builder completed implementation
+- Security Reviewer has run (for code changes)
 - Analytics Validator has run (if applicable)
 - code must be validated
 
@@ -328,6 +358,8 @@ If the request is ambiguous:
 
 Never start with Builder unless an implementation step is approved.
 
+Never skip Security Reviewer for code changes.
+
 Never skip Reviewer for code changes.
 
 ---
@@ -336,15 +368,15 @@ Never skip Reviewer for code changes.
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Reviewer
+Discovery → Product → Analytics Architect → Architect → Builder → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
-Discovery → Architect → Builder → Reviewer
+Discovery → Architect → Builder → Security Reviewer → Reviewer
 
-Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped.
+Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
-All code changes must go through the **Reviewer** step. Iteration Manager confirms workflow completion after Reviewer approval.
+All code changes must go through **Security Reviewer** and **Reviewer**. Iteration Manager confirms workflow completion after Reviewer approval.
 
 ---
 
@@ -498,6 +530,7 @@ agents/
   architect.md
   builder.md
   analytics-validator.md
+  security-reviewer.md
   reviewer.md
   spec-reviewer.md
   reviser.md

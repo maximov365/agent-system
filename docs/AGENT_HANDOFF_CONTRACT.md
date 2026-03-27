@@ -126,6 +126,8 @@ Status values are fixed. No agent may invent new values.
 | `completed` | Workflow for this task is fully complete | Iteration Manager only |
 | `validation_passed` | Analytics instrumentation verified | Analytics Validator (verdict: accept) |
 | `validation_failed` | Analytics instrumentation has must_fix issues | Analytics Validator (verdict: revise) |
+| `security_passed` | No blocking security issues found | Security Reviewer (verdict: pass) |
+| `security_failed` | Security issues require Builder fixes | Security Reviewer (verdict: fail) |
 
 **Mapping from agent-native verdicts to handoff status:**
 
@@ -143,6 +145,9 @@ Status values are fixed. No agent may invent new values.
 | Analytics Validator | `verdict: accept` | `validation_passed` |
 | Analytics Validator | `verdict: revise` | `validation_failed` |
 | Analytics Validator | `verdict: escalate` | `escalate` |
+| Security Reviewer | `verdict: pass` | `security_passed` |
+| Security Reviewer | `verdict: fail` | `security_failed` |
+| Security Reviewer | `verdict: escalate` | `escalate` |
 | Builder | implementation complete | `produced` |
 | Architect | plan complete | `produced` |
 | Product | spec complete | `produced` |
@@ -352,6 +357,25 @@ Appended after the native JSON output block.
 }
 ```
 
+### Security Reviewer
+
+Appended after the native JSON output block.
+
+```json
+{
+  "handoff": {
+    "agent": "Security Reviewer",
+    "artifact_type": "code",
+    "artifact_path": ["src/api.py", "src/auth.py"],
+    "status": "security_passed | security_failed | escalate",
+    "next_recommended_agent": "Reviewer | Builder | null",
+    "next_recommended_reason": "<one sentence>",
+    "blocking_issues": [],
+    "workflow_state": { ... }
+  }
+}
+```
+
 ### Reviewer
 
 Appended after the native review output.
@@ -393,7 +417,7 @@ A handoff block is invalid if:
 - `status` is not one of the allowed values
 - `workflow_state` is missing entirely
 - `workflow_state.current_stage` is not one of the enum values
-- `blocking_issues` is non-empty when `status` is `produced`, `accepted`, `approved`, or `validation_passed`
+- `blocking_issues` is non-empty when `status` is `produced`, `accepted`, `approved`, `validation_passed`, or `security_passed`
 - `artifact_type` is not one of the allowed values
 - `agent` does not match the name of the producing agent
 - `artifact_path` is `null` when `artifact_type` is `feature_spec`, `implementation_plan`, `analytics_spec`, or `code`
