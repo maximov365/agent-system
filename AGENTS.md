@@ -588,7 +588,7 @@ README.md                        # Project overview and setup guide
 project.config.yaml              # Project configuration for template rendering
 setup.py                         # Renders Jinja2 templates from config
 sync.py                          # Syncs framework files to downstream projects
-  requirements.txt                 # Python dependencies for setup.py
+  requirements-framework.txt       # Python dependencies for setup.py (not the app's requirements.txt)
   VERSION                          # Framework version (auto-bumped by pre-commit hook)
 
 agents/

@@ -29,7 +29,7 @@ Full onboarding guide: [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
 3. Start working — Claude/Cursor will follow the agent workflow automatically
 
 ```bash
-pip install jinja2 pyyaml
+pip install -r requirements-framework.txt
 python setup.py --check    # preview what will be rendered
 python setup.py            # render templates
 ```
@@ -47,7 +47,7 @@ python setup.py            # render with new values
 project.config.yaml          # Your project configuration (name, pipeline, domain rules)
 setup.py                     # Renders Jinja2 templates from config
 sync.py                      # Syncs framework files to downstream projects
-requirements.txt             # Python dependencies for setup.py
+requirements-framework.txt   # Python deps for setup.py (won't overwrite app's requirements.txt)
 VERSION                      # Framework version (auto-bumped by pre-commit hook)
 CLAUDE.md                    # Entry point for Claude Code (bootstrap only)
 AGENTS.md                    # Workflow rules, agent roles, routing
@@ -152,7 +152,7 @@ python sync.py --target /path/to/your-project     # copy framework files
 
 ```bash
 cd /path/to/your-project
-pip install jinja2 pyyaml
+pip install -r requirements-framework.txt
 python setup.py            # render templates with your config
 ```
 

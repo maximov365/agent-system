@@ -36,7 +36,7 @@ FRAMEWORK_GLOBS = [
     "docs/TASK_TEMPLATE.md",
     "docs/ONBOARDING.md",
     "setup.py",
-    "requirements.txt",
+    "requirements-framework.txt",
 ]
 
 

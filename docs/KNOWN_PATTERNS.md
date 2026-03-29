@@ -26,3 +26,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 ## Patterns
 
 *(Iteration Manager appends below this line.)*
+
+## Pattern: Framework files must not collide with app-level filenames
+
+- **Context:** When adding files to `sync.py` `FRAMEWORK_GLOBS` for distribution to downstream projects.
+- **Approach:** Use unique prefixes or suffixes for framework-owned files that share common names with application files. Example: `requirements-framework.txt` instead of `requirements.txt`.
+- **Why it worked:** `requirements.txt` collision broke production three times before the rename permanently fixed it.
+- **Related:** `docs/LESSONS_LEARNED.md` entry 2026-03-29.

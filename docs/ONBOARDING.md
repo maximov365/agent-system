@@ -147,7 +147,7 @@ In your project:
 
 ```bash
 cd my-project
-pip install jinja2 pyyaml
+pip install -r requirements-framework.txt
 python setup.py
 ```
 
@@ -219,7 +219,7 @@ This copies framework files and writes `.agent-system-version`. It also runs `se
 
 ```bash
 cd /path/to/my-project
-pip install jinja2 pyyaml   # if not already installed
+pip install -r requirements-framework.txt   # if not already installed
 python setup.py
 ```
 
@@ -326,7 +326,7 @@ Quick reference for what to edit yourself vs what is managed by the framework:
 | `CLAUDE.md` | Framework |
 | `.cursor/rules.md` | Framework |
 | `setup.py` | Framework |
-| `requirements.txt` | Framework |
+| `requirements-framework.txt` | Framework (will not overwrite app's `requirements.txt`) |
 | `docs/AGENT_HANDOFF_CONTRACT.md` | Framework |
 | `docs/AGENT_EXECUTION_MODEL.md` | Framework |
 | `docs/TASK_BACKLOG_AUTOMATION.md` | Framework |

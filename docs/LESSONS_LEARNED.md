@@ -35,3 +35,23 @@ Use one block per closed workflow. Keep it factual and short.
 ## Entries
 
 *(Iteration Manager appends below this line.)*
+
+## 2026-03-29 — requirements.txt collision breaks production
+
+**Workflow outcome:** hotfix
+
+### What went wrong
+- `sync.py` included `requirements.txt` in `FRAMEWORK_GLOBS`, overwriting the application's own `requirements.txt` with the framework's 2-line file (`jinja2`, `pyyaml`)
+- This caused production deployment failure for Unfolda (missing all app dependencies)
+- The same issue had already been manually fixed **twice before** (commits `17869bd`, `35a2162`) without a permanent solution
+
+### Repeated must_fix / review / security themes
+- Framework files must never collide with common application filenames
+- The audit process missed this because `requirements.txt` was treated as "just another framework file"
+
+### What worked well
+- The permanent fix (renaming to `requirements-framework.txt`) prevents recurrence
+- Git history immediately showed the pattern of repeated fixes
+
+### Follow-ups
+- When adding any file to `FRAMEWORK_GLOBS`, verify the filename doesn't collide with common app conventions (`requirements.txt`, `Makefile`, `Dockerfile`, `.env`, etc.)
