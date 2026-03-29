@@ -82,16 +82,22 @@ def template_backup_path(source: Path) -> Path:
 
 
 def discover_templates() -> list[tuple[Path, Path]]:
-    """Return (template_source, output_target) pairs."""
+    """Return (template_source, output_target) pairs.
+
+    Priority: if the main file has Jinja2 variables (e.g. freshly synced),
+    use it as source and update .templates/. Otherwise fall back to the
+    .templates/ backup.
+    """
     pairs = []
 
     if TEMPLATES_DIR.exists():
         for target in collect_template_paths():
             backup = template_backup_path(target)
-            if backup.exists():
-                pairs.append((backup, target))
-            elif has_variables(target.read_text()):
+            target_text = target.read_text()
+            if has_variables(target_text):
                 pairs.append((target, target))
+            elif backup.exists():
+                pairs.append((backup, target))
     else:
         for path in collect_template_paths():
             if has_variables(path.read_text()):
@@ -101,10 +107,10 @@ def discover_templates() -> list[tuple[Path, Path]]:
 
 
 def save_template(source: Path) -> None:
+    """Save source as the canonical template backup, always overwriting."""
     backup = template_backup_path(source)
     backup.parent.mkdir(parents=True, exist_ok=True)
-    if not backup.exists():
-        shutil.copy2(source, backup)
+    shutil.copy2(source, backup)
 
 
 def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
