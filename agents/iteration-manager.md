@@ -94,13 +94,13 @@ State fields:
 | `analytics_used` | bool | Whether Analytics Architect was invoked for this feature |
 | `product_spec_accepted` | bool | Whether Product's feature specification has passed the quality loop |
 
-`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product, its quality loop, or Designer is active; `analytics` while Analytics Architect is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
+`current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product, its quality loop, or Designer is active; `analytics` while Analytics Architect or its quality loop is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
 
 **State lifecycle rules:**
 
 `product_spec_accepted` becomes `true` only when Gatekeeper returns `accept` for the Product feature specification artifact. It must not be set to `true` at any earlier point.
 
-`builder_cycle_count` increments by 1 each time Reviewer returns `CHANGES REQUIRED`. It resets to `0` when Reviewer returns `APPROVED` or `APPROVED WITH MINOR CHANGES`. If `builder_cycle_count` reaches `3`, escalate to the user.
+`builder_cycle_count` increments by 1 each time Reviewer returns `CHANGES REQUIRED`. It also covers Security Reviewer `security_failed` cycles (Builder → Security Reviewer → Builder) within the same counter. It resets to `0` when Reviewer returns `APPROVED` or `APPROVED WITH MINOR CHANGES`. If `builder_cycle_count` reaches `3`, escalate to the user.
 
 `analytics_used` is set to `true` when Analytics Architect is invoked and must not revert to `false` for the same task.
 
@@ -160,6 +160,7 @@ Classify every incoming request before selecting an agent.
 | Approved Architect plan exists; trivial change or no testable logic | `Builder` |
 | Builder completed implementation; Analytics Architect was not used | `Security Reviewer` |
 | Builder completed implementation; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
+| Builder completed implementation; Analytics Architect was used but no instrumentation changes | `Security Reviewer` |
 | Non-code artifact needs quality review | `Spec Reviewer` (via quality loop) |
 
 ### Fallback rule

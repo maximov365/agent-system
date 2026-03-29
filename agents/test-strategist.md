@@ -13,7 +13,7 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, and `docs/DECISIONS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Read the approved Architect plan for the task
 - Identify what behavior must be tested
 - Define test levels: unit, integration, end-to-end

@@ -368,7 +368,7 @@ Appended after the native JSON output block.
     "artifact_type": "<same as reviewed artifact>",
     "artifact_path": "<same as reviewed artifact>",
     "status": "accepted | revise | escalate",
-    "next_recommended_agent": "Reviser | Designer | Test Strategist | Architect | Analytics Architect | Builder | null",
+    "next_recommended_agent": "Reviser | Product | Designer | Test Strategist | Architect | Analytics Architect | Builder | null",
     "next_recommended_reason": "<one sentence>",
     "blocking_issues": [],
     "workflow_state": { ... }
@@ -471,7 +471,10 @@ Agents must not move `workflow_state.current_stage` backwards unless explicitly 
 
 **Allowed regressions:**
 - `validation` → `implementation` — Reviewer returned `changes_required`; Builder must correct
-- Quality loop internal cycles — `Spec Reviewer` ↔ `Reviser` iterations do not change `current_stage` (it stays at `product` or `architecture` for the duration of the loop)
+- Quality loop internal cycles — `Spec Reviewer` ↔ `Reviser` iterations do not change `current_stage` (it stays at `product`, `analytics`, or `architecture` for the duration of the loop)
+
+**Not regressions (same stage):**
+- Transitions within the same `current_stage` value (e.g., Security Reviewer → Builder, both at `implementation`; Analytics Validator → Builder, both at `implementation`) do not require special handling
 
 **Forbidden regressions** (must trigger escalation):
 - `implementation` → `product` or earlier

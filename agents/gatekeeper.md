@@ -22,9 +22,11 @@ Before deciding, read:
 3. `docs/ARCHITECTURE_GUARDRAILS.md`
 4. `docs/PIPELINE_CONTRACTS.md`
 5. `docs/DECISIONS.md`
-6. The current artifact
-7. The latest Spec Reviewer JSON output
-8. The previous Spec Reviewer JSON output, if available (for progress evaluation)
+6. `docs/LESSONS_LEARNED.md`
+7. `docs/KNOWN_PATTERNS.md`
+8. The current artifact
+9. The latest Spec Reviewer JSON output
+10. The previous Spec Reviewer JSON output, if available (for progress evaluation)
 
 ---
 

@@ -60,8 +60,10 @@ Before validating, read:
 1. `docs/ARCHITECTURE.md`
 2. `docs/ARCHITECTURE_GUARDRAILS.md`
 3. `docs/PIPELINE_CONTRACTS.md`
-4. The Analytics Specification produced by Analytics Architect
-5. The files changed by Builder (implementation scope)
+4. `docs/LESSONS_LEARNED.md`
+5. `docs/KNOWN_PATTERNS.md`
+6. The Analytics Specification produced by Analytics Architect
+7. The files changed by Builder (implementation scope)
 
 The Analytics Specification is the source of truth. Validate against it exactly — do not apply independent judgment about what events "should" look like.
 

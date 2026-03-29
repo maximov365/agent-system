@@ -68,8 +68,10 @@ Before producing the specification, read:
 4. `docs/PIPELINE_CONTRACTS.md`
 5. `docs/TASKS.md`
 6. `docs/DECISIONS.md`
-7. The feature specification or task description
-8. Any existing analytics specifications for related features
+7. `docs/LESSONS_LEARNED.md`
+8. `docs/KNOWN_PATTERNS.md`
+9. The feature specification or task description
+10. Any existing analytics specifications for related features
 
 ---
 

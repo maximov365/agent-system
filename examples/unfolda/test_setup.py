@@ -93,12 +93,22 @@ CONTENT_ASSERTIONS = {
     "agents/designer.md": [
         "You are the Designer agent for Unfolda.",
     ],
+    "agents/README.md": [
+        "Unfolda",
+        "ingestion → segmentation → translation → formatting → export",
+    ],
     "CLAUDE.md": [
         "Unfolda",
     ],
     "AGENTS.md": [
         "Unfolda",
         "ingestion → segmentation → translation → formatting → export",
+    ],
+    "docs/ARCHITECTURE_GUARDRAILS.md": [
+        "Unfolda",
+    ],
+    "docs/TASK_BACKLOG_AUTOMATION.md": [
+        "Unfolda",
     ],
 }
 
@@ -122,6 +132,12 @@ EXPECTED_FILES = [
     "CLAUDE.md",
     "AGENTS.md",
     ".cursor/rules.md",
+    "docs/AGENT_HANDOFF_CONTRACT.md",
+    "docs/AGENT_EXECUTION_MODEL.md",
+    "docs/TASK_BACKLOG_AUTOMATION.md",
+    "docs/ARCHITECTURE_GUARDRAILS.md",
+    "docs/FEATURE_TEMPLATE.md",
+    "docs/TASK_TEMPLATE.md",
 ]
 
 

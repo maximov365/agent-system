@@ -11,7 +11,7 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, and `docs/DECISIONS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Understand the requested task and its current scope
 - Restate the task in one sentence before planning to confirm understanding
 - Check whether the requested task aligns with PRD, architecture, and existing decisions

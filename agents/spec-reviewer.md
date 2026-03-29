@@ -37,7 +37,9 @@ Before reviewing any artifact, read:
 6. `docs/ARCHITECTURE_GUARDRAILS.md`
 7. `docs/PIPELINE_CONTRACTS.md`
 8. `docs/DECISIONS.md`
-9. The artifact being reviewed
+9. `docs/LESSONS_LEARNED.md`
+10. `docs/KNOWN_PATTERNS.md`
+11. The artifact being reviewed
 
 Conflicts with any of these sources must be reported in `source_conflicts` and trigger `escalate` unless they are minor and self-contained.
 
@@ -142,7 +144,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ```json
 {
-  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec",
+  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | test_plan",
   "artifact_path": "<path or title of the artifact being reviewed>",
   "iteration": "<current iteration number, e.g. 1>",
   "dimension_scores": {

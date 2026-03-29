@@ -252,10 +252,11 @@ Invoke Builder (implements instrumentation as part of approved plan)
         ↓
   ┌─────────────────────────────────────────┐
   │ validation_passed → invoke Security Reviewer │
-  │ validation_failed → invoke Builder           │
+  │ validation_failed → invoke Builder (loop back │
+  │   through AV after Builder re-implements)    │
   │ escalate → stop, request user input          │
   └─────────────────────────────────────────┘
-        ↓
+        ↓ (validation_passed)
   Security Reviewer returns verdict + handoff
         ↓
   ┌─────────────────────────────────────────┐

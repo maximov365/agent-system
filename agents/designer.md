@@ -13,7 +13,7 @@ You do not commit tasks to `docs/TASKS.md`.
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, and `docs/TASKS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Read the accepted Product feature specification
 - Read `docs/BRAND.md` when it exists (for brand guidelines, colors, typography)
 - Read `project.config.yaml` for product context and UX copy examples

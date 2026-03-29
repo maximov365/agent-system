@@ -17,7 +17,7 @@ Every request is routed by the **Iteration Manager**, which selects the correct 
 Non-code artifacts (specs, plans) go through a quality iteration loop before implementation:
 
 ```
-Generator → Spec Reviewer → Gatekeeper → Reviser → (repeat until accepted)
+Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
 ```
 
 ## Quick start
@@ -46,7 +46,9 @@ python setup.py            # render with new values
 ```
 project.config.yaml          # Your project configuration (name, pipeline, domain rules)
 setup.py                     # Renders Jinja2 templates from config
+sync.py                      # Syncs framework files to downstream projects
 requirements.txt             # Python dependencies for setup.py
+VERSION                      # Framework version (auto-bumped by pre-commit hook)
 CLAUDE.md                    # Entry point for Claude Code (bootstrap only)
 AGENTS.md                    # Workflow rules, agent roles, routing
 
@@ -85,12 +87,17 @@ docs/
   AGENT_HANDOFF_CONTRACT.md  # Agent communication format
   AGENT_EXECUTION_MODEL.md   # Execution mechanics
   TASK_BACKLOG_AUTOMATION.md # Backlog management rules
+  ONBOARDING.md              # Guide for new and existing projects
   features/                  # Individual feature spec files
   plans/                     # Implementation plan files
   reviews/                   # Review output files
 
 .cursor/
   rules.md                   # Coding rules (execution, testing, safety, git)
+
+hooks/
+  pre-commit                 # Auto-bump VERSION on framework changes
+  install.py                 # Install hooks into .git/hooks/
 
 examples/
   unfolda/                   # Reference project configuration
@@ -150,7 +157,8 @@ python setup.py            # render templates with your config
 ```
 
 6. Add your project-specific docs: `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, etc.
-7. Commit and start working
+7. Create empty organizational memory files: `docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`
+8. Commit and start working
 
 ## Upgrading a downstream project
 
@@ -181,6 +189,16 @@ git add -A && git commit -m "chore: upgrade agent framework to vX.Y.Z"
 - Every step is explicit and reversible (`git checkout` to undo)
 
 The framework version is tracked in `.agent-system-version` in each downstream project.
+
+## Versioning
+
+`VERSION` is auto-bumped (patch increment) on every commit that changes framework files. A pre-commit hook detects staged framework file changes and increments `VERSION` automatically.
+
+To install the hook after cloning:
+
+```bash
+python3 hooks/install.py
+```
 
 ## Language
 

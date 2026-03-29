@@ -11,11 +11,11 @@ The system supports both:
 
 All production code implementation must follow the:
 
-Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
+Architect → [Test Strategist] → Builder → [Analytics Validator] → Security Reviewer → Reviewer
 
-cycle. Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic.
+cycle. Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic. Analytics Validator is conditional on Analytics Architect having been used.
 
-Earlier steps (Discovery, Product, Designer, Analytics Architect) are used to clarify scope, product design, visual direction, and measurement before implementation.
+Earlier steps (Discovery, Product, Designer, Analytics Architect) are used to clarify scope, product design, visual direction, and measurement before implementation. When Analytics Architect is used, Analytics Validator verifies instrumentation after Builder and before Security Reviewer.
 
 ---
 
@@ -183,7 +183,7 @@ Responsibilities:
 
 Security Reviewer **does not implement fixes** and **does not review architecture compliance or scope**.
 
-Security Reviewer runs **after Builder and before Reviewer** for all code changes.
+Security Reviewer runs **after Builder (or after Analytics Validator, when applicable) and before Reviewer** for all code changes.
 
 ---
 
@@ -464,6 +464,7 @@ This loop applies to:
 - implementation plans
 - design notes
 - decision notes
+- analytics specifications
 
 This loop **does NOT replace mandatory code review**.
 
@@ -574,7 +575,7 @@ These rules apply to every agent, including Iteration Manager:
 - If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
 - Every agent output must end with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
 - Agents must not invoke other agents directly. Control always returns to Iteration Manager.
-- Builder review cycles (Builder → Reviewer → Builder fix) are limited to a maximum of **3 iterations**. If Reviewer does not approve after 3 cycles, escalate to the user.
+- Builder review cycles (Builder → [Analytics Validator] → Security Reviewer → Reviewer → Builder fix) are limited to a maximum of **3 iterations**. If Reviewer does not approve after 3 cycles, escalate to the user.
 
 ---
 
@@ -587,7 +588,8 @@ README.md                        # Project overview and setup guide
 project.config.yaml              # Project configuration for template rendering
 setup.py                         # Renders Jinja2 templates from config
 sync.py                          # Syncs framework files to downstream projects
-requirements.txt                 # Python dependencies for setup.py
+  requirements.txt                 # Python dependencies for setup.py
+  VERSION                          # Framework version (auto-bumped by pre-commit hook)
 
 agents/
   README.md                      # Agent directory overview
@@ -631,6 +633,10 @@ docs/
 
 .cursor/
   rules.md                       # Coding rules (execution, testing, safety, git)
+
+hooks/
+  pre-commit                     # Auto-bump VERSION on framework file changes
+  install.py                     # Symlink hooks into .git/hooks/
 
 examples/
   unfolda/                       # Reference project configuration

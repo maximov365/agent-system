@@ -10,7 +10,7 @@ A structured workflow where every development task is handled by a specialized A
 
 **Without the system:** You send a feature request, the AI thinks about it and writes code immediately. There is no verification that the plan is sound, no review that the code is correct, no tracking of decisions.
 
-**With the system:** Requests are routed through a controlled pipeline. Discovery clarifies unknowns (including market research), Product defines scope, Designer creates UI mockups for user feedback, Architect plans, Test Strategist defines what to test, Builder implements, Security Reviewer checks for vulnerabilities, Reviewer validates. Each step is explicit and the output of one step is the input to the next.
+**With the system:** Requests are routed through a controlled pipeline. Discovery clarifies unknowns (including market research), Product defines scope, Designer creates UI mockups for user feedback, Analytics Architect defines measurement, Architect plans, Test Strategist defines what to test, Builder implements, Analytics Validator verifies instrumentation, Security Reviewer checks for vulnerabilities, Reviewer validates. Each step is explicit and the output of one step is the input to the next.
 
 The key benefits:
 - Architectural discipline — code stays inside defined boundaries
@@ -164,8 +164,10 @@ These are not created by the agent system — you write them. Agents will read t
 | `docs/TASKS.md` | Start empty — agents will add tasks here |
 | `docs/DECISIONS.md` | Start empty — agents will record decisions here |
 | `docs/FEATURES.md` | Start empty — agents will add feature specs here |
+| `docs/LESSONS_LEARNED.md` | Start empty — Iteration Manager appends after completed workflows |
+| `docs/KNOWN_PATTERNS.md` | Start empty — Iteration Manager appends validated patterns |
 
-Stubs for these files are already in `docs/` (added by sync). Fill them with your project content.
+Create these files manually (they are project-owned and not included in `sync.py`). Fill PRD, ARCHITECTURE, and PIPELINE_CONTRACTS with your project content; the rest can start empty.
 
 ### 6. Commit and start working
 
@@ -267,6 +269,8 @@ After setup, agents expect to find these files in your project:
 | `docs/DECISIONS.md` | **Yes** | Decision log (can start as stub) |
 | `docs/FEATURES.md` | **Yes** | Feature specs (can start as stub) |
 | `docs/FEATURE_MAP.md` | **Yes** | Capability index |
+| `docs/LESSONS_LEARNED.md` | **Yes** | Workflow lessons — starts empty; IM appends |
+| `docs/KNOWN_PATTERNS.md` | **Yes** | Validated patterns — starts empty; IM appends |
 | `docs/BRAND.md` | optional | Required only for UI/design tasks |
 
 Agents will ask you to fill in missing required docs before proceeding. They will not fabricate missing context.
@@ -295,6 +299,8 @@ The system self-documents. After each workflow cycle:
 - Tasks are updated in `docs/TASKS.md`
 - Decisions are recorded in `docs/DECISIONS.md`
 - Feature specs go into `docs/FEATURES.md`
+- Lessons and review themes are appended to `docs/LESSONS_LEARNED.md`
+- Validated patterns are recorded in `docs/KNOWN_PATTERNS.md`
 
 ---
 
