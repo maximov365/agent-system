@@ -50,6 +50,8 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | `docs/ARCHITECTURE_CHECKLIST.md` | Checklist for reviewing non-trivial changes |
 | `docs/PIPELINE_CONTRACTS.md` | Stage-level input/output contracts |
 | `docs/DECISIONS.md` | Significant technical decisions |
+| `docs/LESSONS_LEARNED.md` | Workflow lessons and repeated review themes (read before work; IM appends) |
+| `docs/KNOWN_PATTERNS.md` | Validated approaches in practice (read before work; IM appends) |
 | `docs/TASKS.md` | Task tracking |
 | `docs/FEATURES.md` | Approved feature list |
 | `docs/FEATURE_MAP.md` | Capability blocks, dependency map, and capability index |

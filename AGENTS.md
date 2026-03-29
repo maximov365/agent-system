@@ -241,8 +241,9 @@ Responsibilities:
 - Move artifacts to the next workflow stage
 - Decide when user input is required
 - Escalate to the user when necessary
+- After each **completed** workflow (Reviewer approved and closure conditions met), append structured entries to `docs/LESSONS_LEARNED.md` and, when justified, to `docs/KNOWN_PATTERNS.md` (see `agents/iteration-manager.md`)
 
-Iteration Manager **does not produce workflow artifacts** (specifications, plans, code). It produces routing JSON, handoff blocks, and the closing user-facing summary defined in `CLAUDE.md`.
+Iteration Manager **does not produce workflow artifacts** (feature specifications, implementation plans, or code). It produces routing JSON, handoff blocks, and the closing user-facing summary defined in `CLAUDE.md`. The only document exceptions are **append-only** updates to `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` for organizational memory.
 
 ---
 
@@ -558,6 +559,8 @@ Architecture updates must be reflected in:
 
 `docs/ARCHITECTURE_GUARDRAILS.md` is the single source of truth for architectural constraints.
 
+`docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` capture organizational experience; they must not override PRD, architecture, guardrails, or `docs/DECISIONS.md`.
+
 When these files govern different domains, all apply. When they conflict on the same matter, escalate to the user.
 
 ---
@@ -566,6 +569,8 @@ When these files govern different domains, all apply. When they conflict on the 
 
 These rules apply to every agent, including Iteration Manager:
 
+- Before starting work, read `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` (after `AGENTS.md` and alongside other mandatory reads in `CLAUDE.md`). Apply lessons and patterns; do not repeat documented mistakes without addressing why this time is different.
+- Organizational memory does **not** override `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, or `docs/DECISIONS.md`. If a lesson conflicts with those sources, escalate.
 - If something is unclear, make one explicit assumption, state it clearly, and proceed — do not ask multiple clarifying questions.
 - Every agent output must end with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
 - Agents must not invoke other agents directly. Control always returns to Iteration Manager.
@@ -609,6 +614,8 @@ docs/
   PIPELINE_CONTRACTS.md          # Stage-level input/output contracts
   TASKS.md                       # Task tracking with lifecycle statuses
   DECISIONS.md                   # Significant technical decisions
+  LESSONS_LEARNED.md             # Post-workflow log — what failed, repeated review themes, what worked
+  KNOWN_PATTERNS.md              # Durable approaches validated in practice (organizational memory)
   FEATURES.md                    # Feature specifications (one per capability)
   FEATURE_MAP.md                 # Capability blocks and dependency map
   FEATURE_TEMPLATE.md            # Template for new feature specifications

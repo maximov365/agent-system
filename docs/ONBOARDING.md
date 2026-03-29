@@ -49,6 +49,15 @@ Framework files are templates rendered with your project config. Project files a
 
 `setup.py` takes the framework file templates (stored in `.templates/`) and renders them with values from `project.config.yaml`. The result is agent definitions that say "You are the Builder agent for **YourProject**" instead of `{{ project.name }}`.
 
+### Organizational memory (`LESSONS_LEARNED.md`, `KNOWN_PATTERNS.md`)
+
+Two **project-owned** files accumulate experience across workflows:
+
+- **`docs/LESSONS_LEARNED.md`** — after each completed workflow, Iteration Manager appends what went wrong, which review or `must_fix` themes repeated, and what worked.
+- **`docs/KNOWN_PATTERNS.md`** — durable approaches that proved correct in practice (complements `docs/DECISIONS.md`).
+
+Every agent reads both files before work (see `CLAUDE.md` and `AGENTS.md`). They are **not** on the `sync.py` copy list so that framework upgrades do not overwrite your project’s accumulated history. Seed empty files from the `agent-system` repo’s `docs/` templates when adopting the system, then keep them in version control.
+
 ### Development workflow
 
 All code changes follow a structured pipeline. The full workflow for features with measurable outcomes:
@@ -303,6 +312,8 @@ Quick reference for what to edit yourself vs what is managed by the framework:
 | `docs/BRAND.md` | You |
 | `docs/TASKS.md` | Agents (Iteration Manager, Product, Architect) |
 | `docs/DECISIONS.md` | Agents (Discovery, Architect, Iteration Manager) |
+| `docs/LESSONS_LEARNED.md` | Iteration Manager (append after completed workflows); all agents read |
+| `docs/KNOWN_PATTERNS.md` | Iteration Manager (append when a pattern is validated); all agents read |
 | `docs/FEATURES.md` | Agents (Product) |
 | `agents/*.md` | Framework (`sync.py` + `setup.py`) |
 | `AGENTS.md` | Framework |

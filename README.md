@@ -75,6 +75,8 @@ docs/
   PIPELINE_CONTRACTS.md      # Stage I/O contracts (you fill this)
   TASKS.md                   # Task backlog (managed by agents)
   DECISIONS.md               # Technical decisions (managed by agents)
+  LESSONS_LEARNED.md         # Workflow lessons (IM appends; all agents read)
+  KNOWN_PATTERNS.md          # Validated patterns (IM appends; all agents read)
   FEATURES.md                # Feature specs (managed by agents)
   FEATURE_MAP.md             # Capability index (you fill this)
   BRAND.md                   # Brand guide (optional)

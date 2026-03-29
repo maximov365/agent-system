@@ -22,18 +22,20 @@ Rule ownership and conflict resolution are defined in the Precedence section of 
 
 Read in order:
 1. `AGENTS.md`
-2. `docs/PRD.md`
-3. `docs/ARCHITECTURE.md`
-4. `docs/ARCHITECTURE_GUARDRAILS.md`
-5. `docs/PIPELINE_CONTRACTS.md`
-6. `docs/TASKS.md`
-7. `docs/DECISIONS.md`
+2. `docs/LESSONS_LEARNED.md`
+3. `docs/KNOWN_PATTERNS.md`
+4. `docs/PRD.md`
+5. `docs/ARCHITECTURE.md`
+6. `docs/ARCHITECTURE_GUARDRAILS.md`
+7. `docs/PIPELINE_CONTRACTS.md`
+8. `docs/TASKS.md`
+9. `docs/DECISIONS.md`
 
 **For tasks involving code, also read:**
-8. `.cursor/rules.md`
+10. `.cursor/rules.md`
 
 **For UI, frontend, or design tasks, also read:**
-9. `docs/BRAND.md`
+11. `docs/BRAND.md`
 
 ---
 
@@ -48,6 +50,7 @@ Iteration Manager ends every completed workflow with the following user-facing s
 **Verified:** <how it was tested or checked>
 **Assumptions made:** <explicit assumptions, or "none">
 **Risks / Limitations:** <known gaps or fragile areas>
-**Docs updated:** <docs/TASKS.md / docs/DECISIONS.md / docs/ARCHITECTURE.md / none>
+**Docs updated:** <docs/TASKS.md / docs/DECISIONS.md / docs/ARCHITECTURE.md / docs/LESSONS_LEARNED.md / docs/KNOWN_PATTERNS.md / none>
+**Context memory:** <appended to LESSONS_LEARNED.md and/or KNOWN_PATTERNS.md — brief note what was added | skipped — reason e.g. trivial doc-only change>
 **Next step:** <one sentence — the smallest useful next action>
 ```

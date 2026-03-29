@@ -36,6 +36,7 @@ Prefer plans that can be executed independently by Builder without requiring add
 ## Execution rules
 
 - Implement only the requested scope unless instructed otherwise
+- Read `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` before non-trivial implementation (see `AGENTS.md`)
 - Read relevant files before modifying them
 - Follow existing code style in the file being modified
 - Do not auto-format unrelated lines
