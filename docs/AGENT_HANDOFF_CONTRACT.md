@@ -49,7 +49,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 
 `artifact_path` must follow these rules depending on artifact type:
 
-- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`) — repository-relative path to the file, e.g. `docs/features/FEAT-42.md`
+- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
 - **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -92,7 +92,7 @@ Every agent appends the following JSON block at the end of its output, after its
 {
   "handoff": {
     "agent": "<agent name>",
-    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | code | none",
+    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | test_plan | code | none",
     "artifact_path": "<path or title; JSON array of paths when artifact_type is code>",
     "status": "<see Allowed statuses>",
     "next_recommended_agent": "<agent name, or null>",
@@ -105,7 +105,8 @@ Every agent appends the following JSON block at the end of its output, after its
       "quality_loop_iteration": 0,
       "builder_cycle_count": 0,
       "analytics_used": false,
-      "product_spec_accepted": false
+      "product_spec_accepted": false,
+      "onboarding_phase": null
     }
   }
 }
@@ -119,7 +120,7 @@ Status values are fixed. No agent may invent new values.
 
 | Status | Meaning | Produced by |
 |---|---|---|
-| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser |
+| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser, Spec Reviewer |
 | `accepted` | Artifact passed quality review | Gatekeeper (decision: accept) |
 | `revise` | Artifact has must_fix issues; send to Reviser | Spec Reviewer (verdict: revise), Gatekeeper (decision: iterate) |
 | `escalate` | Conflict or blocker requires user input | Any agent |
@@ -191,6 +192,8 @@ Every handoff must carry the current `workflow_state`. Iteration Manager reads t
 | Analytics Architect | `analytics_used` | Set to `true` |
 | Reviewer (approved) | `builder_cycle_count` | Reset to `0` |
 | Reviewer (changes_required) | `builder_cycle_count` | Increment by `1` |
+| Security Reviewer (security_failed) | `builder_cycle_count` | Increment by `1` |
+| Iteration Manager (onboarding) | `onboarding_phase` | Advance after each phase completes; `null` when not onboarding |
 | Any agent starting quality loop | `quality_loop_iteration` | Set to `1` on first invocation; increment on each Reviser cycle |
 | Gatekeeper (accept or escalate) | `quality_loop_iteration` | Reset to `0` |
 
@@ -200,238 +203,29 @@ Each agent receives the current `workflow_state` from the previous handoff and u
 
 ## Per-agent handoff requirements
 
-### Discovery
+All agents use the same handoff block structure. The table below defines the agent-specific field values.
 
-```json
-{
-  "handoff": {
-    "agent": "Discovery",
-    "artifact_type": "design_note",
-    "artifact_path": "<path to discovery output, or null>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Product | Architect | null",
-    "next_recommended_reason": "<one sentence>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
+| Agent | `artifact_type` | `status` values | `next_recommended_agent` |
+|---|---|---|---|
+| Discovery | `design_note` | `produced`, `escalate` | Product, Architect, null |
+| Product | `feature_spec` | `produced`, `escalate` | Spec Reviewer |
+| Designer | `design` | `produced`, `escalate` | Analytics Architect, Architect |
+| Analytics Architect | `analytics_spec` | `produced`, `escalate` | Architect, Spec Reviewer |
+| Architect | `implementation_plan` | `produced`, `escalate` | Spec Reviewer |
+| Test Strategist | `test_plan` | `produced`, `escalate` | Builder |
+| Builder | `code` | `produced`, `escalate` | Analytics Validator, Security Reviewer |
+| Spec Reviewer | _same as reviewed artifact_ | `revise`, `escalate`, `produced` | Gatekeeper |
+| Reviser | _same as revised artifact_ | `produced`, `escalate` | Spec Reviewer |
+| Gatekeeper | _same as reviewed artifact_ | `accepted`, `revise`, `escalate` | Reviser, Product, Designer, Architect, Analytics Architect, Test Strategist, Builder, null |
+| Analytics Validator | `code` | `validation_passed`, `validation_failed`, `escalate` | Security Reviewer, Builder, null |
+| Security Reviewer | `code` | `security_passed`, `security_failed`, `escalate` | Reviewer, Builder, null |
+| Reviewer | `code` | `approved`, `changes_required`, `escalate` | null, Builder |
+| Iteration Manager | `none` | `completed`, `escalate` | null |
 
-### Product
-
-```json
-{
-  "handoff": {
-    "agent": "Product",
-    "artifact_type": "feature_spec",
-    "artifact_path": "<path to feature specification>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Spec Reviewer",
-    "next_recommended_reason": "New feature specification produced; quality loop required.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Analytics Architect
-
-```json
-{
-  "handoff": {
-    "agent": "Analytics Architect",
-    "artifact_type": "analytics_spec",
-    "artifact_path": "<path to analytics specification>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Architect",
-    "next_recommended_reason": "Analytics specification complete; ready for implementation planning.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Architect
-
-```json
-{
-  "handoff": {
-    "agent": "Architect",
-    "artifact_type": "implementation_plan",
-    "artifact_path": "<path or title of implementation plan>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Spec Reviewer",
-    "next_recommended_reason": "Implementation plan produced; quality loop required.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Designer
-
-```json
-{
-  "handoff": {
-    "agent": "Designer",
-    "artifact_type": "design",
-    "artifact_path": "<path to design artifact>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Analytics Architect | Architect",
-    "next_recommended_reason": "Design approved by user; ready for analytics specification or implementation planning.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Test Strategist
-
-```json
-{
-  "handoff": {
-    "agent": "Test Strategist",
-    "artifact_type": "test_plan",
-    "artifact_path": "<path to test plan, or null>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Builder",
-    "next_recommended_reason": "Test plan produced; Builder can begin implementation.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Builder
-
-```json
-{
-  "handoff": {
-    "agent": "Builder",
-    "artifact_type": "code",
-    "artifact_path": ["src/pipeline.py", "tests/test_pipeline.py"],
-    "status": "produced | escalate",
-    "next_recommended_agent": "Analytics Validator | Security Reviewer",
-    "next_recommended_reason": "<one sentence: instrumentation changed or not>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Spec Reviewer
-
-Appended after the native JSON output block.
-
-```json
-{
-  "handoff": {
-    "agent": "Spec Reviewer",
-    "artifact_type": "<same as reviewed artifact>",
-    "artifact_path": "<same as reviewed artifact>",
-    "status": "revise | escalate | produced",
-    "next_recommended_agent": "Gatekeeper",
-    "next_recommended_reason": "Review complete; Gatekeeper decides whether to accept or iterate.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-Note: Spec Reviewer always routes to Gatekeeper. Gatekeeper reads the review output and decides `accept`, `iterate`, or `escalate`.
-
-### Reviser
-
-```json
-{
-  "handoff": {
-    "agent": "Reviser",
-    "artifact_type": "<same as revised artifact>",
-    "artifact_path": "<same as revised artifact>",
-    "status": "produced | escalate",
-    "next_recommended_agent": "Spec Reviewer",
-    "next_recommended_reason": "Revision complete; return to Spec Reviewer for next iteration.",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Gatekeeper
-
-Appended after the native JSON output block.
-
-```json
-{
-  "handoff": {
-    "agent": "Gatekeeper",
-    "artifact_type": "<same as reviewed artifact>",
-    "artifact_path": "<same as reviewed artifact>",
-    "status": "accepted | revise | escalate",
-    "next_recommended_agent": "Reviser | Product | Designer | Test Strategist | Architect | Analytics Architect | Builder | null",
-    "next_recommended_reason": "<one sentence>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Analytics Validator
-
-Appended after the native JSON output block.
-
-```json
-{
-  "handoff": {
-    "agent": "Analytics Validator",
-    "artifact_type": "code",
-    "artifact_path": ["src/pipeline.py", "src/events.py"],
-    "status": "validation_passed | validation_failed | escalate",
-    "next_recommended_agent": "Security Reviewer | Builder | null",
-    "next_recommended_reason": "<one sentence>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Security Reviewer
-
-Appended after the native JSON output block.
-
-```json
-{
-  "handoff": {
-    "agent": "Security Reviewer",
-    "artifact_type": "code",
-    "artifact_path": ["src/api.py", "src/auth.py"],
-    "status": "security_passed | security_failed | escalate",
-    "next_recommended_agent": "Reviewer | Builder | null",
-    "next_recommended_reason": "<one sentence>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
-
-### Reviewer
-
-Appended after the native review output.
-
-```json
-{
-  "handoff": {
-    "agent": "Reviewer",
-    "artifact_type": "code",
-    "artifact_path": ["src/pipeline.py", "tests/test_pipeline.py"],
-    "status": "approved | changes_required | escalate",
-    "next_recommended_agent": "null | Builder",
-    "next_recommended_reason": "<one sentence, or null if approved>",
-    "blocking_issues": [],
-    "workflow_state": { ... }
-  }
-}
-```
+**Notes:**
+- Builder sets `next_recommended_agent` to `Analytics Validator` when instrumentation was changed, or `Security Reviewer` when it was not.
+- Spec Reviewer always routes to Gatekeeper. Gatekeeper reads the review output and decides `accept`, `iterate`, or `escalate`.
+- `artifact_path` for `code` is a JSON array of file paths; for all other types it is a single repository-relative path or short identifier.
 
 ---
 

@@ -31,11 +31,110 @@ Task proposals must follow `docs/TASK_TEMPLATE.md` and must not include task IDs
 
 ---
 
+## Onboarding intake mode
+
+When invoked during the **Onboarding Workflow** (Phase 2), Product operates in intake mode. The goal is to produce the project's `docs/PRD.md` based on the Discovery Brief and a conversation with the user.
+
+### Intake behavior
+
+1. Read the Discovery Brief from Phase 1
+2. Read `project.config.yaml` for any pre-filled context
+3. Do **not** read `docs/PRD.md` or `docs/ARCHITECTURE.md` (they are being created)
+4. Present follow-up questions to fill gaps not covered by the Discovery Brief
+5. After receiving answers, produce a complete `docs/PRD.md`
+
+### Intake questions
+
+Based on the Discovery Brief, ask targeted questions about gaps. Common areas to clarify:
+
+**Product definition:**
+1. Is the product description in the Discovery Brief accurate? Anything to add or correct?
+2. Are there additional user segments beyond those identified?
+3. What product principles should guide all decisions? (e.g., "privacy by architecture", "works offline", "minimal friction")
+
+**Capabilities:**
+4. What are the core capabilities? (the 3–5 main things the product does)
+5. For each capability, what is the expected user flow?
+6. Are there modes or variants? (e.g., "free vs paid", "basic vs advanced")
+
+**Requirements:**
+7. What are the hard quality requirements? (performance, accuracy, reliability targets)
+8. What are the privacy/security requirements expressed as product constraints?
+
+**MVP boundaries:**
+9. Review the MVP scope from Discovery — anything to add or remove?
+10. What are the explicit non-goals for MVP? (features that sound related but are out of scope)
+
+**Success:**
+11. How will you measure activation? (what does "first successful use" mean?)
+12. How will you measure retention?
+
+### Intake output
+
+Produce a complete `docs/PRD.md` following this structure:
+
+```text
+# Product Requirements — <product name>
+
+## Vision
+<2–4 sentence product vision>
+
+## Problem
+<what problem this solves; current alternatives and their limitations>
+
+## Target Users
+| Segment | Need |
+|---|---|
+| ... | ... |
+
+## Product Principles
+1. ...
+2. ...
+
+## Core Capabilities
+### <Capability 1>
+<description, user flow, expected behavior>
+
+### <Capability 2>
+...
+
+## MVP Scope
+### In scope (MVP)
+- ...
+
+### Not in scope (MVP)
+- ...
+
+## Privacy & Security Requirements
+| Requirement | Detail |
+|---|---|
+| ... | ... |
+
+## Quality Requirements
+| Metric | Target |
+|---|---|
+| ... | ... |
+
+## Success Metrics
+| Metric | Definition |
+|---|---|
+| ... | ... |
+
+## Risks
+| Risk | Mitigation |
+|---|---|
+| ... | ... |
+```
+
+After producing this output, append a handoff block with `artifact_type: "feature_spec"` and `status: "produced"`. The document will go through the Quality Iteration Workflow before being finalized.
+
+---
+
 ## Templates
 
 When writing feature specifications and tasks:
 
-- Feature specifications must follow the structure defined in `docs/FEATURE_TEMPLATE.md`.
+- Feature specifications must include: Summary, Problem, Goals, Non-Goals, User Flow, Functional Requirements, MVP Slice, Constraints, Risks, Success Criteria, and Tasks.
 - Tasks generated from the feature must follow the structure defined in `docs/TASK_TEMPLATE.md`.
 
 Do not invent alternative formats.

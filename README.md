@@ -14,7 +14,7 @@ Discovery → Product → [Designer] → Analytics Architect → Architect → [
 
 Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
 
-Non-code artifacts (specs, plans) go through a quality iteration loop before implementation:
+Non-code artifacts (specs, plans) go through a quality loop before implementation:
 
 ```
 Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
@@ -79,10 +79,8 @@ docs/
   DECISIONS.md               # Technical decisions (managed by agents)
   LESSONS_LEARNED.md         # Workflow lessons (IM appends; all agents read)
   KNOWN_PATTERNS.md          # Validated patterns (IM appends; all agents read)
-  FEATURES.md                # Feature specs (managed by agents)
   FEATURE_MAP.md             # Capability index (you fill this)
   BRAND.md                   # Brand guide (optional)
-  FEATURE_TEMPLATE.md        # Template for new features
   TASK_TEMPLATE.md           # Template for new tasks
   AGENT_HANDOFF_CONTRACT.md  # Agent communication format
   AGENT_EXECUTION_MODEL.md   # Execution mechanics

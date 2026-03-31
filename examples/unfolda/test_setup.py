@@ -34,7 +34,6 @@ RENDERED_GLOBS = [
     "docs/AGENT_EXECUTION_MODEL.md",
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/FEATURE_TEMPLATE.md",
     "docs/TASK_TEMPLATE.md",
 ]
 
@@ -136,7 +135,6 @@ EXPECTED_FILES = [
     "docs/AGENT_EXECUTION_MODEL.md",
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/FEATURE_TEMPLATE.md",
     "docs/TASK_TEMPLATE.md",
 ]
 

@@ -26,7 +26,7 @@ Discovery → Architect → [Test Strategist] → Builder → Security Reviewer 
 
 Brackets indicate optional steps.
 
-Non-code artifacts (feature specs, implementation plans) go through a quality iteration loop before implementation begins:
+Non-code artifacts (feature specs, implementation plans) go through a quality loop before implementation begins:
 
 Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
 
@@ -53,7 +53,6 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | `docs/LESSONS_LEARNED.md` | Workflow lessons and repeated review themes (read before work; IM appends) |
 | `docs/KNOWN_PATTERNS.md` | Validated approaches in practice (read before work; IM appends) |
 | `docs/TASKS.md` | Task tracking |
-| `docs/FEATURES.md` | Approved feature list |
 | `docs/FEATURE_MAP.md` | Capability blocks, dependency map, and capability index |
 
 ---

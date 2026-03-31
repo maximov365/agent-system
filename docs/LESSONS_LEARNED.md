@@ -55,3 +55,64 @@ Use one block per closed workflow. Keep it factual and short.
 
 ### Follow-ups
 - When adding any file to `FRAMEWORK_GLOBS`, verify the filename doesn't collide with common app conventions (`requirements.txt`, `Makefile`, `Dockerfile`, `.env`, etc.)
+
+## 2026-03-29 — TASK-001 Guided conversational onboarding
+
+**Workflow outcome:** completed
+
+### What went wrong
+- none — clean implementation
+
+### Repeated must_fix / review / security themes
+- none
+
+### What worked well
+- Reusing existing agent roles (Discovery, Product, Designer, Architect) in "intake mode" rather than creating new onboarding-specific agents
+- Onboarding documents go through the same quality loops as feature specs, ensuring consistent quality
+- Each agent's intake questions are self-contained — no complex cross-agent dependency during the conversation phase
+
+### Follow-ups
+- Consider adding a `--guided` flag to `sync.py` that automatically creates stub docs and prints onboarding instructions
+
+## 2026-03-29 — TASK-002 Consistency audit and prompt optimization
+
+**Workflow outcome:** completed
+
+### What went wrong
+- `onboarding_phase` was added to `AGENTS.md` and `agents/iteration-manager.md` but not to `docs/AGENT_HANDOFF_CONTRACT.md` workflow_state schema — agents had no guidance on how to include it in handoffs
+- `design` and `test_plan` artifact types existed in the Allowed artifact types table but were missing from the handoff JSON template example — agents would use the template and omit valid types
+- `Security Reviewer` `security_failed` was documented as incrementing `builder_cycle_count` in `iteration-manager.md` but the AGENT_HANDOFF_CONTRACT.md field update rules table only listed Reviewer — inconsistency between the two sources
+- Feature status lifecycle used `done` in FEATURE_TEMPLATE while task lifecycle used `completed` — inconsistent terminal status names
+- Quality loop was declared to apply to "analytics specifications" but no routing path existed for it
+
+### Repeated must_fix / review / security themes
+- Cross-file consistency breaks when a concept (artifact type, workflow state field, lifecycle status) is added to one file but not propagated to all files that reference it
+- Terminology drift: "quality iteration loop" / "quality loop" / "iteration loop" appeared interchangeably
+
+### What worked well
+- Single-source compression reduced the four most-loaded files by ~735 lines (~45%) without losing any normative content
+- Table format for Agent Roles and per-agent handoff requirements is more scannable and harder to drift
+
+### Follow-ups
+- none
+
+## 2026-03-29 — TASK-003 Re-audit, FEATURES.md removal, checklist compression
+
+**Workflow outcome:** completed
+
+### What went wrong
+- `onboarding_phase` was added to handoff template and IM init block but missed in the IM state fields table — the primary reference table that agents consult
+- `builder_cycle_count` prose described only Reviewer CHANGES REQUIRED but the counter also covers Security Reviewer security_failed — misleading parenthetical
+- Iteration Manager itself was missing from the per-agent handoff requirements table despite being required to append handoff blocks
+- `docs/FEATURES.md` was a dead file: referenced in TASK_BACKLOG_AUTOMATION.md escalation rules and ONBOARDING.md, but no agent was instructed to write to it — the escalation rule was silently broken
+
+### Repeated must_fix / review / security themes
+- Same pattern as TASK-002: adding a concept to one file without propagating to all files that reference it
+- Dead references create false safety: an escalation rule that references an empty file provides no protection
+
+### What worked well
+- Systematic re-audit caught 6 warnings that the first batch of fixes introduced or left behind
+- ARCHITECTURE_CHECKLIST.md compression (252 → 97 lines) by referencing GUARDRAILS rule numbers instead of restating rationale
+
+### Follow-ups
+- Run `sync.py` to propagate framework changes to Voxema and other downstream projects

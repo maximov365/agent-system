@@ -74,7 +74,7 @@ Discovery → Architect → [Test Strategist] → Builder → Security Reviewer 
 
 Brackets indicate optional steps. Designer runs for features with user-facing UI that need visual design. Test Strategist is invoked when the task has non-trivial testable logic. Security Reviewer runs for all code changes. Analytics Architect and Analytics Validator are paired: if one runs, the other must too.
 
-Non-code artifacts go through a quality iteration loop:
+Non-code artifacts go through a quality loop:
 
 ```
 Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
@@ -82,7 +82,78 @@ Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat
 
 ---
 
-## Scenario A — New project from scratch
+## Scenario A — Guided onboarding (recommended)
+
+The fastest way to start. You create a minimal project, sync framework files, and then the agent system guides you through creating all project documents via conversation.
+
+### 1. Create a repository and bootstrap
+
+```bash
+mkdir my-project && cd my-project
+git init
+cp /path/to/agent-system/project.config.yaml ./project.config.yaml
+```
+
+You do **not** need to fill in `project.config.yaml` — the agents will populate it during onboarding.
+
+### 2. Sync framework files and render
+
+```bash
+# From agent-system directory:
+python sync.py --target /path/to/my-project
+
+# In your project:
+cd my-project
+pip install -r requirements-framework.txt
+python setup.py
+```
+
+### 3. Create empty doc stubs and commit
+
+```bash
+mkdir -p docs
+for f in PRD.md ARCHITECTURE.md PIPELINE_CONTRACTS.md FEATURE_MAP.md TASKS.md DECISIONS.md LESSONS_LEARNED.md KNOWN_PATTERNS.md; do
+  [ ! -f "docs/$f" ] && echo "<!-- placeholder -->" > "docs/$f"
+done
+git add -A
+git commit -m "chore: bootstrap agent system v$(cat .agent-system-version)"
+```
+
+### 4. Start the guided onboarding
+
+Open the project in Cursor and say:
+
+> **"Запускаем новый проект"** (or "Start a new project")
+
+The Iteration Manager detects that project docs are empty stubs and starts the **Onboarding Workflow** (defined in `AGENTS.md`):
+
+| Phase | Agent | What happens | Output |
+|---|---|---|---|
+| 1 | Discovery | Asks about product identity, users, competitors, technical constraints | Discovery Brief |
+| 2 | Product | Asks follow-ups, produces PRD → Quality Loop (up to 3 iterations) | `docs/PRD.md` |
+| 3 | Designer | Asks about brand, colors, typography, UI patterns → Quality Loop | `docs/BRAND.md` |
+| 4 | Architect | Asks about tech stack, pipeline, domain rules → Quality Loop | `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/FEATURE_MAP.md` |
+| 5 | IM | Generates `project.config.yaml`, re-renders templates, creates stubs, commits | Ready for development |
+
+Phase 3 (Designer) is optional — skipped for backend-only or API-only products.
+
+### What you need to know before starting
+
+The agents will ask you everything they need, but it helps to have thought about:
+
+- **What the product does** — a clear 2–3 sentence description
+- **Who it's for** — 2–4 user segments
+- **What makes it different** — competitive context
+- **Technical constraints** — platform, language, privacy rules
+- **What's in MVP** — and what's explicitly not
+
+You don't need polished answers. The agents refine through iteration.
+
+---
+
+## Scenario B — Manual setup
+
+For teams that prefer to write project documents directly, or when adopting the agent system into an existing project with established docs.
 
 ### 1. Create a repository
 
@@ -163,7 +234,6 @@ These are not created by the agent system — you write them. Agents will read t
 | `docs/FEATURE_MAP.md` | Capability blocks and their dependencies |
 | `docs/TASKS.md` | Start empty — agents will add tasks here |
 | `docs/DECISIONS.md` | Start empty — agents will record decisions here |
-| `docs/FEATURES.md` | Start empty — agents will add feature specs here |
 | `docs/LESSONS_LEARNED.md` | Start empty — Iteration Manager appends after completed workflows |
 | `docs/KNOWN_PATTERNS.md` | Start empty — Iteration Manager appends validated patterns |
 
@@ -180,7 +250,7 @@ Open Cursor in your project directory. The agent workflow is active immediately.
 
 ---
 
-## Scenario B — Existing project
+## Scenario C — Existing project
 
 ### 1. Check prerequisites
 
@@ -267,7 +337,6 @@ After setup, agents expect to find these files in your project:
 | `docs/PIPELINE_CONTRACTS.md` | **Yes** | Stage I/O contracts |
 | `docs/TASKS.md` | **Yes** | Task backlog (can start as stub) |
 | `docs/DECISIONS.md` | **Yes** | Decision log (can start as stub) |
-| `docs/FEATURES.md` | **Yes** | Feature specs (can start as stub) |
 | `docs/FEATURE_MAP.md` | **Yes** | Capability index |
 | `docs/LESSONS_LEARNED.md` | **Yes** | Workflow lessons — starts empty; IM appends |
 | `docs/KNOWN_PATTERNS.md` | **Yes** | Validated patterns — starts empty; IM appends |
@@ -298,7 +367,6 @@ You don't invoke agents directly by name. You describe what you want and the Ite
 The system self-documents. After each workflow cycle:
 - Tasks are updated in `docs/TASKS.md`
 - Decisions are recorded in `docs/DECISIONS.md`
-- Feature specs go into `docs/FEATURES.md`
 - Lessons and review themes are appended to `docs/LESSONS_LEARNED.md`
 - Validated patterns are recorded in `docs/KNOWN_PATTERNS.md`
 
@@ -316,11 +384,10 @@ Quick reference for what to edit yourself vs what is managed by the framework:
 | `docs/PIPELINE_CONTRACTS.md` | You + agents |
 | `docs/FEATURE_MAP.md` | You + agents |
 | `docs/BRAND.md` | You |
-| `docs/TASKS.md` | Agents (Iteration Manager, Product, Architect) |
-| `docs/DECISIONS.md` | Agents (Discovery, Architect, Iteration Manager) |
+| `docs/TASKS.md` | Iteration Manager (commits); Product, Architect (propose only) |
+| `docs/DECISIONS.md` | Agents (Builder, Architect, Discovery — write; Iteration Manager — routes) |
 | `docs/LESSONS_LEARNED.md` | Iteration Manager (append after completed workflows); all agents read |
 | `docs/KNOWN_PATTERNS.md` | Iteration Manager (append when a pattern is validated); all agents read |
-| `docs/FEATURES.md` | Agents (Product) |
 | `agents/*.md` | Framework (`sync.py` + `setup.py`) |
 | `AGENTS.md` | Framework |
 | `CLAUDE.md` | Framework |
@@ -332,7 +399,6 @@ Quick reference for what to edit yourself vs what is managed by the framework:
 | `docs/TASK_BACKLOG_AUTOMATION.md` | Framework |
 | `docs/ARCHITECTURE_GUARDRAILS.md` | Framework |
 | `docs/ARCHITECTURE_CHECKLIST.md` | Framework |
-| `docs/FEATURE_TEMPLATE.md` | Framework |
 | `docs/TASK_TEMPLATE.md` | Framework |
 | `docs/ONBOARDING.md` | Framework |
 

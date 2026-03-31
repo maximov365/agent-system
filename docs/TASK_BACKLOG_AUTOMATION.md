@@ -199,7 +199,7 @@ If any check fails:
 Iteration Manager must escalate to the user before committing when:
 
 - The proposed task changes the priority of an existing open task
-- The proposed task introduces a new major feature not present in `docs/FEATURES.md`
+- The proposed task introduces a new major feature not present in `docs/FEATURE_MAP.md`
 - The proposed task changes the order of planned roadmap items
 - The proposed task introduces a scope boundary beyond the accepted feature specification
 - The proposed task requires a new external dependency, provider, or infrastructure component
@@ -228,9 +228,9 @@ When a task status transitions, Iteration Manager must update `docs/TASKS.md` im
 |---|---|
 | `docs/TASKS.md` | The backlog file this contract governs |
 | `docs/FEATURE_MAP.md` | Source of truth for capability IDs used in `capability_id` field |
-| `docs/FEATURES.md` | Feature tasks must have a corresponding entry here |
+| `docs/FEATURE_MAP.md` | Feature tasks must map to a capability defined here |
 | `docs/AGENT_HANDOFF_CONTRACT.md` | Task ID conventions and `workflow_state.task_id` field |
 | `agents/iteration-manager.md` | Workflow completion conditions and state lifecycle rules |
 | `docs/AGENT_EXECUTION_MODEL.md` | Workflow persistence via `docs/TASKS.md` |
 | `docs/TASK_TEMPLATE.md` | Template that all task proposals must follow |
-| `docs/FEATURE_TEMPLATE.md` | Template that all feature proposals must follow |
+| `docs/TASK_TEMPLATE.md` | Template that all task proposals must follow |

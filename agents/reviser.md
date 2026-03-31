@@ -23,6 +23,9 @@ You may revise:
 - Implementation plans
 - Design notes
 - Decision notes
+- Analytics specifications
+- Design artifacts (UI mockups produced by Designer)
+- Test plans
 
 You must not modify:
 
@@ -120,7 +123,6 @@ The revised artifact should remain recognizably the same document.
 
 The artifact must still follow its expected template after revision:
 
-- Feature specifications → `docs/FEATURE_TEMPLATE.md`
 - Tasks → `docs/TASK_TEMPLATE.md`
 
 Do not invent new section structures. Do not remove required sections.

@@ -176,43 +176,13 @@ Parallel workflows for different `task_id` values are allowed.
 
 ## Quality loop execution
 
-The quality iteration loop is controlled exclusively by Iteration Manager. Spec Reviewer, Reviser, and Gatekeeper never invoke each other directly.
+The quality loop is controlled exclusively by Iteration Manager. No quality loop agent (Spec Reviewer, Reviser, Gatekeeper) may invoke another agent directly.
 
-**Loop trigger conditions** (Iteration Manager decides):
-- A new feature specification was produced by Product
-- An implementation plan was produced by Architect and affects multiple modules
-- Architectural risk is detected
-- Artifact clarity is insufficient for Builder to proceed
+Trigger conditions, loop sequence, and termination rules are defined in:
+- `AGENTS.md` — Quality Iteration Workflow and Iteration Rules sections
+- `agents/iteration-manager.md` — Quality loop control section
 
-**Loop execution sequence:**
-
-```
-Iteration Manager detects quality_loop_required = true
-        ↓
-Invoke Spec Reviewer (iteration = 1)
-        ↓
-Spec Reviewer returns JSON + handoff
-        ↓
-Iteration Manager invokes Gatekeeper
-        ↓
-  Gatekeeper returns decision
-        ↓
-  ┌─────────────────────────────────────────┐
-  │ accept  → exit loop, resume main flow   │
-  │ iterate → invoke Reviser                │
-  │ escalate → stop, request user input     │
-  └─────────────────────────────────────────┘
-        ↓ (if iterate)
-Reviser returns revised artifact + handoff
-        ↓
-Iteration Manager invokes Spec Reviewer (iteration = n+1)
-        ↓
-       ... (repeat until accept, escalate, or iteration 3)
-```
-
-**Loop rules** (defined in `AGENTS.md` — Iteration Rules section):
-- `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff
-- If the artifact changes substantially, reset `quality_loop_iteration` to 1
+**Execution-specific rule:** Each loop cycle is a separate Iteration Manager → Agent → Handoff cycle. `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff.
 
 ---
 
@@ -220,54 +190,13 @@ Iteration Manager invokes Spec Reviewer (iteration = n+1)
 
 The analytics instrumentation flow is controlled by Iteration Manager. Analytics Architect and Analytics Validator never invoke each other or other agents directly.
 
-**Trigger conditions:**
-- Feature has measurable outcomes (user behavior, observability, pipeline success)
-- `product_spec_accepted` is `true` (Product spec has passed the quality loop)
-- No analytics specification already exists for this feature
+Trigger conditions, flow sequence, and validation logic are defined in:
+- `AGENTS.md` — Development Workflow section
+- `agents/iteration-manager.md` — Implementation workflow transitions
 
-**Analytics flow sequence:**
-
-```
-  Optional: Invoke Designer (if feature has user-facing UI)
-        ↓ (Designer iterates with user until design is approved)
-Iteration Manager detects analytics_required = true
-        ↓
-Invoke Analytics Architect
-        ↓
-Analytics Architect produces Analytics Specification + handoff
-        ↓
-Invoke Architect (incorporates instrumentation in implementation plan)
-        ↓
-  Optional: Invoke Test Strategist (if task has non-trivial testable logic)
-        ↓
-Invoke Builder (implements instrumentation as part of approved plan)
-        ↓
-  Did Builder change or introduce instrumentation?
-  ┌─────────────────────────────────────────┐
-  │ yes → invoke Analytics Validator        │
-  │ no  → invoke Security Reviewer          │
-  └─────────────────────────────────────────┘
-        ↓ (if Analytics Validator)
-  Analytics Validator returns verdict + handoff
-        ↓
-  ┌─────────────────────────────────────────┐
-  │ validation_passed → invoke Security Reviewer │
-  │ validation_failed → invoke Builder (loop back │
-  │   through AV after Builder re-implements)    │
-  │ escalate → stop, request user input          │
-  └─────────────────────────────────────────┘
-        ↓ (validation_passed)
-  Security Reviewer returns verdict + handoff
-        ↓
-  ┌─────────────────────────────────────────┐
-  │ security_passed → invoke Reviewer       │
-  │ security_failed → invoke Builder        │
-  │ escalate → stop, request user input     │
-  └─────────────────────────────────────────┘
-```
-
-**Analytics loop rules** (pairing rule defined in `AGENTS.md` — Development Workflow section):
-- `analytics_used` is set to `true` in `workflow_state` when Analytics Architect is invoked and must not revert to `false` for the same task
+**Execution-specific rules:**
+- Builder indicates instrumentation changes via `next_recommended_agent` (`Analytics Validator` if changed, `Security Reviewer` if not)
+- `analytics_used` is set to `true` in `workflow_state` when Analytics Architect is invoked and must not revert to `false`
 
 ---
 
@@ -288,7 +217,7 @@ Iteration Manager must stop execution and escalate when any of the following occ
 | Invalid handoff block | `workflow_state` missing, unknown `status`, invalid enum, wrong format |
 | Escalation returned | Any agent sets `status: escalate` |
 | Quality loop iteration limit | `quality_loop_iteration` reached 3 without Gatekeeper acceptance |
-| Builder cycle limit | `builder_cycle_count` reached 3 (Reviewer returned `CHANGES REQUIRED` three times) |
+| Builder review cycle limit | `builder_cycle_count` reached 3 (Reviewer returned `CHANGES REQUIRED` three times) |
 | Missing `workflow_state` | Handoff block present but `workflow_state` field absent |
 | Forbidden stage regression | `current_stage` moved backwards outside of allowed correction cycles |
 | No meaningful progress | Two consecutive quality loop iterations did not change the set of `must_fix` issues |

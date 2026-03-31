@@ -38,7 +38,7 @@ Before routing, read:
 
 - Classify the incoming request or workflow state
 - Select the correct starting agent or next agent
-- Determine whether the quality iteration loop is required
+- Determine whether the quality loop is required
 - Enforce workflow sequencing (no Builder without Architect plan, no skipping Reviewer)
 - Enforce analytics-by-default rule (Analytics Architect before Architect when required)
 - Control quality loop lifecycle (start, iterate, stop, escalate)
@@ -90,9 +90,10 @@ State fields:
 | `artifact_id` | string or null | Identifier of the artifact currently under review; `null` when no artifact is active |
 | `current_stage` | enum | Must be one of: `discovery` `product` `analytics` `architecture` `implementation` `validation` `complete` |
 | `quality_loop_iteration` | int | Current iteration number when quality loop is active; `0` when inactive |
-| `builder_cycle_count` | int | Number of consecutive Builder correction cycles on the current task |
+| `builder_cycle_count` | int | Number of consecutive Builder review cycles on the current task |
 | `analytics_used` | bool | Whether Analytics Architect was invoked for this feature |
 | `product_spec_accepted` | bool | Whether Product's feature specification has passed the quality loop |
+| `onboarding_phase` | int or null | Current onboarding phase (1–5); `null` when not in onboarding workflow |
 
 `current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product, its quality loop, or Designer is active; `analytics` while Analytics Architect or its quality loop is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
 
@@ -103,6 +104,25 @@ State fields:
 `builder_cycle_count` increments by 1 each time Reviewer returns `CHANGES REQUIRED`. It also covers Security Reviewer `security_failed` cycles (Builder → Security Reviewer → Builder) within the same counter. It resets to `0` when Reviewer returns `APPROVED` or `APPROVED WITH MINOR CHANGES`. If `builder_cycle_count` reaches `3`, escalate to the user.
 
 `analytics_used` is set to `true` when Analytics Architect is invoked and must not revert to `false` for the same task.
+
+**State initialisation for onboarding:**
+
+When a `project_onboarding` request is detected, initialise `workflow_state` as:
+
+```json
+{
+  "task_id": "onboarding",
+  "artifact_id": null,
+  "current_stage": "discovery",
+  "quality_loop_iteration": 0,
+  "builder_cycle_count": 0,
+  "analytics_used": false,
+  "product_spec_accepted": false,
+  "onboarding_phase": 1
+}
+```
+
+`onboarding_phase` tracks progress: 1 (Discovery intake), 2 (Product intake), 3 (Designer intake), 4 (Architect intake), 5 (Assembly). Iteration Manager advances this value after each phase completes successfully.
 
 **State initialisation for new features:**
 
@@ -132,6 +152,7 @@ Classify every incoming request before selecting an agent.
 
 | Request type | Description |
 |---|---|
+| `project_onboarding` | User requests to start or set up a new project; project docs are empty stubs |
 | `technical_uncertainty` | Multiple implementation approaches possible; right choice is unclear |
 | `feature_idea` | Rough feature request with unclear scope or missing acceptance criteria |
 | `analytics_required_feature` | Feature with user behavior, measurable outcomes, or observability needs |
@@ -151,6 +172,7 @@ Classify every incoming request before selecting an agent.
 
 | Condition | Start with |
 |---|---|
+| Project onboarding; user requests new project setup; project docs are empty stubs | `Discovery` (onboarding intake mode) |
 | Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
@@ -177,13 +199,34 @@ Never skip `Reviewer` for code changes.
 Never skip `Analytics Architect` when the feature introduces measurable outcomes and no analytics spec exists.
 `Analytics Architect` must run only after `Product` has produced a feature specification and that specification has passed the quality loop (`product_spec_accepted: true`) — never before.
 `Analytics Architect` must run at most once per feature specification unless the feature specification changes substantially. Do not re-invoke Analytics Architect for minor spec updates.
-Maximum Builder correction cycles per task before escalation: **3**. If `builder_cycle_count` reaches `3` (Reviewer returned `CHANGES REQUIRED` three times on the same task), escalate to the user.
+Maximum Builder review cycles per task before escalation: **3**. If `builder_cycle_count` reaches `3` (counting both Reviewer `CHANGES REQUIRED` and Security Reviewer `security_failed` on the same task), escalate to the user.
 
 ---
 
 ## Stage transition logic
 
 After each agent completes, determine the next step based on the agent's output and current workflow state.
+
+### Onboarding workflow transitions
+
+When `workflow_state.task_id` is `"onboarding"`, use these transitions:
+
+| Previous agent | Phase | Result | Next action |
+|---|---|---|---|
+| `Discovery` (intake) | 1 | Discovery brief produced | → `Product` (onboarding intake mode); set `onboarding_phase: 2` |
+| `Product` (intake) | 2 | PRD.md draft produced | → Quality loop (invoke `Spec Reviewer`) |
+| `Product` → Quality loop | 2 | Gatekeeper `accept` | → `Designer` (onboarding intake mode) if UI product, set `onboarding_phase: 3`; else → `Architect` (onboarding intake mode), set `onboarding_phase: 4` |
+| `Designer` (intake) | 3 | BRAND.md draft produced | → Quality loop (invoke `Spec Reviewer`) |
+| `Designer` → Quality loop | 3 | Gatekeeper `accept` | → `Architect` (onboarding intake mode); set `onboarding_phase: 4` |
+| `Architect` (intake) | 4 | Architecture docs drafts produced | → Quality loop (invoke `Spec Reviewer`) |
+| `Architect` → Quality loop | 4 | Gatekeeper `accept` | → Assembly phase; set `onboarding_phase: 5` |
+
+During assembly (phase 5), Iteration Manager:
+1. Generates `project.config.yaml` from approved documents
+2. Runs `python setup.py` to re-render templates
+3. Creates any missing stub docs
+4. Commits the initial project
+5. Produces the closing summary defined in `CLAUDE.md`
 
 ### Implementation workflow transitions
 
@@ -195,7 +238,9 @@ After each agent completes, determine the next step based on the agent's output 
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; feature has measurable outcomes | → `Analytics Architect` |
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; no analytics needed | → `Architect` |
 | `Designer` | Design approved by user | → `Analytics Architect` (if feature has measurable outcomes) or → `Architect` |
-| `Analytics Architect` | Analytics spec produced | → `Architect` |
+| `Analytics Architect` | Analytics spec produced; complex (multiple events or high risk) | → Quality loop (invoke `Spec Reviewer`) |
+| `Analytics Architect` | Analytics spec produced; simple | → `Architect` |
+| `Analytics Architect` → Quality loop | Gatekeeper `accept` | → `Architect` |
 | `Architect` | Implementation plan produced | → Quality loop (invoke `Spec Reviewer`) |
 | `Architect` → Quality loop | Gatekeeper `accept`; task has non-trivial testable logic | → `Test Strategist` |
 | `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic | → `Builder` |

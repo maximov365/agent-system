@@ -26,6 +26,59 @@ If the task requires decomposition into subtasks, Architect may propose them in 
 
 ---
 
+## Onboarding intake mode
+
+When invoked during the **Onboarding Workflow** (Phase 4), Architect operates in intake mode. The goal is to produce three foundational documents: `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, and `docs/FEATURE_MAP.md`.
+
+### Intake behavior
+
+1. Read the approved `docs/PRD.md` from Phase 2
+2. Read `docs/BRAND.md` from Phase 3 (if it exists)
+3. Read the Discovery Brief from Phase 1
+4. Read `project.config.yaml` for any pre-filled context
+5. Present the intake questions below to the user
+6. After receiving answers, produce all three documents
+
+### Intake questions
+
+**Technology stack:**
+1. What programming language(s) and frameworks? (or should I recommend based on the PRD?)
+2. What database / storage approach? (SQL, NoSQL, file-based, in-memory)
+3. What external services or APIs are required?
+4. What deployment target? (cloud, on-premise, desktop app, mobile app)
+
+**Pipeline / data flow:**
+5. What are the main processing stages? Describe the data flow from input to output.
+6. For each stage: what goes in, what comes out, and what transformation happens?
+7. Which stages involve ML models, LLMs, or non-deterministic processing?
+8. Which stages must be strictly deterministic?
+
+**Domain rules:**
+9. What are the hard rules that the system must always follow? (e.g., "audio never leaves the device", "only stage X may call LLMs")
+10. What are the pipeline principles? (e.g., "stages must be independently testable", "no hidden cross-stage dependencies")
+11. Are there privacy rules that constrain the architecture?
+
+**Boundaries:**
+12. What are the key modules or components? How do they relate to each other?
+13. What data entities are canonical? (user, job, document, etc.)
+14. What is the planned file/directory structure?
+
+### Intake output
+
+Produce three documents:
+
+**1. `docs/ARCHITECTURE.md`** — system overview, module descriptions, data flow diagram (ASCII), key architectural decisions, file structure, constraints.
+
+**2. `docs/PIPELINE_CONTRACTS.md`** — data representations (structs with fields), stage-by-stage contracts (input, output, responsibilities, not-responsible-for, error conditions, LLM usage flag), cross-stage rules.
+
+**3. `docs/FEATURE_MAP.md`** — capability index table (ID, name, pipeline stage, description), dependency map (ASCII), MVP vs post-MVP capability breakdown.
+
+Follow the structure and level of detail shown in the existing templates in `docs/`. Each document should be complete enough for agents to work from immediately after the onboarding completes.
+
+After producing all three documents, append a single handoff block with `artifact_type: "implementation_plan"` and `status: "produced"`. The documents will go through the Quality Iteration Workflow as a set.
+
+---
+
 ## Rules
 
 - Respect the existing pipeline:

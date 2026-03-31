@@ -608,7 +608,6 @@ output_docs:
     - { name: "PIPELINE_CONTRACTS.md", description: "Stage input/output contracts" }
     - { name: "DECISIONS.md", description: "Accepted technical decisions" }
     - { name: "TASKS.md", description: "Task tracking with lifecycle statuses" }
-    - { name: "FEATURES.md", description: "Feature specifications per capability" }
     - { name: "FEATURE_MAP.md", description: "Capability blocks, dependency map, capability index" }
     - { name: "ARCH_DISCOVERY.md", description: "Pre-architecture discovery recommendations" }
 

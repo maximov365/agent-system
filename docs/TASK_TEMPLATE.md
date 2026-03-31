@@ -193,7 +193,7 @@ When Iteration Manager commits a task to `docs/TASKS.md`, template sections map 
 | Created by | `source_agent` |
 | _(from handoff block)_ | `source_artifact` |
 | _(from feature context)_ | `parent_feature` |
-| _(inferred by Iteration Manager)_ | `type` |
+| _(inferred by Iteration Manager)_ | `type` (`feature` / `implementation` / `analytics` / `fix` / `follow_up`) |
 
 ---
 

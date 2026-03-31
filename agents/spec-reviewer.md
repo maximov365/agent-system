@@ -20,6 +20,9 @@ You must never modify the artifact being reviewed. Your role is strictly evaluat
 - Implementation plans
 - Design notes
 - Decision notes
+- Analytics specifications
+- Design artifacts (UI mockups produced by Designer)
+- Test plans
 
 Do not review code, tests, or configuration files — those belong to the Reviewer agent.
 
@@ -111,7 +114,7 @@ Use when the artifact cannot be corrected by Reviser alone:
 - repository context is insufficient to evaluate correctness
 - PRD alignment cannot be determined without user input
 
-Escalation suspends the iteration loop until the user resolves the conflict.
+Escalation suspends the quality loop until the user resolves the conflict.
 
 **Escalate takes priority over revise.** If escalation criteria are met, set verdict to `escalate` regardless of scores.
 
@@ -144,7 +147,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ```json
 {
-  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | test_plan",
+  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | test_plan",
   "artifact_path": "<path or title of the artifact being reviewed>",
   "iteration": "<current iteration number, e.g. 1>",
   "dimension_scores": {

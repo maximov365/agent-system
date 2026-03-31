@@ -32,7 +32,6 @@ FRAMEWORK_GLOBS = [
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
     "docs/ARCHITECTURE_CHECKLIST.md",
-    "docs/FEATURE_TEMPLATE.md",
     "docs/TASK_TEMPLATE.md",
     "docs/ONBOARDING.md",
     "setup.py",

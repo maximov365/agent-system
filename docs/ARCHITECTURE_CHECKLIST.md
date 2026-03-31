@@ -1,231 +1,98 @@
 # Architecture Checklist
 
-Use this checklist when reviewing any **non-trivial change**.
+Use this checklist when reviewing any **non-trivial change**. It verifies alignment with `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/ARCHITECTURE.md`, and `docs/DECISIONS.md`.
 
-This checklist helps ensure that implementation remains aligned with:
+Used primarily by Architect and Reviewer. Builder may also use it before finalizing a non-trivial step.
 
-- `docs/ARCHITECTURE.md`
-- `docs/ARCHITECTURE_GUARDRAILS.md`
-- `docs/DECISIONS.md`
-
-It should be used primarily by:
-
-- Architect
-- Reviewer
-
-Builder may also use it before finalizing a non-trivial implementation step.
+If any section raises a concern: **stop → report the issue → propose the smallest architectural correction.** Do not continue implementation while violating constraints.
 
 ---
 
-# Quick Review Rule
+## When to use
 
-If any checklist section raises a concern:
+Any change affecting: pipeline stages, stage interfaces, new dependencies, LLM usage, data flow or state, multiple modules. Skip for small isolated fixes. When uncertain, use the checklist.
 
-→ stop  
-→ report the issue  
-→ propose the smallest architectural correction  
-
-Do not continue implementation while violating architectural constraints.
+Confirm usage: `Architecture Checklist reviewed — no violations detected.` or `Architecture Checklist reviewed — issue detected in section <N>.`
 
 ---
 
-# When to Use This Checklist
-
-This checklist must be used for any **non-trivial implementation or architectural change**, including:
-
-- changes affecting pipeline stages
-- changes affecting stage interfaces
-- new dependencies
-- modifications involving LLM usage
-- changes affecting data flow or state
-- changes touching multiple modules
-
-Minor changes that affect only a small isolated function may skip this checklist.
-
-If uncertain whether the change is trivial:
-
-→ assume the checklist should be used.
-
----
-
-# Checklist Usage Rule
-
-Architect and Reviewer should explicitly confirm checklist usage when reviewing non-trivial changes.
-
-Typical confirmation format:
-
-> Architecture Checklist reviewed — no violations detected.
-
-or
-
-> Architecture Checklist reviewed — issue detected in section <X>.
-
-This ensures the checklist is actively applied during implementation and review.
-
----
-
-# 1. Pipeline Integrity
+## 1. Pipeline Integrity _(Guardrails Rule 1–2)_
 
 - Does the change preserve the pipeline structure?
-- Are pipeline stages still conceptually distinct?
-- Has any stage been bypassed or collapsed?
-- Has a later stage been called directly without going through earlier required stages?
+- Has any stage been bypassed, collapsed, or called out of order?
 - Has any stage contract changed?
 
-If any answer indicates pipeline drift, stop and escalate.
+## 2. Stage Boundaries _(Guardrails Rule 2)_
 
----
-
-# 2. Stage Boundaries
-
-- Are inputs and outputs for the affected stage still explicit?
-- Are stage boundaries still clear?
+- Are inputs/outputs for the affected stage still explicit?
 - Has hidden coupling been introduced between stages?
-- Has any stage begun depending on ambient runtime state?
-- Are errors raised at stage boundaries rather than silently swallowed?
-- Do error messages avoid leaking sensitive input content?
+- Are errors raised at boundaries (not silently swallowed)? Do error messages avoid leaking sensitive content?
 
-If stage boundaries are no longer explicit, the change is not acceptable.
+## 3. Domain Logic vs Infrastructure _(Guardrails Rule 4)_
 
----
+- Is domain logic still separate from I/O and infrastructure?
+- Are side effects still at explicit boundaries?
 
-# 3. Domain Logic vs Infrastructure
-
-- Is domain logic still separate from I/O and infrastructure concerns?
-- Has filesystem, network, model, or persistence logic leaked into domain modules?
-- Are side effects still located at explicit boundaries?
-
-If domain logic and infrastructure are mixed without strong justification, stop and escalate.
-
----
-
-# 4. Module Design
+## 4. Module Design _(Guardrails Rule 3)_
 
 - Are modules still focused and cohesive?
-- Has the change introduced a mixed-responsibility file?
-- Has duplicate logic been introduced?
-- Has a new module been added unnecessarily?
+- Has duplicate logic or a mixed-responsibility file been introduced?
 
-Prefer extending existing modules over parallel implementations unless separation clearly improves maintainability.
+## 5. Dependency Safety _(Guardrails Rule 5)_
 
----
+- Were new dependencies introduced? If yes: justified, no lock-in, decision recorded?
 
-# 5. Dependency Safety
-
-- Were any new dependencies introduced?
-- If yes, are they justified?
-- Do they fit the project's architectural constraints?
-- Do they create lock-in or broad project impact?
-- Was a related architectural decision recorded if needed?
-
-If a dependency significantly affects architecture, pipeline behavior, or LLM integration, it must be recorded in `docs/DECISIONS.md`.
-
----
-
-# 6. State and Data Flow
+## 6. State and Data Flow _(Guardrails Rule 6)_
 
 - Is state still explicit and traceable?
-- Has hidden global state been introduced?
-- Has hidden caching been introduced?
-- Are shared mutable objects crossing pipeline stages?
+- Has hidden global state, hidden caching, or cross-stage mutable objects been introduced?
 
-If state is implicit or cross-stage mutation exists, the change is architecturally unsafe.
-
----
-
-# 7. Determinism
+## 7. Determinism _(Guardrails Rule 7)_
 
 - Does the change preserve deterministic behavior where required?
-- Has non-deterministic behavior appeared in any pipeline stage, validation, or orchestration?
+- If LLM logic involved: prompts in `prompts/`, model names externalized, retries explicit and bounded?
 
-If LLM logic is involved:
-
-- are prompts externalized in `prompts/`
-- are model settings controlled and configurable
-- are retries explicit and bounded
-- are outputs stable where determinism is required
-
-If deterministic stages become non-deterministic without approval, stop and escalate.
-
----
-
-# 8. External Dependencies and Services
+## 8. External Dependencies _(Guardrails Rule 8)_
 
 - Has a new external API or cloud dependency been introduced?
-- If yes, is it explicitly approved and isolated?
-- Has experimentation been clearly separated from core behavior?
+- If yes: explicitly approved and isolated?
 
-If new external dependencies are introduced without approval, the change must not proceed.
+## 9. Prompt / LLM Architecture _(Guardrails Rule 7, 9)_
 
----
+- Are prompt templates in `prompts/`? Model names externalized?
+- Has LLM-specific logic leaked into unrelated pipeline stages?
 
-# 9. Prompt / LLM Architecture
+## 10. Architectural Drift _(Guardrails Rule 10)_
 
-- Are prompt templates stored in `prompts/`?
-- Has prompt logic been embedded directly into implementation code?
-- Are model names externalized through configuration or constants?
-- Is retry/fallback behavior explicit and bounded?
-- Has LLM-specific logic leaked into unrelated parts of the pipeline?
+- Does the change silently alter architectural direction?
+- Has a temporary workaround become a de facto decision?
 
-If prompt or model behavior changes affect pipeline correctness, the change may require a decision entry in `docs/DECISIONS.md`.
+## 11. Experimental Code _(Guardrails Rule 11)_
 
----
+- Has experimental code been introduced? If yes: clearly isolated and removable?
+- Has it become a hidden dependency or redefined boundaries?
 
-# 10. Architectural Drift Check
+## 12. Anti-Pattern Check _(Guardrails Rule 12)_
 
-- Does the change silently alter the architectural direction?
-- Has a temporary workaround become a de facto architectural decision?
-- Has an abstraction been added without architectural approval?
-- Has responsibility shifted across modules or stages without being documented?
+- Does the solution rely on a documented anti-pattern?
+- Hidden cross-stage coupling? Speculative abstraction? Duplicate implementation?
 
-If the implementation changes architecture implicitly, stop and escalate.
-
----
-
-# 11. Test Coverage
+## 13. Test Coverage
 
 - Does the change preserve independent testability of affected stages?
-- Has existing test coverage been broken?
 - Has new non-trivial logic been added without tests?
-- Are new tests deterministic and free of external I/O?
 
-If test coverage for affected stages has been reduced, the change is not acceptable without justification.
-
----
-
-# 12. Documentation Check
+## 14. Documentation
 
 - Does `docs/ARCHITECTURE.md` still describe the system correctly?
-- Does `docs/ARCHITECTURE_GUARDRAILS.md` still match the intended constraints?
 - Should this change be recorded in `docs/DECISIONS.md`?
-- Should task or feature documentation be updated?
-
-If architecture-relevant behavior changed, documentation must be updated before completion.
 
 ---
 
-# 13. Final Review Decision
+## Final Review Decision
 
-A non-trivial change should be approved only if:
+Approve only if: pipeline integrity preserved, stage contracts explicit, no hidden coupling/state, dependencies justified, determinism intact, test coverage preserved, decisions documented.
 
-- pipeline integrity is preserved
-- stage contracts remain explicit
-- no hidden coupling or hidden state was introduced
-- dependencies remain justified
-- deterministic behavior remains intact where required
-- no unapproved external dependencies were introduced
-- error handling is correct at stage boundaries
-- test coverage for affected stages is preserved
-- relevant architecture decisions are documented
+If any fail: stop, report, propose the smallest correction.
 
-If any of these fail, the correct action is:
-
-- stop
-- report the conflict
-- propose the smallest acceptable architectural correction
-
-Use the verdict defined in `agents/reviewer.md`:
-
-- `APPROVED`
-- `APPROVED WITH MINOR CHANGES`
-- `CHANGES REQUIRED`
+Verdicts (per `agents/reviewer.md`): `APPROVED` | `APPROVED WITH MINOR CHANGES` | `CHANGES REQUIRED`
