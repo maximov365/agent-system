@@ -117,7 +117,7 @@ Always respond with a single JSON block followed by a handoff block. No other pr
 
 ```json
 {
-  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | ux_copy | test_plan",
+  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | ux_copy | marketing_campaign | test_plan",
   "artifact_path": "<path or title of the artifact>",
   "iteration": "<current iteration number>",
   "review_verdict": "accept | revise | escalate",

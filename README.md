@@ -61,9 +61,11 @@ agents/
     references.md            #   Visual/UX references, design inspiration
     brand.md                 #   Brand positioning, naming, identity
     marketing.md             #   Go-to-market, channels, messaging
+    legal.md                 #   Regulatory compliance, privacy, legal
   product.md                 # Define features and tasks
   designer.md                # UI mockups and visual prototypes
   ux-writer.md               # User-facing copy and tone of voice
+  marketing.md               # Marketing strategy, campaigns, launch kits
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
   test-strategist.md         # Define test strategy
@@ -131,6 +133,7 @@ examples/
 | **Product** | Turns ideas into feature specs and task breakdowns |
 | **Designer** | Creates UI mockups and iterates with user feedback (optional) |
 | **UX Writer** | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
+| **Marketing** | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
 | **Analytics Architect** | Defines events, metrics, instrumentation |
 | **Architect** | Plans implementation before coding |
 | **Test Strategist** | Defines test strategy before implementation (optional) |

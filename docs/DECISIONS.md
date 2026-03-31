@@ -296,3 +296,40 @@ Option 2: Deploy Contracts + CI/CD templates. Scored 37/40 vs 35/40 (Option 1) a
 - CI templates in `templates/ci/` (reference only, not auto-synced)
 - `CLAUDE.md` mandatory reads list includes `docs/DEPLOY_CONTRACTS.md`
 - `--no-redeploy` for sync.py cancelled — gitignore already prevents downstream commits from framework syncs
+
+---
+
+## DEC-010: Marketing Agent as standalone agent
+
+**Date:** 2026-03-29
+**Status:** Accepted
+
+### Context
+
+The system needs a marketing capability — product analysis, strategy definition, campaign creation, launch kits. Discovery already has a `marketing.md` mode for GTM research, but it's read-only and produces recommendations, not campaign artifacts.
+
+### Options considered
+
+1. **Extend Discovery marketing mode** — add campaign creation to existing mode
+2. **Standalone Marketing agent** — new agent with its own artifact type and operating modes
+3. **External marketing tool integration** — connect to third-party marketing platforms
+
+### Decision
+
+Option 2: Standalone Marketing agent.
+
+### Rationale
+
+- Marketing produces unique artifacts (`marketing_campaign`) that differ from any existing agent output
+- Has multiple operating modes (strategy, campaign creation, launch prep, review)
+- Needs to collaborate with UX Writer (tone) and Designer (visual briefs)
+- Discovery marketing mode remains useful as an upstream research step; Marketing builds on those findings
+- External tool integration is premature without a strategy layer to decide what to create
+
+### Implications
+
+- New `agents/marketing.md` agent definition
+- New `marketing_campaign` artifact type in handoff contract
+- IM routing updated for `marketing_strategy` request type
+- Standard workflow transitions include Marketing → Quality loop and Marketing → UX Writer paths
+- Spec Reviewer, Reviser, Gatekeeper updated to handle `marketing_campaign` artifacts

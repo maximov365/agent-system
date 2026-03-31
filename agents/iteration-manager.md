@@ -132,6 +132,7 @@ Classify every incoming request before selecting an agent.
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
 | `copy_creation` | Feature has user-facing text; copy needs to be written or reviewed |
 | `standalone_copy` | Release notes, emails, notifications, or other copy request |
+| `marketing_strategy` | Marketing strategy, campaign creation, launch preparation, or marketing review |
 | `non_code_artifact_improvement` | Feature spec, task breakdown, or plan needs quality review |
 | `workflow_continuation` | Agent returned a result; next step must be determined |
 | `system_audit` | User requests system audit, framework review, or health check |
@@ -151,6 +152,8 @@ Classify every incoming request before selecting an agent.
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
 | Design approved (or no Designer); feature has user-facing text | `UX Writer` |
 | Standalone copy request (release notes, emails, notifications) | `UX Writer` |
+| Marketing strategy, campaign creation, launch preparation | `Marketing` |
+| Marketing review of existing copy | `Marketing` (review mode) |
 | Accepted feature specification with measurable outcomes and no analytics spec exists (`product_spec_accepted: true`) | `Analytics Architect` |
 | Task exists and is ready for planning; analytics spec exists or is not required | `Architect` |
 | Approved Architect plan exists; task has non-trivial testable logic | `Test Strategist` |
@@ -184,18 +187,13 @@ Maximum Builder review cycles per task before escalation: **3**. If `builder_cyc
 
 Stop the workflow and escalate to the user when:
 
-- The task or artifact contradicts `docs/PRD.md` or `docs/ARCHITECTURE.md`
-- The task conflicts with a decision in `docs/DECISIONS.md`
-- Implementation would change pipeline boundaries
-- A new external dependency, provider, or infrastructure component is required
-- Gatekeeper returns `escalate`
-- Analytics Validator returns `escalate`
-- Security Reviewer returns `escalate`
-- Reviewer returns `CHANGES REQUIRED` and `builder_cycle_count` has reached `3`
+- Task contradicts `docs/PRD.md`, `docs/ARCHITECTURE.md`, or `docs/DECISIONS.md`
+- Implementation would change pipeline boundaries or require new external dependency/infra
+- Any agent returns `escalate`; Reviewer returns `CHANGES REQUIRED` after 3 builder cycles
 - No meaningful progress across two consecutive quality loop iterations
 - Repository context is insufficient to determine the correct next step
 
-Escalation output must include the specific reason and the artifact or agent output that triggered it.
+Escalation output must include the reason and the triggering artifact or agent output.
 
 ---
 

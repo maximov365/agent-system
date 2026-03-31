@@ -82,3 +82,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Add `docs/DEPLOY_CONTRACTS.md` as a project-specific document (not framework-synced). Extend Architect with a mandatory "Deployment Impact" section in every plan. Extend Reviewer with a deployment checklist. Provide CI/CD templates as reference files per stack. Deployment concerns are handled by existing agents rather than a new DevOps Agent.
 - **Why it worked:** Follows the established pattern of extending existing agents rather than creating new ones (same as UX Writer's dual-invocation pattern). Deploy Contracts mirror the proven Pipeline Contracts structure. CI templates give projects a starting point without locking them into a specific workflow.
 - **Related:** `docs/DECISIONS.md` DEC-009.
+
+## Pattern: On-demand creative agents with quality loop integration
+
+- **Context:** Some agents (Marketing, UX Writer) produce creative artifacts that benefit from quality review but are not mandatory in every workflow run. Inserting them as mandatory steps would slow down internal/technical changes unnecessarily.
+- **Approach:** Define the agent with multiple operating modes (strategy, campaign, review). Route via IM on demand or at specific workflow points. Integrate with the quality loop for complex artifacts. Connect to UX Writer for tone consistency and Designer for visual briefs. Do not insert as mandatory step in the standard implementation workflow.
+- **Why it worked:** Marketing Agent can run independently (user request), after Product spec (strategy), or before launch (launch kit) without blocking the implementation pipeline. Quality loop handles complex strategies; simple campaigns go directly to the user.
+- **Related:** `docs/DECISIONS.md` DEC-010.

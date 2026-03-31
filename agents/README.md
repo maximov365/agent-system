@@ -66,6 +66,7 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | Product | Turns ideas into feature specifications and task breakdowns |
 | Designer | Creates UI mockups and iterates with user feedback (optional) |
 | UX Writer | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
+| Marketing | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
 | Analytics Architect | Defines analytics events, metrics, and instrumentation requirements |
 | Architect | Plans implementation before coding begins |
 | Test Strategist | Defines test strategy before implementation (optional) |

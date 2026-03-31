@@ -194,3 +194,19 @@ Use one block per closed workflow. Keep it factual and short.
 ### Follow-ups
 - Voxema: apply `macos-app.yml` template, fix EdDSA signature handoff, add swift test to CI
 - Unfolda: apply `web-api.yml` template, create proper CI/CD pipeline, fill in Deploy Contracts
+
+---
+
+## TASK-009: Marketing Agent (2026-03-29)
+
+### What went wrong
+- Nothing significant. The agent modes pattern and UX Writer precedent made integration straightforward.
+
+### Repeated review themes
+- Artifact type enum fragmentation continues — `marketing_campaign` is the 12th value in the `artifact_type` enum across handoff contract, spec-reviewer, gatekeeper. Consider validating enums programmatically in audit.py.
+- Each new agent requires updates to 6–8 files (agent def, AGENTS.md, IM dispatcher, standard-workflow, handoff contract, spec-reviewer, reviser, gatekeeper, READMEs). A checklist or script for "add new agent" would reduce omission risk.
+
+### What worked well
+- Clean separation between Discovery marketing mode (research) and Marketing agent (campaign creation) avoids role confusion
+- Reused existing patterns: standalone agent with operating modes, quality loop integration, UX Writer collaboration
+- Marketing agent is fully on-demand — no mandatory insertion into the standard workflow, keeping it lightweight

@@ -46,6 +46,7 @@ The project prioritizes:
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
 | **UX Writer** | `agents/ux-writer.md` | Write and review all user-facing text; ensure consistent tone of voice | Write code; change scope; make design decisions |
+| **Marketing** | `agents/marketing.md` | Analyze product, define marketing strategy, create campaigns, ad copy, email sequences, launch kits | Write code; change product scope; make design decisions |
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
 | **Architect** | `agents/architect.md` | Propose minimal implementation plans; define files, risks, and acceptance criteria | Write production code |
 | **Test Strategist** | `agents/test-strategist.md` | Define test strategy (levels, edge cases, failure modes) for approved plans | Write code; modify the implementation plan |
@@ -63,6 +64,7 @@ The project prioritizes:
 
 - **Designer** is optional — runs after Product spec is accepted and before UX Writer or Architect, only when the feature has user-facing UI.
 - **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
+- **Marketing** is optional — runs after Product spec is accepted (or after Discovery marketing mode), on demand for campaigns, or before launch. Works with UX Writer for tone consistency and Designer for visual briefs.
 - **Analytics Architect** must run before Architect when required. Architect must include instrumentation in the plan. Architect must not remove or weaken defined analytics events.
 - **Test Strategist** is optional — runs after Architect plan is accepted and before Builder, only for non-trivial testable logic.
 - **Security Reviewer** runs after Builder (or after Analytics Validator) and before Reviewer for all code changes.
@@ -84,6 +86,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Design approved, feature has user-facing text | UX Writer | No user-facing text; backend-only |
 | Standalone copy request (release notes, emails) | UX Writer | — |
 | Builder completed, feature has user-facing text | UX Writer (copy review) | No user-facing strings in code |
+| Marketing strategy, campaign creation, launch prep | Marketing | No marketing needed |
 | Feature with measurable outcomes | Analytics Architect | No user-facing behavior, no observability; analytics already exist |
 | Implementation planning needed | Architect | — |
 | Accepted Architect plan, non-trivial testable logic | Test Strategist | Trivial change, no testable logic |

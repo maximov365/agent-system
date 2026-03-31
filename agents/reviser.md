@@ -26,6 +26,7 @@ You may revise:
 - Analytics specifications
 - Design artifacts (UI mockups produced by Designer)
 - UX copy documents (copy produced by UX Writer)
+- Marketing artifacts (strategies, campaigns, launch kits produced by Marketing)
 - Test plans
 
 You must not modify:

@@ -61,4 +61,7 @@ After each agent completes, determine the next step based on the agent's output 
 | `Security Reviewer` | `escalate` | → Escalate to user |
 | `Reviewer` | `APPROVED` or `APPROVED WITH MINOR CHANGES` | → Confirm workflow completion |
 | `Reviewer` | `CHANGES REQUIRED` | → `Builder` (corrections required) |
+| `Marketing` | Strategy produced | → Quality loop (invoke `Spec Reviewer`) if complex; otherwise → present to user |
+| `Marketing` | Campaign / launch kit produced | → `UX Writer` (tone review) if brand consistency needed; otherwise → present to user |
+| `Marketing` → Quality loop | Gatekeeper `accept` | → Present to user; proceed to campaign creation if requested |
 | `System Auditor` | Audit report produced | → Present to user; user approves proposals → route to appropriate agents |
