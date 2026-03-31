@@ -162,6 +162,7 @@ Classify every incoming request before selecting an agent.
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
 | `non_code_artifact_improvement` | Feature spec, task breakdown, or plan needs quality review |
 | `workflow_continuation` | Agent returned a result; next step must be determined |
+| `system_audit` | User requests system audit, framework review, or health check |
 | `ambiguous` | Request does not clearly match any category |
 
 ---
@@ -184,6 +185,7 @@ Classify every incoming request before selecting an agent.
 | Builder completed implementation; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
 | Builder completed implementation; Analytics Architect was used but no instrumentation changes | `Security Reviewer` |
 | Non-code artifact needs quality review | `Spec Reviewer` (via quality loop) |
+| System audit, framework review, health check | `System Auditor` |
 
 ### Fallback rule
 
@@ -255,6 +257,7 @@ During assembly (phase 5), Iteration Manager:
 | `Security Reviewer` | `escalate` | → Escalate to user |
 | `Reviewer` | `APPROVED` or `APPROVED WITH MINOR CHANGES` | → Confirm workflow completion |
 | `Reviewer` | `CHANGES REQUIRED` | → `Builder` (corrections required) |
+| `System Auditor` | Audit report produced | → Present to user; user approves proposals → route to appropriate agents |
 
 ### Quality loop transitions
 

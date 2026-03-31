@@ -56,6 +56,7 @@ The project prioritizes:
 | **Spec Reviewer** | `agents/spec-reviewer.md` | Evaluate non-code artifact quality using a scoring rubric | Write code; rewrite artifacts |
 | **Reviser** | `agents/reviser.md` | Apply `must_fix` changes from Spec Reviewer; preserve scope and intent | Produce original artifacts; change scope |
 | **Gatekeeper** | `agents/gatekeeper.md` | Decide accept / iterate / escalate for quality loops | Rewrite artifacts; make architectural decisions |
+| **System Auditor** | `agents/system-auditor.md` | Audit framework health across downstream projects; propose improvements | Implement changes; modify downstream files |
 
 **Sequencing notes:**
 
@@ -86,6 +87,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Builder completed, code changes | Security Reviewer | Non-code changes only |
 | Security Reviewer passed, code must be validated | Reviewer | — |
 | New project setup, empty project docs | Onboarding (Discovery intake) | — |
+| System audit, framework review, health check | System Auditor | — |
 
 **Hard rules:**
 - Never start with Builder unless an approved Architect plan exists.

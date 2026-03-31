@@ -10,3 +10,4 @@
 | TASK-002 | Consistency audit and prompt optimization | completed | high | medium |
 | TASK-003 | Re-audit fixes, FEATURES.md removal, checklist compression | completed | medium | medium |
 | TASK-004 | Auto-sync downstream projects on framework commit | completed | high | small |
+| TASK-005 | System Auditor agent + audit.py automated checks | completed | medium | medium |

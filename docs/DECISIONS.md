@@ -9,6 +9,7 @@
 | DEC-002 | Single-source principle for workflow rules | accepted | 2026-03-29 |
 | DEC-003 | Remove FEATURES.md and FEATURE_TEMPLATE.md from framework | accepted | 2026-03-29 |
 | DEC-004 | Push-based auto-sync for downstream projects | accepted | 2026-03-29 |
+| DEC-005 | System Auditor agent for framework self-improvement | accepted | 2026-03-29 |
 
 ---
 
@@ -154,3 +155,39 @@ Option 3 — Push-based auto-sync via post-commit hook, with `downstream.project
 - New `hooks/post-commit` auto-runs `sync.py --all --render` when framework files change
 - `hooks/install.py` updated to install both pre-commit and post-commit hooks
 - Developers must run `python hooks/install.py` once after cloning to activate the post-commit hook
+
+---
+
+## DEC-005 — System Auditor agent for framework self-improvement
+
+**Status:** accepted
+**Date:** 2026-03-29
+
+### Context
+
+Framework improvements (consistency audits, prompt optimization, dead reference detection) were performed manually by the user requesting an ad-hoc review. There was no systematic mechanism to monitor framework health across downstream projects or detect systemic issues from cross-project patterns.
+
+### Options Considered
+
+1. **Manual audits only** — user triggers reviews periodically (status quo)
+2. **Automated checks only** — a script runs checks but has no interpretive layer
+3. **System Auditor agent + audit.py** — agent interprets automated findings, analyzes cross-project patterns, and proposes improvements; never implements without user approval
+
+### Decision
+
+Option 3 — System Auditor agent backed by `audit.py` automated checks.
+
+### Rationale
+
+- Automated checks (`audit.py`) catch mechanical issues (version drift, dead references, prompt size) reliably
+- The agent layer adds interpretive analysis (cross-project pattern recognition, root cause analysis, prioritized recommendations)
+- Read-only constraint (never implements) keeps the user in control while reducing cognitive load for identifying what needs attention
+- Fits naturally into existing Iteration Manager routing — `system_audit` request type
+
+### Implications
+
+- New `agents/system-auditor.md` agent definition (synced to downstream like other agents)
+- New `audit.py` script in agent-system root (not synced — framework-level tool)
+- Iteration Manager routes `system_audit` requests to System Auditor
+- System Auditor output goes to user for approval; approved proposals routed to appropriate agents
+- Agent produces `design_note` artifact type with structured findings JSON

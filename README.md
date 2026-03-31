@@ -99,6 +99,7 @@ hooks/
   install.py                 # Install hooks into .git/hooks/
 
 downstream.projects            # Local registry of downstream projects (gitignored)
+audit.py                         # Cross-project audit and health checks
 
 examples/
   unfolda/                   # Reference project configuration
@@ -122,6 +123,7 @@ examples/
 | **Spec Reviewer** | Evaluates non-code artifact quality |
 | **Reviser** | Fixes non-code artifacts based on review feedback |
 | **Gatekeeper** | Final accept/iterate/escalate decision |
+| **System Auditor** | Audits framework health; proposes improvements (never implements) |
 
 ## Configuration
 
