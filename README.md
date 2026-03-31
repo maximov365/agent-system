@@ -86,6 +86,7 @@ docs/
   ARCHITECTURE_GUARDRAILS.md # Architectural constraints
   ARCHITECTURE_CHECKLIST.md  # Review checklist
   PIPELINE_CONTRACTS.md      # Stage I/O contracts (you fill this)
+  DEPLOY_CONTRACTS.md        # Deployment requirements (you fill this)
   TASKS.md                   # Task backlog (managed by agents)
   DECISIONS.md               # Technical decisions (managed by agents)
   LESSONS_LEARNED.md         # Workflow lessons (IM appends; all agents read)
@@ -111,6 +112,11 @@ hooks/
 
 downstream.projects            # Local registry of downstream projects (gitignored)
 audit.py                         # Cross-project audit and health checks
+
+templates/
+  ci/                        # CI/CD workflow templates (copy to your project)
+    web-api.yml              #   Next.js + FastAPI + Postgres + Redis
+    macos-app.yml            #   Swift/SwiftUI + SPM + Sparkle + DMG
 
 examples/
   unfolda/                   # Reference project configuration

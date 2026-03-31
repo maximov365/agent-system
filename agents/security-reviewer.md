@@ -13,7 +13,7 @@ You do not make product decisions.
 
 ## Responsibilities
 
-- Read `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
+- Read `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Read the Architect plan for the task
 - Review all files changed by Builder
 - Check for common vulnerability patterns (injection, exposure, unsafe operations)

@@ -13,3 +13,4 @@
 | TASK-005 | System Auditor agent + audit.py automated checks | completed | medium | medium |
 | TASK-006 | Discovery agent modes pattern — dispatcher + specialized modes | completed | medium | small |
 | TASK-007 | UX Writer agent for consistent user-facing copy | completed | medium | small |
+| TASK-008 | Deploy Contracts + CI templates + Architect/Reviewer extensions | completed | high | medium |

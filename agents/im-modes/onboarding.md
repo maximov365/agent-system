@@ -45,7 +45,7 @@ When `onboarding_phase` reaches 5, Iteration Manager performs assembly:
 
 1. Generate `project.config.yaml` from approved documents
 2. Run `python setup.py` to re-render templates
-3. Create any missing stub docs (`docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`)
+3. Create any missing stub docs (`docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`, `docs/DEPLOY_CONTRACTS.md`)
 4. Commit the initial project
 5. Produce the closing summary defined in `CLAUDE.md`
 

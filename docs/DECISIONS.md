@@ -258,3 +258,41 @@ Create a standalone UX Writer agent rather than a Discovery mode or Designer sub
 - Standard workflow extended with two optional UX Writer steps
 - `ux_copy` added to Spec Reviewer, Reviser, and Gatekeeper scope
 - No impact on existing workflows when UX Writer is skipped
+
+---
+
+## DEC-009: Deploy Contracts and CI templates for deployment quality
+
+**Date:** 2026-03-29
+**Status:** accepted
+**Task:** TASK-008
+
+### Context
+
+Analysis of both downstream projects revealed systematic deployment failures: Unfolda had no CI/CD, worker kills during Railway redeploys with cascading data corruption (3 consecutive failures from framework syncs); Voxema had CI without tests, broken Sparkle EdDSA signature handoff, and config drift. The agent workflow ended at Reviewer approval with no deployment coverage.
+
+### Options considered
+
+1. **Deploy Contracts + Architect/Reviewer extensions** — minimal, process-only
+2. **Deploy Contracts + CI/CD templates + pre-deploy validation** — moderate, process + tooling
+3. **Full DevOps Agent** — heavyweight, new agent in workflow
+
+### Decision
+
+Option 2: Deploy Contracts + CI/CD templates. Scored 37/40 vs 35/40 (Option 1) and 24/40 (Option 3).
+
+### Rationale
+
+- Closes all 5 identified deployment failure patterns without adding a new agent
+- Deploy Contracts reuse the proven Pipeline Contracts pattern
+- CI templates are a one-time investment per stack, covering both existing projects
+- DevOps Agent is overkill for 2 projects and hard to reverse once integrated
+
+### Implications
+
+- New `docs/DEPLOY_CONTRACTS.md` template (project-specific, not synced)
+- Architect output format extended with mandatory "Deployment Impact" section
+- Reviewer checklist extended with deployment verification
+- CI templates in `templates/ci/` (reference only, not auto-synced)
+- `CLAUDE.md` mandatory reads list includes `docs/DEPLOY_CONTRACTS.md`
+- `--no-redeploy` for sync.py cancelled — gitignore already prevents downstream commits from framework syncs

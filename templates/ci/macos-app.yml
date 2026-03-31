@@ -1,0 +1,158 @@
+# CI/CD template for macOS native apps
+# Stack: Swift/SwiftUI + SPM + Sparkle auto-update + DMG distribution
+#
+# Copy this file to your project's .github/workflows/ and customize:
+# 1. Replace <SCHEME>, <APP_NAME> with your Xcode scheme and app name
+# 2. Configure signing secrets (DEVELOPER_ID_APPLICATION, etc.)
+# 3. Adjust Sparkle settings (SUFeedURL, signing keys)
+# 4. Set macOS runner version to match your deployment target
+#
+# This template implements two pipelines:
+#   PR/push: test → build (validation only)
+#   Tag v*:  test → build → sign → notarize → DMG → release → appcast
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+
+env:
+  SCHEME: "MyApp"            # <-- customize
+  APP_NAME: "MyApp"          # <-- customize
+  MACOS_TARGET: "14.2"       # <-- customize (minimum deployment target)
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Resolve packages
+        run: xcodebuild -resolvePackageDependencies -scheme ${{ env.SCHEME }}
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -scheme ${{ env.SCHEME }} \
+            -destination "platform=macOS" \
+            -derivedDataPath .xcode-derived \
+            -resultBundlePath TestResults.xcresult \
+            | xcpretty --color
+
+  build:
+    name: Build
+    runs-on: macos-15
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Build archive
+        run: |
+          xcodebuild archive \
+            -scheme ${{ env.SCHEME }} \
+            -destination "platform=macOS" \
+            -archivePath .build/${{ env.APP_NAME }}.xcarchive \
+            -derivedDataPath .xcode-derived \
+            | xcpretty --color
+
+  # Release pipeline — runs only on version tags
+  release:
+    name: Release
+    runs-on: macos-15
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      # Uncomment for code signing:
+      # - name: Import signing certificate
+      #   env:
+      #     DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
+      #     DEVELOPER_ID_PASSWORD: ${{ secrets.DEVELOPER_ID_PASSWORD }}
+      #   run: |
+      #     echo "$DEVELOPER_ID_APPLICATION" | base64 --decode > cert.p12
+      #     security create-keychain -p "" build.keychain
+      #     security import cert.p12 -k build.keychain -P "$DEVELOPER_ID_PASSWORD" -T /usr/bin/codesign
+      #     security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+      #     security default-keychain -s build.keychain
+
+      - name: Build archive
+        run: |
+          xcodebuild archive \
+            -scheme ${{ env.SCHEME }} \
+            -destination "platform=macOS" \
+            -archivePath .build/${{ env.APP_NAME }}.xcarchive \
+            -derivedDataPath .xcode-derived
+
+      - name: Export app
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath .build/${{ env.APP_NAME }}.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath .build/export
+
+      # Uncomment for notarization:
+      # - name: Notarize
+      #   env:
+      #     APPLE_ID: ${{ secrets.APPLE_ID }}
+      #     APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      #     APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+      #   run: |
+      #     xcrun notarytool submit .build/export/${{ env.APP_NAME }}.app.zip \
+      #       --apple-id "$APPLE_ID" \
+      #       --team-id "$APPLE_TEAM_ID" \
+      #       --password "$APPLE_APP_PASSWORD" \
+      #       --wait
+
+      - name: Create DMG
+        run: |
+          hdiutil create -volname "${{ env.APP_NAME }}" \
+            -srcfolder ".build/export/${{ env.APP_NAME }}.app" \
+            -ov -format UDZO \
+            ".build/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.dmg"
+
+      # Uncomment for Sparkle signing:
+      # - name: Sign DMG with Sparkle EdDSA
+      #   env:
+      #     SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+      #   run: |
+      #     SIGNATURE=$(.build/${{ env.APP_NAME }}.xcarchive/Products/Applications/${{ env.APP_NAME }}.app/Contents/Frameworks/Sparkle.framework/Versions/B/Resources/bin/sign_update \
+      #       ".build/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.dmg" \
+      #       --ed-key-file <(echo "$SPARKLE_PRIVATE_KEY"))
+      #     echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ".build/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.dmg"
+          generate_release_notes: true
+
+      # Uncomment for appcast update:
+      # - name: Update appcast
+      #   run: |
+      #     git checkout gh-pages
+      #     python scripts/update_appcast.py \
+      #       --version ${{ steps.version.outputs.version }} \
+      #       --signature "${{ env.SPARKLE_SIGNATURE }}" \
+      #       --dmg-url "https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.dmg"
+      #     git add appcast.xml
+      #     git commit -m "Update appcast for v${{ steps.version.outputs.version }}"
+      #     git push origin gh-pages

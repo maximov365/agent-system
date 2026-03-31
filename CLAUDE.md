@@ -28,14 +28,15 @@ Read in order:
 5. `docs/ARCHITECTURE.md`
 6. `docs/ARCHITECTURE_GUARDRAILS.md`
 7. `docs/PIPELINE_CONTRACTS.md`
-8. `docs/TASKS.md`
-9. `docs/DECISIONS.md`
+8. `docs/DEPLOY_CONTRACTS.md`
+9. `docs/TASKS.md`
+10. `docs/DECISIONS.md`
 
 **For tasks involving code, also read:**
-10. `.cursor/rules.md`
+11. `.cursor/rules.md`
 
 **For UI, frontend, or design tasks, also read:**
-11. `docs/BRAND.md`
+12. `docs/BRAND.md`
 
 ---
 

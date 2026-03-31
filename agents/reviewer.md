@@ -16,7 +16,7 @@ If Test Strategist produced a test plan for this task, verify that Builder imple
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Read the Architect plan for the task
 - Review the Builder implementation
 - Verify that all approved plan steps are addressed
@@ -153,6 +153,21 @@ Report any potential security risks.
 
 ---
 
+## Deployment checks
+
+Verify against `docs/DEPLOY_CONTRACTS.md`:
+
+- If new env vars are needed, are they documented in DEPLOY_CONTRACTS.md?
+- If database migrations are included, are they reversible? Is the migration order correct?
+- If infrastructure changes are needed, are they documented?
+- Does the Architect plan include a Deployment Impact section? If it says "none", verify that's actually true.
+- Are there breaking API changes that would require coordination between services?
+- If CI/CD changes are needed, are they included in the implementation?
+
+If deployment impact was missed by the Architect plan, flag it as a required change.
+
+---
+
 ## Documentation checks
 
 Verify that if the change affects system behavior:
@@ -201,6 +216,9 @@ Status: APPROVED / APPROVED WITH MINOR CHANGES / CHANGES REQUIRED
 
 ## Security
 <any risks or unsafe patterns?>
+
+## Deployment
+<env vars documented? migrations reversible? CI updated? DEPLOY_CONTRACTS.md current?>
 
 ## Required Changes
 - [blocking] <issue that must be fixed before proceeding>

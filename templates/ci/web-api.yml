@@ -1,0 +1,163 @@
+# CI/CD template for web app + API projects
+# Stack: Next.js (frontend) + FastAPI/Express (backend) + PostgreSQL + Redis
+#
+# Copy this file to your project's .github/workflows/ and customize:
+# 1. Replace <PYTHON_VERSION>, <NODE_VERSION> with your versions
+# 2. Adjust service containers (postgres, redis) to match your stack
+# 3. Add your project-specific env vars to the test matrix
+# 4. Configure deploy steps for your hosting (Railway, Vercel, Fly, etc.)
+#
+# This template implements the pipeline from docs/DEPLOY_CONTRACTS.md:
+#   lint → test → build → deploy staging → smoke test → deploy production
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"    # <-- customize
+  NODE_VERSION: "20"         # <-- customize
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt ruff
+
+      - name: Install Node deps
+        working-directory: web
+        run: npm ci
+
+      - name: Lint Python
+        run: ruff check .
+
+      - name: Lint TypeScript
+        working-directory: web
+        run: npm run lint
+
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      REDIS_URL: redis://localhost:6379
+      # Add other test env vars here
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install deps
+        run: pip install -r requirements.txt pytest pytest-asyncio
+
+      - name: Run migrations
+        run: alembic upgrade head
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install deps
+        working-directory: web
+        run: npm ci
+
+      - name: Run tests
+        working-directory: web
+        run: npm test -- --run
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000  # <-- customize
+
+  # Uncomment and configure for your hosting provider:
+  #
+  # deploy-staging:
+  #   name: Deploy Staging
+  #   runs-on: ubuntu-latest
+  #   needs: [test-backend, test-frontend]
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Deploy to staging
+  #       run: echo "Deploy to staging here"
+  #
+  # smoke-test:
+  #   name: Smoke Test
+  #   runs-on: ubuntu-latest
+  #   needs: deploy-staging
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Run smoke tests
+  #       run: ./scripts/smoke_test.sh
+  #       env:
+  #         API_URL: https://staging.example.com  # <-- customize
+  #
+  # deploy-production:
+  #   name: Deploy Production
+  #   runs-on: ubuntu-latest
+  #   needs: smoke-test
+  #   environment: production  # requires manual approval in GitHub
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Deploy to production
+  #       run: echo "Deploy to production here"

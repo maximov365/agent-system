@@ -173,3 +173,24 @@ Use one block per closed workflow. Keep it factual and short.
 ### Follow-ups
 - `AGENTS.md` may need the agent modes pattern if more agents are added — monitor the 4000-token threshold
 - Consider a central artifact type registry to reduce enum duplication across agents
+
+---
+
+## TASK-008: Deploy Contracts + CI templates (2026-03-29)
+
+### What went wrong
+- Audit found 16 dead reference warnings: `docs/DEPLOY_CONTRACTS.md` was referenced by agents synced to downstream projects, but the stub file didn't exist there yet. Unlike framework files, project-specific docs need manual creation in each downstream project.
+
+### Repeated review themes
+- Project-specific documents (`PIPELINE_CONTRACTS.md`, `DEPLOY_CONTRACTS.md`) referenced by framework agents must exist as stubs in every downstream project — otherwise audit flags dead references
+- `--no-redeploy` for sync.py was unnecessary because the gitignore mechanism already prevents framework-only syncs from creating downstream commits
+
+### What worked well
+- Discovery with concrete evidence from both projects' LESSONS_LEARNED.md produced actionable recommendations with clear scoring
+- Extending existing agents (Architect, Reviewer) was simpler and more effective than creating a new DevOps Agent
+- CI templates as reference files (not auto-synced) give projects flexibility while providing a starting point
+- Deploy Contracts as a project-specific doc (not framework-synced) allows each project to define its own deployment requirements
+
+### Follow-ups
+- Voxema: apply `macos-app.yml` template, fix EdDSA signature handoff, add swift test to CI
+- Unfolda: apply `web-api.yml` template, create proper CI/CD pipeline, fill in Deploy Contracts

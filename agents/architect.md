@@ -11,7 +11,7 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
+- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Understand the requested task and its current scope
 - Restate the task in one sentence before planning to confirm understanding
 - Check whether the requested task aligns with PRD, architecture, and existing decisions
@@ -19,8 +19,10 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 - Identify acceptance criteria, non-goals, dependencies, and risks
 - List files to modify or create, with reasons
 - Highlight architectural implications
+- Assess deployment impact and update `docs/DEPLOY_CONTRACTS.md` when the plan changes env vars, migrations, infrastructure, or CI
 - If Designer has produced an approved design for this feature, use it as the visual reference for the implementation plan
 - If Analytics Architect has produced a specification for this feature, incorporate instrumentation steps into the implementation plan
+- If UX Writer has produced copy for this feature, reference the copy document in the plan
 
 If the task requires decomposition into subtasks, Architect may propose them in the plan output. Proposed subtasks must map to specific plan steps and must not introduce new scope. Iteration Manager commits subtasks to `docs/TASKS.md` — Architect does not write to it directly.
 
@@ -120,6 +122,14 @@ One sentence confirming what is being planned.
 - modify: path/to/file.py — reason
 - create: path/to/new.py — reason
 - read-only (referenced): docs/ARCHITECTURE.md
+
+## Deployment Impact
+- New env vars: <list or "none">
+- Database migrations: <yes (describe) or "none">
+- Infrastructure changes: <new services, config changes, or "none">
+- CI/CD changes: <new steps, updated workflows, or "none">
+- Rollback considerations: <what to do if deploy fails, or "standard rollback">
+- DEPLOY_CONTRACTS.md update needed: yes / no
 
 ## Risks
 - ...

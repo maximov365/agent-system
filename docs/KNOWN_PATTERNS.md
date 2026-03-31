@@ -75,3 +75,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Define a single agent (e.g., UX Writer) with two operating modes — "creation" (pre-Architect) and "review" (post-Builder). The standard-workflow transition table has separate rows for each invocation point. Each mode produces the same artifact type but with different status values (`produced` vs. `approved`/`changes_suggested`).
 - **Why it worked:** UX Writer creates copy before Architect plans (so copy text informs implementation), and reviews strings after Builder implements (catching developer-speak). Both steps are optional with clear skip conditions, so the pipeline doesn't slow down for backend-only changes.
 - **Related:** `docs/DECISIONS.md` DEC-008.
+
+## Pattern: Deployment contracts for catch-before-deploy quality
+
+- **Context:** When deployment bugs repeat across projects (missing env vars, untested migrations, broken CI, config drift) and the agent workflow has no deployment coverage.
+- **Approach:** Add `docs/DEPLOY_CONTRACTS.md` as a project-specific document (not framework-synced). Extend Architect with a mandatory "Deployment Impact" section in every plan. Extend Reviewer with a deployment checklist. Provide CI/CD templates as reference files per stack. Deployment concerns are handled by existing agents rather than a new DevOps Agent.
+- **Why it worked:** Follows the established pattern of extending existing agents rather than creating new ones (same as UX Writer's dual-invocation pattern). Deploy Contracts mirror the proven Pipeline Contracts structure. CI templates give projects a starting point without locking them into a specific workflow.
+- **Related:** `docs/DECISIONS.md` DEC-009.

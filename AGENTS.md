@@ -161,7 +161,7 @@ before Architect begins implementation planning. Analytics Validator must verify
 
 Tasks are tracked in `docs/TASKS.md`. Lifecycle: planned → in_progress → implemented → in_review → approved → completed. Only Iteration Manager may commit tasks or transition status. Full rules, authority, and status transitions are in `docs/TASK_BACKLOG_AUTOMATION.md`.
 
-Significant decisions → `docs/DECISIONS.md`. Architecture changes → `docs/ARCHITECTURE.md`.
+Significant decisions → `docs/DECISIONS.md`. Architecture changes → `docs/ARCHITECTURE.md`. Deployment changes → `docs/DEPLOY_CONTRACTS.md`.
 
 ---
 
