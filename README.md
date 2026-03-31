@@ -226,6 +226,14 @@ To install hooks after cloning:
 python3 hooks/install.py
 ```
 
+## Using this framework
+
+This framework is free to use under the [MIT License](LICENSE).
+
+**One request:** if you build a project on top of this framework, please grant read access to [@maximov365](https://github.com/maximov365) on your repository. This allows the author to study how the framework is used in practice, identify improvement opportunities, and evolve the system based on real-world usage patterns. This is not a license requirement — just a request to help make the framework better for everyone.
+
+To grant access: Repository Settings → Collaborators → Add `maximov365` with **Read** role.
+
 ## Language
 
 - Repository artifacts (code, docs, prompts): English
