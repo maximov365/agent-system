@@ -130,6 +130,8 @@ Classify every incoming request before selecting an agent.
 | `approved_plan_execution` | Architect plan exists and is approved; Builder can start |
 | `code_review` | Builder completed implementation; code must be validated |
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
+| `copy_creation` | Feature has user-facing text; copy needs to be written or reviewed |
+| `standalone_copy` | Release notes, emails, notifications, or other copy request |
 | `non_code_artifact_improvement` | Feature spec, task breakdown, or plan needs quality review |
 | `workflow_continuation` | Agent returned a result; next step must be determined |
 | `system_audit` | User requests system audit, framework review, or health check |
@@ -147,13 +149,16 @@ Classify every incoming request before selecting an agent.
 | Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
+| Design approved (or no Designer); feature has user-facing text | `UX Writer` |
+| Standalone copy request (release notes, emails, notifications) | `UX Writer` |
 | Accepted feature specification with measurable outcomes and no analytics spec exists (`product_spec_accepted: true`) | `Analytics Architect` |
 | Task exists and is ready for planning; analytics spec exists or is not required | `Architect` |
 | Approved Architect plan exists; task has non-trivial testable logic | `Test Strategist` |
 | Approved Architect plan exists; trivial change or no testable logic | `Builder` |
-| Builder completed implementation; Analytics Architect was not used | `Security Reviewer` |
-| Builder completed implementation; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
-| Builder completed implementation; Analytics Architect was used but no instrumentation changes | `Security Reviewer` |
+| Builder completed implementation; feature has user-facing strings | `UX Writer` (copy review) |
+| Builder completed implementation; no user-facing strings; Analytics Architect was not used | `Security Reviewer` |
+| Builder completed implementation; no user-facing strings; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
+| Builder completed implementation; no user-facing strings; Analytics Architect was used but no instrumentation changes | `Security Reviewer` |
 | Non-code artifact needs quality review | `Spec Reviewer` (via quality loop) |
 | System audit, framework review, health check | `System Auditor` |
 

@@ -25,6 +25,7 @@ You may revise:
 - Decision notes
 - Analytics specifications
 - Design artifacts (UI mockups produced by Designer)
+- UX copy documents (copy produced by UX Writer)
 - Test plans
 
 You must not modify:

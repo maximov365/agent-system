@@ -229,3 +229,32 @@ Option 3 — Agent modes pattern.
 - `FRAMEWORK_GLOBS` in `sync.py`, `hooks/pre-commit`, `hooks/post-commit`, and `audit.py` updated to include `agents/discovery-modes/*.md`
 - GITIGNORE_ENTRIES unchanged — `/agents/` already covers the subdirectory
 - Pattern can be applied to other large agents (e.g., Iteration Manager) if compression is needed
+
+---
+
+## DEC-008: UX Writer as independent agent
+
+**Date:** 2026-03-29
+**Status:** accepted
+**Task:** TASK-007
+
+### Context
+
+The system lacked a dedicated agent for user-facing text. Copy was handled ad-hoc by Designer, Product, or Builder, leading to inconsistent tone of voice and developer-speak in UI strings.
+
+### Decision
+
+Create a standalone UX Writer agent rather than a Discovery mode or Designer sub-role, because:
+
+- UX Writer produces unique artifacts (`ux_copy`) — copy documents and copy reviews — unlike any existing agent
+- It has three invocation points: after Designer (copy creation), after Builder (copy review), and standalone (release notes, emails)
+- It depends on `docs/BRAND.md` as a primary input, not on discovery modes
+- Copy creation and copy review are distinct operations with different output formats
+
+### Implications
+
+- New file: `agents/ux-writer.md`
+- New `artifact_type`: `ux_copy` in handoff contract
+- Standard workflow extended with two optional UX Writer steps
+- `ux_copy` added to Spec Reviewer, Reviser, and Gatekeeper scope
+- No impact on existing workflows when UX Writer is skipped

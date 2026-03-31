@@ -25,9 +25,20 @@ Start the quality loop (invoke `Spec Reviewer`) when:
 - Architectural risk is detected in an artifact
 - Artifact clarity is insufficient for Builder to proceed without clarification
 
+Applicable artifact types:
+
+- feature specifications
+- task breakdowns
+- implementation plans
+- design notes
+- decision notes
+- analytics specifications
+- UX copy documents
+- onboarding documents (PRD, Architecture, Brand — during the Onboarding Workflow)
+
 Do not start the quality loop for:
 
-- Code, tests, or configuration
+- Code, tests, or configuration — those go through Builder → Security Reviewer → Reviewer (mandatory code review is separate)
 - Trivial non-product changes (dependency upgrades, single-line fixes)
 - Artifacts that have already been accepted by Gatekeeper in this workflow cycle
 

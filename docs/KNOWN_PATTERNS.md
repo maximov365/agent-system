@@ -68,3 +68,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Refactor the agent into a lightweight dispatcher that selects a mode from a table, then loads only the relevant mode file from a subdirectory (`agents/<agent>-modes/*.md`). Each mode file is self-contained with its own responsibilities and output format. The dispatcher retains shared responsibilities, principles, and special modes (e.g., onboarding intake).
 - **Why it worked:** `discovery.md` went from 316 → ~130 lines. No changes to `AGENTS.md` routing, `iteration-manager.md`, or the handoff contract. Adding a new mode requires only: (1) create a file, (2) add a row to the dispatcher table. The subdirectory is automatically covered by existing GITIGNORE_ENTRIES (`/agents/`).
 - **Related:** `docs/DECISIONS.md` DEC-006.
+
+## Pattern: Dual-invocation agents for pre/post-build quality
+
+- **Context:** Some quality concerns (copy tone, accessibility, security) benefit from both a preparation step (before implementation) and a verification step (after implementation).
+- **Approach:** Define a single agent (e.g., UX Writer) with two operating modes — "creation" (pre-Architect) and "review" (post-Builder). The standard-workflow transition table has separate rows for each invocation point. Each mode produces the same artifact type but with different status values (`produced` vs. `approved`/`changes_suggested`).
+- **Why it worked:** UX Writer creates copy before Architect plans (so copy text informs implementation), and reviews strings after Builder implements (catching developer-speak). Both steps are optional with clear skip conditions, so the pipeline doesn't slow down for backend-only changes.
+- **Related:** `docs/DECISIONS.md` DEC-008.

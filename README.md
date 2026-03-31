@@ -9,7 +9,7 @@ The system enables predictable, safe, and increasingly autonomous product develo
 All work flows through a controlled pipeline of specialized agents:
 
 ```
-Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder → [UX Writer review] → Analytics Validator → Security Reviewer → Reviewer
 ```
 
 Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
@@ -63,6 +63,7 @@ agents/
     marketing.md             #   Go-to-market, channels, messaging
   product.md                 # Define features and tasks
   designer.md                # UI mockups and visual prototypes
+  ux-writer.md               # User-facing copy and tone of voice
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
   test-strategist.md         # Define test strategy
@@ -123,6 +124,7 @@ examples/
 | **Discovery** | Explores options via specialized modes: technical, market, references, brand, marketing |
 | **Product** | Turns ideas into feature specs and task breakdowns |
 | **Designer** | Creates UI mockups and iterates with user feedback (optional) |
+| **UX Writer** | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
 | **Analytics Architect** | Defines events, metrics, instrumentation |
 | **Architect** | Plans implementation before coding |
 | **Test Strategist** | Defines test strategy before implementation (optional) |

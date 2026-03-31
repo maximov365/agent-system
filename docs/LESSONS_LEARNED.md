@@ -153,3 +153,23 @@ Use one block per closed workflow. Keep it factual and short.
 
 ### Follow-ups
 - Consider applying the same pattern to `iteration-manager.md` if further compression is needed (DEC-006 implications)
+
+---
+
+## TASK-007: UX Writer agent (2026-03-29)
+
+### What went wrong
+- Nothing significant — the pattern for adding new agents is well-established at this point
+
+### Repeated review themes
+- `AGENTS.md` token size hit the warning threshold (~4025 tokens) after adding UX Writer routing entries; this is the central routing doc and hard to split further
+- `ux_copy` artifact type needed to be added in four separate files (handoff contract, spec-reviewer, reviser, gatekeeper) — fragmentation of artifact type enums is a recurring cost of adding new agents
+
+### What worked well
+- UX Writer as a standalone agent (not a mode) was the right call — unique artifact types and multiple invocation points don't fit the mode pattern
+- Copy review (post-Builder) adds a quality layer without blocking the pipeline — minor findings flow through, significant ones loop back to Builder
+- Integration into standard-workflow transitions was clean — two insertion points (post-Designer + post-Builder) with clear skip conditions
+
+### Follow-ups
+- `AGENTS.md` may need the agent modes pattern if more agents are added — monitor the 4000-token threshold
+- Consider a central artifact type registry to reduce enum duplication across agents

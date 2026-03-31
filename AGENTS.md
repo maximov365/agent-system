@@ -45,6 +45,7 @@ The project prioritizes:
 | **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing | Write production code |
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
+| **UX Writer** | `agents/ux-writer.md` | Write and review all user-facing text; ensure consistent tone of voice | Write code; change scope; make design decisions |
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
 | **Architect** | `agents/architect.md` | Propose minimal implementation plans; define files, risks, and acceptance criteria | Write production code |
 | **Test Strategist** | `agents/test-strategist.md` | Define test strategy (levels, edge cases, failure modes) for approved plans | Write code; modify the implementation plan |
@@ -60,7 +61,8 @@ The project prioritizes:
 
 **Sequencing notes:**
 
-- **Designer** is optional — runs after Product spec is accepted and before Analytics Architect or Architect, only when the feature has user-facing UI.
+- **Designer** is optional — runs after Product spec is accepted and before UX Writer or Architect, only when the feature has user-facing UI.
+- **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
 - **Analytics Architect** must run before Architect when required. Architect must include instrumentation in the plan. Architect must not remove or weaken defined analytics events.
 - **Test Strategist** is optional — runs after Architect plan is accepted and before Builder, only for non-trivial testable logic.
 - **Security Reviewer** runs after Builder (or after Analytics Validator) and before Reviewer for all code changes.
@@ -79,6 +81,9 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Technical uncertainty, market research | Discovery | — |
 | Rough feature idea, unclear scope | Product | — |
 | Accepted spec with user-facing UI | Designer | Backend-only, API-only, trivial UI |
+| Design approved, feature has user-facing text | UX Writer | No user-facing text; backend-only |
+| Standalone copy request (release notes, emails) | UX Writer | — |
+| Builder completed, feature has user-facing text | UX Writer (copy review) | No user-facing strings in code |
 | Feature with measurable outcomes | Analytics Architect | No user-facing behavior, no observability; analytics already exist |
 | Implementation planning needed | Architect | — |
 | Accepted Architect plan, non-trivial testable logic | Test Strategist | Trivial change, no testable logic |
@@ -102,13 +107,13 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
 Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
 
-Brackets indicate optional steps. Designer runs only for features with user-facing UI. Test Strategist runs only for tasks with non-trivial testable logic. Earlier stages (Discovery, Product) are optional depending on the request. Test Strategist is optional — invoked when the task has non-trivial testable logic. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
+Brackets indicate optional steps. Designer runs only for features with user-facing UI. UX Writer runs when the feature has user-facing text (after Designer or after Product if no Designer); also runs after Builder to review copy in code. Test Strategist runs only for tasks with non-trivial testable logic. Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
 All code changes must go through **Security Reviewer** and **Reviewer**. Iteration Manager confirms workflow completion after Reviewer approval.
 
@@ -116,84 +121,15 @@ All code changes must go through **Security Reviewer** and **Reviewer**. Iterati
 
 # Onboarding Workflow
 
-Guided conversational onboarding creates a new project. Agents ask structured questions and produce project documents iteratively. Detailed transitions are in `agents/im-modes/onboarding.md`.
-
-**Phases:**
-
-| Phase | Agent | Produces | Quality loop | Artifact type |
-|---|---|---|---|---|
-| 1 | Discovery | Discovery brief | No | `design_note` |
-| 2 | Product | `docs/PRD.md` | Yes | `feature_spec` |
-| 3 | Designer | `docs/BRAND.md` | Yes | `design` |
-| 4 | Architect | `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/FEATURE_MAP.md` | Yes | `implementation_plan` |
-| 5 | Iteration Manager | `project.config.yaml`, stub docs | No | `none` |
-
-**Skip rules:** Skip Phase 1 if the user provides comprehensive upfront context. Skip Phase 3 if no user-facing UI. Phases 2 and 4 are always required.
-
-**Phase rules:** Each phase starts with structured intake questions → user answers → agent produces draft → quality loop (max 3 iterations) → Gatekeeper acceptance → next phase. Each agent reads approved outputs of all previous phases as context.
-
-**Intake conversation rules:** During onboarding, agents do **not** read project docs as inputs (these are being created). They **do** read `project.config.yaml` for pre-filled context and outputs of previous onboarding phases.
-
-**Assembly (Phase 5):** Iteration Manager generates `project.config.yaml`, runs `python setup.py`, creates stub docs, commits, and presents the closing summary.
-
-**Workflow state:** `onboarding_phase` field in `workflow_state` tracks progress (1–5). State fields and lifecycle rules are in `agents/iteration-manager.md`; initialisations are in `agents/im-modes/onboarding.md`.
+Guided conversational onboarding for new projects. Phases: Discovery → Product → [Designer] → Architect → Assembly. Each phase uses structured intake questions, quality loops, and Gatekeeper acceptance. Full transitions, skip rules, and assembly steps are in `agents/im-modes/onboarding.md`.
 
 ---
 
 # Quality Loop
 
-The Iteration Manager decides when the Quality Loop should be used:
+Non-code artifacts use: Generator → Spec Reviewer → Gatekeeper → [Reviser → Spec Reviewer ...]. Maximum **3** iterations. Does **not** replace mandatory code review.
 
-- when a new feature spec is created
-- when an implementation plan affects multiple modules
-- when architectural risk is detected
-- when artifact clarity is insufficient for implementation
-
-Non-code artifacts may use a structured quality loop:
-
-Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat)
-
-Generator is typically the Product or Architect agent that created the artifact and remains responsible for its intent. The loop runs as follows: Generator produces the artifact; Spec Reviewer evaluates it; Gatekeeper decides accept, iterate, or escalate; if iterate, Reviser applies fixes and the artifact returns to Spec Reviewer.
-
-This loop applies to:
-
-- feature specifications
-- task breakdowns
-- implementation plans
-- design notes
-- decision notes
-- analytics specifications
-- onboarding documents (PRD, Architecture, Brand — during the Onboarding Workflow)
-
-This loop **does NOT replace mandatory code review**.
-
-Quality loops must not be triggered again for the same artifact unless the artifact meaningfully changes.
-
----
-
-# Iteration Rules
-
-Maximum iterations: **3**
-
-Do not restart the loop after Gatekeeper acceptance.
-
-Stop earlier if:
-
-- artifact quality threshold is reached
-- no `must_fix` issues remain
-- reviewer feedback becomes repetitive
-- remaining feedback is stylistic only
-
-Escalate to the user when:
-
-- the task contradicts `docs/PRD.md` or `docs/ARCHITECTURE.md`
-- the task conflicts with a decision in `docs/DECISIONS.md`
-- implementation would change pipeline boundaries
-- a new external dependency or provider is required
-- a new infrastructure component is required
-- repository context is insufficient to proceed safely
-
-Do not make assumptions about these cases — escalate explicitly.
+Applicable artifact types, start/stop conditions, and loop lifecycle are in `agents/im-modes/quality-loop.md`. Escalation conditions are in `agents/iteration-manager.md`.
 
 ---
 
@@ -223,31 +159,9 @@ before Architect begins implementation planning. Analytics Validator must verify
 
 # Task Lifecycle
 
-Tasks are tracked in:
+Tasks are tracked in `docs/TASKS.md`. Lifecycle: planned → in_progress → implemented → in_review → approved → completed. Only Iteration Manager may commit tasks or transition status. Full rules, authority, and status transitions are in `docs/TASK_BACKLOG_AUTOMATION.md`.
 
-`docs/TASKS.md`
-
-Typical lifecycle: planned → in_progress → implemented → in_review → approved → completed
-
-Tasks may also be set to `cancelled` by Iteration Manager with user confirmation when a task becomes obsolete, merged, or invalid. Tasks must not be deleted from `docs/TASKS.md`.
-
-Status transitions:
-
-- **planned → in_progress**: Builder begins implementation
-- **in_progress → implemented**: Builder completes implementation
-- **implemented → in_review**: Reviewer begins validation
-- **in_review → approved**: Reviewer approves
-- **approved → completed**: Iteration Manager confirms workflow closure or schedules follow-up tasks if Reviewer approved with minor changes
-
-Only Iteration Manager may commit new tasks to `docs/TASKS.md` or transition task status. Product and Architect may propose tasks in their output; Reviewer may propose non-blocking follow-up tasks. Automated task creation rules are defined in `docs/TASK_BACKLOG_AUTOMATION.md`.
-
-Significant decisions must be recorded in:
-
-`docs/DECISIONS.md`
-
-Architecture updates must be reflected in:
-
-`docs/ARCHITECTURE.md`
+Significant decisions → `docs/DECISIONS.md`. Architecture changes → `docs/ARCHITECTURE.md`.
 
 ---
 
@@ -280,14 +194,7 @@ These rules apply to every agent, including Iteration Manager:
 
 # Repository Structure
 
-See `README.md` for the full project structure. Key locations:
-
-- `agents/*.md` — agent role definitions
-- `agents/discovery-modes/*.md` — Discovery agent mode definitions (technical, market, references, brand, marketing, legal)
-- `agents/im-modes/*.md` — Iteration Manager workflow modes (onboarding, standard-workflow, quality-loop)
-- `docs/` — project documentation, templates, and workflow contracts
-- `.cursor/rules.md` — coding rules
-- `project.config.yaml` — project configuration for template rendering
+See `README.md` for the full project structure. Agent definitions: `agents/*.md`, `agents/discovery-modes/*.md`, `agents/im-modes/*.md`. Coding rules: `.cursor/rules.md`.
 
 ---
 

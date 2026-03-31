@@ -33,9 +33,14 @@ After each agent completes, determine the next step based on the agent's output 
 | `Discovery` | Recommendation produced | → `Product` (if feature scope needed) or → `Architect` (if task already exists) |
 | `Product` | Feature spec produced | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
 | `Product` → Quality loop | Gatekeeper `accept`; feature has user-facing UI | → `Designer` |
-| `Product` → Quality loop | Gatekeeper `accept`; no UI; feature has measurable outcomes | → `Analytics Architect` |
-| `Product` → Quality loop | Gatekeeper `accept`; no UI; no analytics needed | → `Architect` |
-| `Designer` | Design approved by user | → `Analytics Architect` (if feature has measurable outcomes) or → `Architect` |
+| `Product` → Quality loop | Gatekeeper `accept`; no UI but has user-facing text | → `UX Writer` (copy creation) |
+| `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; feature has measurable outcomes | → `Analytics Architect` |
+| `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; no analytics needed | → `Architect` |
+| `Designer` | Design approved by user; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Designer` | Design approved by user; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `UX Writer` | Copy document produced; complex (multiple screens or high brand risk) | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
+| `UX Writer` | Copy document produced; simple (single screen or low risk) | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `UX Writer` → Quality loop | Gatekeeper `accept` | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
 | `Analytics Architect` | Analytics spec produced; complex (multiple events or high risk) | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
 | `Analytics Architect` | Analytics spec produced; simple | → `Architect` |
 | `Analytics Architect` → Quality loop | Gatekeeper `accept` | → `Architect` |
@@ -43,8 +48,11 @@ After each agent completes, determine the next step based on the agent's output 
 | `Architect` → Quality loop | Gatekeeper `accept`; task has non-trivial testable logic | → `Test Strategist` |
 | `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic | → `Builder` |
 | `Test Strategist` | Test plan produced | → `Builder` |
-| `Builder` | Implementation complete; instrumentation changed | → `Analytics Validator` |
-| `Builder` | Implementation complete; no instrumentation changes | → `Security Reviewer` |
+| `Builder` | Implementation complete; feature has user-facing strings | → `UX Writer` (copy review) |
+| `Builder` | Implementation complete; no user-facing strings; instrumentation changed | → `Analytics Validator` |
+| `Builder` | Implementation complete; no user-facing strings; no instrumentation changes | → `Security Reviewer` |
+| `UX Writer` (copy review) | `all_clear` or `changes_suggested` (minor) | → `Analytics Validator` (if instrumentation changed) or → `Security Reviewer` |
+| `UX Writer` (copy review) | `changes_suggested` (significant) | → `Builder` (copy fixes required) |
 | `Analytics Validator` | `accept` | → `Security Reviewer` |
 | `Analytics Validator` | `revise` | → `Builder` (instrumentation fixes required) |
 | `Analytics Validator` | `escalate` | → Escalate to user |
