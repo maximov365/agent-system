@@ -54,3 +54,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Delete the file and all references. Inline any essential format guidance into the agent that would use it. Update escalation rules to reference the file that actually serves the function.
 - **Why it worked:** `docs/FEATURES.md` was referenced in an escalation rule but never populated across 36+ completed tasks. Removing it (and redirecting the rule to `docs/FEATURE_MAP.md`) eliminated a false safety guarantee. Three existing docs (PRD, FEATURE_MAP, TASKS) already covered feature tracking.
 - **Related:** `docs/DECISIONS.md` DEC-003.
+
+## Pattern: Push-based auto-sync for framework distribution
+
+- **Context:** When a framework repository produces files consumed by multiple downstream projects, and manual sync is error-prone.
+- **Approach:** Use a post-commit hook that detects framework file changes in the commit, reads a local registry of downstream projects, and runs sync + template render automatically. The registry is gitignored (machine-specific paths). A `find_python` fallback chain resolves venv differences.
+- **Why it worked:** Eliminated the manual sync step that was repeatedly forgotten (flagged as a follow-up in TASK-003). Zero additional infrastructure — just a git hook and a text file.
+- **Related:** `docs/DECISIONS.md` DEC-004.

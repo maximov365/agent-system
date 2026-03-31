@@ -115,4 +115,21 @@ Use one block per closed workflow. Keep it factual and short.
 - ARCHITECTURE_CHECKLIST.md compression (252 → 97 lines) by referencing GUARDRAILS rule numbers instead of restating rationale
 
 ### Follow-ups
-- Run `sync.py` to propagate framework changes to Voxema and other downstream projects
+- ~~Run `sync.py` to propagate framework changes to Voxema and other downstream projects~~ Superseded by TASK-004: post-commit hook now auto-syncs downstream.
+
+## 2026-03-29 — TASK-004 Auto-sync downstream projects on framework commit
+
+**Workflow outcome:** completed
+
+### What went wrong
+- First `sync.py --all --render` test failed because `sys.executable` was system python (no pyyaml) — `run_check` and `run_setup` did not discover project venvs
+
+### Repeated must_fix / review / security themes
+- Tools that invoke subprocess with `sys.executable` must account for venv discovery when the calling python may differ from the project python
+
+### What worked well
+- `find_python` fallback chain (project venv → agent-system venv → sys.executable) resolved the dependency issue cleanly
+- Plain-text `downstream.projects` format avoids adding yaml as a dependency to sync.py
+
+### Follow-ups
+- none

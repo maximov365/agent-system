@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""
+Post-commit hook: auto-sync downstream projects when framework files change.
+
+Checks the most recent commit for framework file changes. If any are found,
+runs `sync.py --all --render` to push updates to all registered downstream
+projects and render their templates.
+
+Install:
+    python hooks/install.py
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SYNC_SCRIPT = ROOT / "sync.py"
+DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
+
+FRAMEWORK_GLOBS = [
+    "agents/*.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".cursor/rules.md",
+    "docs/AGENT_HANDOFF_CONTRACT.md",
+    "docs/AGENT_EXECUTION_MODEL.md",
+    "docs/TASK_BACKLOG_AUTOMATION.md",
+    "docs/ARCHITECTURE_GUARDRAILS.md",
+    "docs/ARCHITECTURE_CHECKLIST.md",
+    "docs/TASK_TEMPLATE.md",
+    "docs/ONBOARDING.md",
+    "setup.py",
+    "requirements-framework.txt",
+]
+
+
+def get_committed_files() -> set[str]:
+    result = subprocess.run(
+        ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+        capture_output=True, text=True, cwd=str(ROOT),
+    )
+    return set(result.stdout.strip().splitlines())
+
+
+def collect_framework_paths() -> set[str]:
+    paths = set()
+    for pattern in FRAMEWORK_GLOBS:
+        for p in ROOT.glob(pattern):
+            paths.add(str(p.relative_to(ROOT)))
+    return paths
+
+
+def has_downstream_projects() -> bool:
+    if not DOWNSTREAM_REGISTRY.exists():
+        return False
+    for line in DOWNSTREAM_REGISTRY.read_text().splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            return True
+    return False
+
+
+def main() -> int:
+    if not has_downstream_projects():
+        return 0
+
+    committed = get_committed_files()
+    framework_paths = collect_framework_paths()
+    changed = committed & framework_paths
+
+    if not changed:
+        return 0
+
+    venv_python = ROOT / ".venv" / "bin" / "python3"
+    python = str(venv_python) if venv_python.exists() else sys.executable
+
+    print(f"\n  Framework files changed ({len(changed)}). Syncing downstream projects...")
+
+    result = subprocess.run(
+        [python, str(SYNC_SCRIPT), "--all", "--render"],
+        cwd=str(ROOT),
+    )
+    return result.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())

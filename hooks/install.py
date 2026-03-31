@@ -15,23 +15,26 @@ ROOT = Path(__file__).resolve().parent.parent
 HOOKS_SRC = ROOT / "hooks"
 GIT_HOOKS_DIR = ROOT / ".git" / "hooks"
 
+HOOKS = ["pre-commit", "post-commit"]
+
 
 def install() -> None:
     if not GIT_HOOKS_DIR.exists():
         sys.exit(f"Error: {GIT_HOOKS_DIR} not found. Are you in a git repo?")
 
-    hook_name = "pre-commit"
-    src = HOOKS_SRC / hook_name
-    dst = GIT_HOOKS_DIR / hook_name
+    for hook_name in HOOKS:
+        src = HOOKS_SRC / hook_name
+        if not src.exists():
+            continue
 
-    if dst.exists() or dst.is_symlink():
-        dst.unlink()
+        dst = GIT_HOOKS_DIR / hook_name
+        if dst.exists() or dst.is_symlink():
+            dst.unlink()
 
-    os.symlink(src, dst)
+        os.symlink(src, dst)
+        src.chmod(src.stat().st_mode | stat.S_IEXEC)
+        print(f"  Installed: {hook_name} → {src.relative_to(ROOT)}")
 
-    src.chmod(src.stat().st_mode | stat.S_IEXEC)
-
-    print(f"Installed: {hook_name} → {src.relative_to(ROOT)}")
     print("Done.")
 
 

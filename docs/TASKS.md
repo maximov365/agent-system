@@ -9,3 +9,4 @@
 | TASK-001 | Guided conversational onboarding workflow | completed | high | large |
 | TASK-002 | Consistency audit and prompt optimization | completed | high | medium |
 | TASK-003 | Re-audit fixes, FEATURES.md removal, checklist compression | completed | medium | medium |
+| TASK-004 | Auto-sync downstream projects on framework commit | completed | high | small |

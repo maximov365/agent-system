@@ -13,6 +13,9 @@ __pycache__/
 .vscode/
 .idea/
 
+# Downstream registry (machine-specific paths)
+downstream.projects
+
 # OS
 .DS_Store
 Thumbs.db

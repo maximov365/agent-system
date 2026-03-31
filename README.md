@@ -95,7 +95,10 @@ docs/
 
 hooks/
   pre-commit                 # Auto-bump VERSION on framework changes
+  post-commit                # Auto-sync downstream projects on framework changes
   install.py                 # Install hooks into .git/hooks/
+
+downstream.projects            # Local registry of downstream projects (gitignored)
 
 examples/
   unfolda/                   # Reference project configuration
@@ -158,41 +161,54 @@ python setup.py            # render templates with your config
 7. Create empty organizational memory files: `docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`
 8. Commit and start working
 
-## Upgrading a downstream project
+## Upgrading downstream projects
 
-When `agent-system` improves, use `sync.py` to safely update any downstream project:
+### Automatic (recommended)
+
+Register downstream projects and let the post-commit hook handle sync + render automatically:
 
 ```bash
-# 1. Preview changes
+# 1. Register your projects (one path per line)
+echo "/Users/you/projects/my-app" >> downstream.projects
+
+# 2. Install hooks (once after cloning)
+python3 hooks/install.py
+
+# 3. Commit framework changes — downstream projects update automatically
+git add -A && git commit -m "feat: improve architect agent"
+# post-commit hook detects framework file changes → runs sync.py --all --render
+```
+
+### Manual
+
+```bash
+# Sync + render a single project
+python sync.py --target /path/to/project --render
+
+# Sync all registered projects
+python sync.py --all --render
+
+# Preview without writing
+python sync.py --all --dry-run
 python sync.py --target /path/to/project --diff
-
-# 2. Apply framework files (project-specific files are never touched)
-python sync.py --target /path/to/project
-
-# 3. In the target project: re-render templates with local config
-cd /path/to/project
-python setup.py --check    # verify rendering
-python setup.py            # render with local config
-
-# 4. Review and commit
-git diff
-git add -A && git commit -m "chore: upgrade agent framework to vX.Y.Z"
 ```
 
 **Safety guarantees:**
 - `sync.py` only overwrites framework files (agent definitions, workflow rules, tooling)
 - Project-specific files (`docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, etc.) are never touched
 - `project.config.yaml` is never overwritten — your project identity is preserved
-- Use `--diff` to preview every change before applying
-- Every step is explicit and reversible (`git checkout` to undo)
+- Framework files are automatically added to downstream `.gitignore` (managed block)
+- Framework files are removed from downstream git tracking on first sync (`git rm --cached`)
+- `find_python` auto-discovers project venvs for template rendering
+- `downstream.projects` is gitignored (machine-specific paths)
 
-The framework version is tracked in `.agent-system-version` in each downstream project.
+After cloning a downstream project, run `sync.py --target <project> --render` to restore framework files.
 
 ## Versioning
 
-`VERSION` is auto-bumped (patch increment) on every commit that changes framework files. A pre-commit hook detects staged framework file changes and increments `VERSION` automatically.
+`VERSION` is auto-bumped (patch increment) on every commit that changes framework files. A pre-commit hook detects staged framework file changes and increments `VERSION` automatically. A post-commit hook then syncs all registered downstream projects.
 
-To install the hook after cloning:
+To install hooks after cloning:
 
 ```bash
 python3 hooks/install.py

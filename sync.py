@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-Sync agent-system framework files to a downstream project.
+Sync agent-system framework files to downstream projects.
 
 Usage:
-    python sync.py --target /path/to/project              # copy framework files
+    python sync.py --target /path/to/project              # sync one project
+    python sync.py --target /path/to/project --render      # sync + render templates
     python sync.py --target /path/to/project --dry-run     # preview without writing
     python sync.py --target /path/to/project --diff        # show unified diff
+    python sync.py --all                                   # sync all registered projects
+    python sync.py --all --render                          # sync + render all projects
 
-The target project must have a project.config.yaml file.
+Downstream projects are registered in downstream.projects (one path per line).
 Framework files are overwritten; project-specific files are never touched.
-After syncing, run `python setup.py` in the target to render templates.
 """
 
 import argparse
@@ -21,6 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 VERSION_FILE = ROOT / "VERSION"
+DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 
 FRAMEWORK_GLOBS = [
     "agents/*.md",
@@ -36,6 +39,27 @@ FRAMEWORK_GLOBS = [
     "docs/ONBOARDING.md",
     "setup.py",
     "requirements-framework.txt",
+]
+
+GITIGNORE_MARKER_START = "# >>> agent-system framework (managed by sync.py) >>>"
+GITIGNORE_MARKER_END = "# <<< agent-system framework <<<"
+
+GITIGNORE_ENTRIES = [
+    "/agents/",
+    "/AGENTS.md",
+    "/CLAUDE.md",
+    "/.cursor/rules.md",
+    "/docs/AGENT_HANDOFF_CONTRACT.md",
+    "/docs/AGENT_EXECUTION_MODEL.md",
+    "/docs/TASK_BACKLOG_AUTOMATION.md",
+    "/docs/ARCHITECTURE_GUARDRAILS.md",
+    "/docs/ARCHITECTURE_CHECKLIST.md",
+    "/docs/TASK_TEMPLATE.md",
+    "/docs/ONBOARDING.md",
+    "/setup.py",
+    "/requirements-framework.txt",
+    "/.agent-system-version",
+    "/.templates/",
 ]
 
 
@@ -97,14 +121,27 @@ def write_version(target_root: Path, version: str) -> None:
     version_file.write_text(version + "\n")
 
 
+def find_python(project_root: Path) -> str:
+    """Find a python with jinja2/pyyaml: project venv → agent-system venv → sys.executable."""
+    candidates = [
+        project_root / ".venv" / "bin" / "python3",
+        ROOT / ".venv" / "bin" / "python3",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return sys.executable
+
+
 def run_check(target_root: Path) -> bool:
     setup_py = target_root / "setup.py"
     if not setup_py.exists():
         print("  Warning: setup.py not found in target; skipping render check.")
         return True
 
+    python = find_python(target_root)
     result = subprocess.run(
-        [sys.executable, str(setup_py), "--check"],
+        [python, str(setup_py), "--check"],
         capture_output=True, text=True, cwd=str(target_root),
     )
     if result.returncode == 0:
@@ -113,6 +150,106 @@ def run_check(target_root: Path) -> bool:
 
     print(f"\n  Render check FAILED:\n{result.stderr}", file=sys.stderr)
     return False
+
+
+def load_downstream_projects() -> list[Path]:
+    if not DOWNSTREAM_REGISTRY.exists():
+        return []
+    projects = []
+    for line in DOWNSTREAM_REGISTRY.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        path = Path(stripped).expanduser().resolve()
+        projects.append(path)
+    return projects
+
+
+def run_setup(target: Path) -> bool:
+    setup_py = target / "setup.py"
+    if not setup_py.exists():
+        print(f"  Warning: setup.py not found in {target}; skipping render.")
+        return True
+
+    python = find_python(target)
+    print(f"\n  Rendering templates...")
+    result = subprocess.run(
+        [python, str(setup_py)],
+        capture_output=True, text=True, cwd=str(target),
+    )
+    if result.returncode == 0:
+        print(result.stdout.rstrip())
+        return True
+
+    print(f"  Render FAILED:", file=sys.stderr)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+    return False
+
+
+def build_gitignore_block() -> str:
+    lines = [GITIGNORE_MARKER_START]
+    for entry in GITIGNORE_ENTRIES:
+        lines.append(entry)
+    lines.append(GITIGNORE_MARKER_END)
+    return "\n".join(lines)
+
+
+def update_gitignore(target: Path, dry_run: bool = False) -> bool:
+    """Add or update the managed framework block in downstream .gitignore."""
+    gitignore = target / ".gitignore"
+    block = build_gitignore_block()
+
+    if gitignore.exists():
+        content = gitignore.read_text()
+        if GITIGNORE_MARKER_START in content and GITIGNORE_MARKER_END in content:
+            start = content.index(GITIGNORE_MARKER_START)
+            end = content.index(GITIGNORE_MARKER_END) + len(GITIGNORE_MARKER_END)
+            old_block = content[start:end]
+            if old_block == block:
+                return False
+            if not dry_run:
+                new_content = content[:start] + block + content[end:]
+                gitignore.write_text(new_content)
+            return True
+        else:
+            if not dry_run:
+                separator = "\n" if content.endswith("\n") else "\n\n"
+                gitignore.write_text(content + separator + "\n" + block + "\n")
+            return True
+    else:
+        if not dry_run:
+            gitignore.write_text(block + "\n")
+        return True
+
+
+def untrack_framework_files(target: Path) -> list[str]:
+    """Remove framework files from git index (keep on disk). Returns list of untracked files."""
+    git_dir = target / ".git"
+    if not git_dir.exists():
+        return []
+
+    result = subprocess.run(
+        ["git", "ls-files", "--cached"] + [f":{e.lstrip('/')}" for e in GITIGNORE_ENTRIES if not e.endswith("/")],
+        capture_output=True, text=True, cwd=str(target),
+    )
+    tracked_files = [f for f in result.stdout.strip().splitlines() if f]
+
+    result_dirs = subprocess.run(
+        ["git", "ls-files", "--cached", "agents/"],
+        capture_output=True, text=True, cwd=str(target),
+    )
+    tracked_files += [f for f in result_dirs.stdout.strip().splitlines() if f]
+
+    if not tracked_files:
+        return []
+
+    tracked_files = sorted(set(tracked_files))
+    subprocess.run(
+        ["git", "rm", "--cached", "-q"] + tracked_files,
+        capture_output=True, text=True, cwd=str(target),
+    )
+    return tracked_files
 
 
 def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> bool:
@@ -158,6 +295,11 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
                 print(f"\n{'=' * 60}")
                 print(diff_text, end="")
 
+    gitignore_updated = update_gitignore(target, dry_run=(dry_run or show_diffs))
+    if gitignore_updated:
+        action = "would update" if (dry_run or show_diffs) else "updated"
+        print(f"\n  .gitignore: framework block {action}")
+
     if dry_run or show_diffs:
         print(f"\n  Dry run — no files written.")
         return True
@@ -170,37 +312,74 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
     print(f"\n  Copied {len(new) + len(updated)} file(s).")
     print(f"  Version file: .agent-system-version -> {version}")
 
+    untracked = untrack_framework_files(target)
+    if untracked:
+        print(f"  Removed {len(untracked)} file(s) from git tracking (kept on disk)")
+
     print(f"\n  Running render check...")
     ok = run_check(target)
-
-    if ok:
-        print(f"\n  Done. Next steps:")
-        print(f"    cd {target}")
-        print(f"    python setup.py          # render templates")
-        print(f"    git diff                  # review changes")
-        print(f"    git add -A && git commit  # commit")
-
     return ok
+
+
+def cmd_sync_all(render: bool = False, dry_run: bool = False) -> bool:
+    projects = load_downstream_projects()
+    if not projects:
+        print("No downstream projects registered.")
+        print(f"Add project paths to {DOWNSTREAM_REGISTRY} (one per line).")
+        return True
+
+    all_ok = True
+    for target in projects:
+        print(f"\n{'=' * 60}")
+        if not target.is_dir():
+            print(f"  SKIP: {target} (directory not found)")
+            continue
+        if not (target / "project.config.yaml").exists():
+            print(f"  SKIP: {target} (no project.config.yaml)")
+            continue
+
+        ok = cmd_sync(target, dry_run=dry_run)
+        if ok and render and not dry_run:
+            ok = run_setup(target)
+        all_ok = all_ok and ok
+
+    print(f"\n{'=' * 60}")
+    status = "All projects synced." if all_ok else "Some projects had errors."
+    print(f"\n{status}")
+    return all_ok
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Sync agent-system framework files to a downstream project.",
+        description="Sync agent-system framework files to downstream projects.",
+    )
+    target_group = parser.add_mutually_exclusive_group(required=True)
+    target_group.add_argument(
+        "--target", type=Path,
+        help="Path to a single downstream project root",
+    )
+    target_group.add_argument(
+        "--all", action="store_true", dest="sync_all",
+        help="Sync all projects listed in downstream.projects",
     )
     parser.add_argument(
-        "--target", type=Path, required=True,
-        help="Path to the downstream project root",
+        "--render", action="store_true",
+        help="Run setup.py in each project after syncing to render templates",
     )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="Preview without writing")
     mode.add_argument("--diff", action="store_true", help="Show unified diff of changes")
     args = parser.parse_args()
 
-    target = args.target.resolve()
-    if not target.is_dir():
-        sys.exit(f"Error: {target} is not a directory.")
-
-    ok = cmd_sync(target, dry_run=args.dry_run, show_diffs=args.diff)
+    if args.sync_all:
+        ok = cmd_sync_all(render=args.render, dry_run=args.dry_run)
+    else:
+        target = args.target.resolve()
+        if not target.is_dir():
+            sys.exit(f"Error: {target} is not a directory.")
+        ok = cmd_sync(target, dry_run=args.dry_run, show_diffs=args.diff)
+        if ok and args.render:
+            ok = run_setup(target)
     if not ok:
         sys.exit(1)
 
