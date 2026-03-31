@@ -10,6 +10,7 @@
 | DEC-003 | Remove FEATURES.md and FEATURE_TEMPLATE.md from framework | accepted | 2026-03-29 |
 | DEC-004 | Push-based auto-sync for downstream projects | accepted | 2026-03-29 |
 | DEC-005 | System Auditor agent for framework self-improvement | accepted | 2026-03-29 |
+| DEC-006 | Agent modes pattern for scalable Discovery roles | accepted | 2026-03-29 |
 
 ---
 
@@ -191,3 +192,40 @@ Option 3 — System Auditor agent backed by `audit.py` automated checks.
 - Iteration Manager routes `system_audit` requests to System Auditor
 - System Auditor output goes to user for approval; approved proposals routed to appropriate agents
 - Agent produces `design_note` artifact type with structured findings JSON
+
+---
+
+## DEC-006 — Agent modes pattern for scalable Discovery roles
+
+**Status:** accepted
+**Date:** 2026-03-29
+
+### Context
+
+The user wanted to add more specialized Discovery roles (visual references, branding, marketing) but `AGENTS.md` and `agents/iteration-manager.md` were already near token limits (~3800 and ~5600 tokens respectively). Embedding full instructions for each new Discovery sub-role in `discovery.md` would have inflated the file and every request would load all sub-role context even when only one was needed.
+
+### Options Considered
+
+1. **Separate top-level agents** — create `agents/brand-discovery.md`, `agents/marketing-discovery.md`, etc. as independent agents with full IM routing
+2. **Embed in discovery.md** — add all sub-role instructions to the existing monolithic file
+3. **Agent modes pattern** — Discovery becomes a lightweight dispatcher; each mode is a separate file in `agents/discovery-modes/`; only the relevant mode file is loaded per request
+
+### Decision
+
+Option 3 — Agent modes pattern.
+
+### Rationale
+
+- Keeps `AGENTS.md` routing table unchanged (one entry for Discovery)
+- Keeps `iteration-manager.md` routing unchanged (Discovery remains a single target)
+- Each mode file is only loaded when needed, reducing context window pressure
+- Adding a new mode requires only: (1) create a file in `agents/discovery-modes/`, (2) add a row to the dispatcher table in `discovery.md`
+- Pattern is reusable for other agents if they need sub-specializations in the future
+
+### Implications
+
+- `agents/discovery.md` refactored from 316 lines (all-in-one) to ~130 lines (dispatcher)
+- New directory `agents/discovery-modes/` with 5 mode files: `technical.md`, `market.md`, `references.md`, `brand.md`, `marketing.md`
+- `FRAMEWORK_GLOBS` in `sync.py`, `hooks/pre-commit`, `hooks/post-commit`, and `audit.py` updated to include `agents/discovery-modes/*.md`
+- GITIGNORE_ENTRIES unchanged — `/agents/` already covers the subdirectory
+- Pattern can be applied to other large agents (e.g., Iteration Manager) if compression is needed

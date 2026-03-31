@@ -133,3 +133,23 @@ Use one block per closed workflow. Keep it factual and short.
 
 ### Follow-ups
 - none
+
+## 2026-03-29 — TASK-006 Discovery agent modes pattern
+
+**Workflow outcome:** completed
+
+### What went wrong
+- none — clean implementation
+
+### Repeated must_fix / review / security themes
+- Central routing files (`AGENTS.md`, `iteration-manager.md`) are near token limits; any pattern that adds to them should be scrutinized
+- FRAMEWORK_GLOBS is duplicated across 4 files (sync.py, pre-commit, post-commit, audit.py) — must update all when adding new patterns
+
+### What worked well
+- Dispatcher + mode files pattern: `discovery.md` went from 316 lines (all-in-one) to ~130 lines (dispatcher); each mode is self-contained
+- `AGENTS.md` and `iteration-manager.md` unchanged — the pattern scales without touching routing infrastructure
+- GITIGNORE_ENTRIES `/agents/` naturally covers the subdirectory — no gitignore changes needed
+- Pattern is reusable for other agents that may need sub-specializations
+
+### Follow-ups
+- Consider applying the same pattern to `iteration-manager.md` if further compression is needed (DEC-006 implications)

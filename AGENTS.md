@@ -42,7 +42,7 @@ The project prioritizes:
 
 | Agent | Role file | Core responsibility | Does NOT |
 |---|---|---|---|
-| **Discovery** | `agents/discovery.md` | Explore technical options and market references; recommend the simplest viable direction | Write production code |
+| **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing | Write production code |
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
@@ -52,7 +52,7 @@ The project prioritizes:
 | **Security Reviewer** | `agents/security-reviewer.md` | Check for vulnerabilities, input validation, secrets handling, data exposure | Implement fixes; review architecture or scope |
 | **Analytics Validator** | `agents/analytics-validator.md` | Verify analytics instrumentation matches the Analytics Specification | Modify implementation logic |
 | **Reviewer** | `agents/reviewer.md` | Verify implementation follows the plan; approve or request changes | Implement new features |
-| **Iteration Manager** | `agents/iteration-manager.md` | Route requests, manage transitions, control quality loops, enforce limits | Produce workflow artifacts (except append-only org memory) |
+| **Iteration Manager** | `agents/iteration-manager.md` | Route requests, manage transitions via modes (`agents/im-modes/`): onboarding, standard-workflow, quality-loop | Produce workflow artifacts (except append-only org memory) |
 | **Spec Reviewer** | `agents/spec-reviewer.md` | Evaluate non-code artifact quality using a scoring rubric | Write code; rewrite artifacts |
 | **Reviser** | `agents/reviser.md` | Apply `must_fix` changes from Spec Reviewer; preserve scope and intent | Produce original artifacts; change scope |
 | **Gatekeeper** | `agents/gatekeeper.md` | Decide accept / iterate / escalate for quality loops | Rewrite artifacts; make architectural decisions |
@@ -72,7 +72,7 @@ The project prioritizes:
 
 # Agent Routing Rules
 
-All requests are first interpreted by Iteration Manager, which determines the appropriate starting agent. Full routing logic and transition tables are in `agents/iteration-manager.md`.
+All requests are first interpreted by Iteration Manager, which determines the appropriate starting agent. Routing logic is in `agents/iteration-manager.md`; transition tables are in `agents/im-modes/`.
 
 | Request type | Start with | Skip when |
 |---|---|---|
@@ -116,7 +116,7 @@ All code changes must go through **Security Reviewer** and **Reviewer**. Iterati
 
 # Onboarding Workflow
 
-Guided conversational onboarding creates a new project. Agents ask structured questions and produce project documents iteratively. Detailed transitions are in `agents/iteration-manager.md` — Onboarding workflow transitions.
+Guided conversational onboarding creates a new project. Agents ask structured questions and produce project documents iteratively. Detailed transitions are in `agents/im-modes/onboarding.md`.
 
 **Phases:**
 
@@ -136,7 +136,7 @@ Guided conversational onboarding creates a new project. Agents ask structured qu
 
 **Assembly (Phase 5):** Iteration Manager generates `project.config.yaml`, runs `python setup.py`, creates stub docs, commits, and presents the closing summary.
 
-**Workflow state:** `onboarding_phase` field in `workflow_state` tracks progress (1–5). See `agents/iteration-manager.md` for state initialisation and transition details.
+**Workflow state:** `onboarding_phase` field in `workflow_state` tracks progress (1–5). State fields and lifecycle rules are in `agents/iteration-manager.md`; initialisations are in `agents/im-modes/onboarding.md`.
 
 ---
 
@@ -283,6 +283,8 @@ These rules apply to every agent, including Iteration Manager:
 See `README.md` for the full project structure. Key locations:
 
 - `agents/*.md` — agent role definitions
+- `agents/discovery-modes/*.md` — Discovery agent mode definitions (technical, market, references, brand, marketing, legal)
+- `agents/im-modes/*.md` — Iteration Manager workflow modes (onboarding, standard-workflow, quality-loop)
 - `docs/` — project documentation, templates, and workflow contracts
 - `.cursor/rules.md` — coding rules
 - `project.config.yaml` — project configuration for template rendering

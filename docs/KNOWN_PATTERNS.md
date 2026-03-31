@@ -44,7 +44,7 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 ## Pattern: Single-source with cross-references for workflow rules
 
 - **Context:** When the same rule (agent roles, routing logic, coding policy, quality loop details) appears in multiple framework files.
-- **Approach:** Keep the normative definition in one authoritative file. Other files use a compact summary (table or one-liner) with an explicit cross-reference. Authoritative sources: `AGENTS.md` for workflow rules, `.cursor/rules.md` for coding rules, `agents/iteration-manager.md` for detailed routing and transition tables, `docs/AGENT_HANDOFF_CONTRACT.md` for handoff format.
+- **Approach:** Keep the normative definition in one authoritative file. Other files use a compact summary (table or one-liner) with an explicit cross-reference. Authoritative sources: `AGENTS.md` for workflow rules, `.cursor/rules.md` for coding rules, `agents/iteration-manager.md` for routing logic and state tracking, `agents/im-modes/` for transition tables, `docs/AGENT_HANDOFF_CONTRACT.md` for handoff format.
 - **Why it worked:** Reduced token count by ~45% in the four heaviest files. Eliminated the class of bugs where a rule is updated in one file but not propagated to others (five such bugs found in the first audit).
 - **Related:** `docs/DECISIONS.md` DEC-002.
 
@@ -61,3 +61,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Use a post-commit hook that detects framework file changes in the commit, reads a local registry of downstream projects, and runs sync + template render automatically. The registry is gitignored (machine-specific paths). A `find_python` fallback chain resolves venv differences.
 - **Why it worked:** Eliminated the manual sync step that was repeatedly forgotten (flagged as a follow-up in TASK-003). Zero additional infrastructure — just a git hook and a text file.
 - **Related:** `docs/DECISIONS.md` DEC-004.
+
+## Pattern: Agent modes for scalable sub-specializations
+
+- **Context:** When an agent needs multiple specialized behaviors (e.g., Discovery: technical, market, branding, marketing) but embedding all in one file inflates tokens and loads unnecessary context.
+- **Approach:** Refactor the agent into a lightweight dispatcher that selects a mode from a table, then loads only the relevant mode file from a subdirectory (`agents/<agent>-modes/*.md`). Each mode file is self-contained with its own responsibilities and output format. The dispatcher retains shared responsibilities, principles, and special modes (e.g., onboarding intake).
+- **Why it worked:** `discovery.md` went from 316 → ~130 lines. No changes to `AGENTS.md` routing, `iteration-manager.md`, or the handoff contract. Adding a new mode requires only: (1) create a file, (2) add a row to the dispatcher table. The subdirectory is automatically covered by existing GITIGNORE_ENTRIES (`/agents/`).
+- **Related:** `docs/DECISIONS.md` DEC-006.

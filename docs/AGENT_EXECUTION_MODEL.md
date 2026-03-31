@@ -67,7 +67,7 @@ Iteration Manager reads three fields from the handoff block to make its routing 
 
 | Field | Used for |
 |---|---|
-| `handoff.status` | Maps to transition table in `agents/iteration-manager.md` |
+| `handoff.status` | Maps to transition tables in `agents/im-modes/` |
 | `handoff.next_recommended_agent` | Default routing suggestion (may be overridden) |
 | `handoff.workflow_state` | Current state; used to enforce sequencing rules and limits |
 
@@ -180,7 +180,7 @@ The quality loop is controlled exclusively by Iteration Manager. No quality loop
 
 Trigger conditions, loop sequence, and termination rules are defined in:
 - `AGENTS.md` — Quality Loop and Iteration Rules sections
-- `agents/iteration-manager.md` — Quality loop control section
+- `agents/im-modes/quality-loop.md` — Quality loop control
 
 **Execution-specific rule:** Each loop cycle is a separate Iteration Manager → Agent → Handoff cycle. `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff.
 
@@ -192,7 +192,7 @@ The analytics instrumentation flow is controlled by Iteration Manager. Analytics
 
 Trigger conditions, flow sequence, and validation logic are defined in:
 - `AGENTS.md` — Development Workflow section
-- `agents/iteration-manager.md` — Implementation workflow transitions
+- `agents/im-modes/standard-workflow.md` — Implementation workflow transitions
 
 **Execution-specific rules:**
 - Builder indicates instrumentation changes via `next_recommended_agent` (`Analytics Validator` if changed, `Security Reviewer` if not)
@@ -267,7 +267,7 @@ If an agent output does not contain a valid handoff block, Iteration Manager mus
 
 | Document | Purpose |
 |---|---|
-| `agents/iteration-manager.md` | Full routing logic, state tracking, transition tables |
+| `agents/iteration-manager.md` | Routing logic, state tracking; transition tables in `agents/im-modes/` |
 | `docs/AGENT_HANDOFF_CONTRACT.md` | Handoff block format, allowed statuses, validation rules |
 | `AGENTS.md` | Agent roles, workflow definitions, routing rules |
 | `CLAUDE.md` | Entry contract for Claude Code |

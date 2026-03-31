@@ -11,3 +11,4 @@
 | TASK-003 | Re-audit fixes, FEATURES.md removal, checklist compression | completed | medium | medium |
 | TASK-004 | Auto-sync downstream projects on framework commit | completed | high | small |
 | TASK-005 | System Auditor agent + audit.py automated checks | completed | medium | medium |
+| TASK-006 | Discovery agent modes pattern — dispatcher + specialized modes | completed | medium | small |

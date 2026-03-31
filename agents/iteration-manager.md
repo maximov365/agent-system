@@ -14,6 +14,24 @@ You route, sequence, and control. Every other agent produces; you decide who act
 
 ---
 
+## Mode selection
+
+After classifying the request, load the relevant workflow mode file alongside this dispatcher.
+
+| Workflow context | Mode file | Load when |
+|---|---|---|
+| Onboarding | `agents/im-modes/onboarding.md` | `task_id` is `"onboarding"` or request is `project_onboarding` |
+| Standard workflow | `agents/im-modes/standard-workflow.md` | Any non-onboarding implementation workflow |
+| Quality loop | `agents/im-modes/quality-loop.md` | Quality loop is active or about to start |
+
+**Rules:**
+
+- Always load exactly one workflow mode (onboarding OR standard-workflow).
+- Load quality-loop.md **additionally** when a quality loop is active (`quality_loop_iteration > 0`) or when the current transition requires starting one.
+- This dispatcher contains everything needed for initial routing. Mode files are needed for stage transitions.
+
+---
+
 ## Inputs
 
 Before routing, read:
@@ -59,30 +77,19 @@ Do not mark workflow complete if any of these conditions are unmet, even if Revi
 
 ## Organizational memory
 
-After **every** workflow that reaches completion (`next_action: complete_workflow` — Reviewer approved and closure conditions met), append to `docs/LESSONS_LEARNED.md` using the template in that file. Base the entry on the **user-facing summary** in `CLAUDE.md`, recent agent handoffs, Spec Reviewer `must_fix` history (if any), Reviewer and Security Reviewer findings, and `workflow_state.builder_cycle_count`.
+After **every** completed workflow (`next_action: complete_workflow`), append to `docs/LESSONS_LEARNED.md` using the template in that file. Sources: user-facing summary, agent handoffs, Spec Reviewer `must_fix` history, Reviewer/Security Reviewer findings, `builder_cycle_count`.
 
-**LESSONS_LEARNED.md** must capture:
+**LESSONS_LEARNED.md** — capture: what went wrong (use `none` if clean), repeated must_fix / review themes (use `none` if nothing repeated), what worked well (optional).
 
-- **What went wrong** — incidents, wrong assumptions, rework, escalations, failed paths (use `none` or `n/a` if the run was clean).
-- **Repeated must_fix / review themes** — same or similar feedback across Spec Reviewer, Reviewer, Security Reviewer, or Reviser cycles (use `none` if nothing repeated).
-- **What worked well** — optional short bullets for the same workflow.
+**KNOWN_PATTERNS.md** — append only when the workflow **validated** a reusable architectural or process choice. Skip for trivial changes. Link to `docs/DECISIONS.md` instead of duplicating text.
 
-**KNOWN_PATTERNS.md** — append a new pattern **only** when this workflow **validated** an architectural or process choice worth reusing (e.g. matches `docs/DECISIONS.md` and succeeded in review). Skip for trivial or purely cosmetic changes. Do not duplicate long text; link to decisions or architecture sections.
-
-**When to skip or minimize:**
-
-- Documentation-only or config-only changes with no review iterations and no notable friction — append a one-line LESSONS entry or state in the closing summary that memory was skipped and why.
-- Do not append sensitive data (secrets, personal data, customer identifiers).
-
-**Ordering:** New entries go **below** the `## Entries` / `## Patterns` section, newest last (bottom of file), unless the project adopts reverse-chronological order consistently — then follow the existing file convention.
+**Skip/minimize:** For doc-only or config-only changes with no friction — one-line LESSONS entry or state skip reason in the closing summary. Never append sensitive data. New entries go at bottom of file.
 
 ---
 
 ## Workflow state tracking
 
 Iteration Manager must track workflow state across agent transitions. State must persist across stage transitions and be updated after each agent output. All routing decisions must consider current state.
-
-State fields:
 
 | Field | Type | Description |
 |---|---|---|
@@ -105,44 +112,7 @@ State fields:
 
 `analytics_used` is set to `true` when Analytics Architect is invoked and must not revert to `false` for the same task.
 
-**State initialisation for onboarding:**
-
-When a `project_onboarding` request is detected, initialise `workflow_state` as:
-
-```json
-{
-  "task_id": "onboarding",
-  "artifact_id": null,
-  "current_stage": "discovery",
-  "quality_loop_iteration": 0,
-  "builder_cycle_count": 0,
-  "analytics_used": false,
-  "product_spec_accepted": false,
-  "onboarding_phase": 1
-}
-```
-
-`onboarding_phase` tracks progress: 1 (Discovery intake), 2 (Product intake), 3 (Designer intake), 4 (Architect intake), 5 (Assembly). Iteration Manager advances this value after each phase completes successfully.
-
-**State initialisation for new features:**
-
-When a new feature request is detected (no existing `task_id` in `docs/TASKS.md`), initialise `workflow_state` as:
-
-```json
-{
-  "task_id": "new",
-  "artifact_id": null,
-  "current_stage": "discovery",
-  "quality_loop_iteration": 0,
-  "builder_cycle_count": 0,
-  "analytics_used": false,
-  "product_spec_accepted": false
-}
-```
-
-Use `"current_stage": "product"` instead if the request skips Discovery and goes directly to Product.
-
-State must never carry over from a previous task. Each new `task_id` starts with a fresh initialised state.
+State must never carry over from a previous task. Each new `task_id` starts with a fresh initialised state. State initialisations are defined in the relevant mode files.
 
 ---
 
@@ -202,117 +172,6 @@ Never skip `Analytics Architect` when the feature introduces measurable outcomes
 `Analytics Architect` must run only after `Product` has produced a feature specification and that specification has passed the quality loop (`product_spec_accepted: true`) — never before.
 `Analytics Architect` must run at most once per feature specification unless the feature specification changes substantially. Do not re-invoke Analytics Architect for minor spec updates.
 Maximum Builder review cycles per task before escalation: **3**. If `builder_cycle_count` reaches `3` (counting both Reviewer `CHANGES REQUIRED` and Security Reviewer `security_failed` on the same task), escalate to the user.
-
----
-
-## Stage transition logic
-
-After each agent completes, determine the next step based on the agent's output and current workflow state.
-
-### Onboarding workflow transitions
-
-When `workflow_state.task_id` is `"onboarding"`, use these transitions:
-
-| Previous agent | Phase | Result | Next action |
-|---|---|---|---|
-| `Discovery` (intake) | 1 | Discovery brief produced | → `Product` (onboarding intake mode); set `onboarding_phase: 2` |
-| `Product` (intake) | 2 | PRD.md draft produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Product` → Quality loop | 2 | Gatekeeper `accept` | → `Designer` (onboarding intake mode) if UI product, set `onboarding_phase: 3`; else → `Architect` (onboarding intake mode), set `onboarding_phase: 4` |
-| `Designer` (intake) | 3 | BRAND.md draft produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Designer` → Quality loop | 3 | Gatekeeper `accept` | → `Architect` (onboarding intake mode); set `onboarding_phase: 4` |
-| `Architect` (intake) | 4 | Architecture docs drafts produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Architect` → Quality loop | 4 | Gatekeeper `accept` | → Assembly phase; set `onboarding_phase: 5` |
-
-During assembly (phase 5), Iteration Manager:
-1. Generates `project.config.yaml` from approved documents
-2. Runs `python setup.py` to re-render templates
-3. Creates any missing stub docs
-4. Commits the initial project
-5. Produces the closing summary defined in `CLAUDE.md`
-
-### Implementation workflow transitions
-
-| Previous agent | Result | Next action |
-|---|---|---|
-| `Discovery` | Recommendation produced | → `Product` (if feature scope needed) or → `Architect` (if task already exists) |
-| `Product` | Feature spec produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Product` → Quality loop | Gatekeeper `accept`; feature has user-facing UI | → `Designer` |
-| `Product` → Quality loop | Gatekeeper `accept`; no UI; feature has measurable outcomes | → `Analytics Architect` |
-| `Product` → Quality loop | Gatekeeper `accept`; no UI; no analytics needed | → `Architect` |
-| `Designer` | Design approved by user | → `Analytics Architect` (if feature has measurable outcomes) or → `Architect` |
-| `Analytics Architect` | Analytics spec produced; complex (multiple events or high risk) | → Quality loop (invoke `Spec Reviewer`) |
-| `Analytics Architect` | Analytics spec produced; simple | → `Architect` |
-| `Analytics Architect` → Quality loop | Gatekeeper `accept` | → `Architect` |
-| `Architect` | Implementation plan produced | → Quality loop (invoke `Spec Reviewer`) |
-| `Architect` → Quality loop | Gatekeeper `accept`; task has non-trivial testable logic | → `Test Strategist` |
-| `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic | → `Builder` |
-| `Test Strategist` | Test plan produced | → `Builder` |
-| `Builder` | Implementation complete; instrumentation changed | → `Analytics Validator` |
-| `Builder` | Implementation complete; no instrumentation changes | → `Security Reviewer` |
-| `Analytics Validator` | `accept` | → `Security Reviewer` |
-| `Analytics Validator` | `revise` | → `Builder` (instrumentation fixes required) |
-| `Analytics Validator` | `escalate` | → Escalate to user |
-| `Security Reviewer` | `security_passed` | → `Reviewer` |
-| `Security Reviewer` | `security_failed` | → `Builder` (security fixes required) |
-| `Security Reviewer` | `escalate` | → Escalate to user |
-| `Reviewer` | `APPROVED` or `APPROVED WITH MINOR CHANGES` | → Confirm workflow completion |
-| `Reviewer` | `CHANGES REQUIRED` | → `Builder` (corrections required) |
-| `System Auditor` | Audit report produced | → Present to user; user approves proposals → route to appropriate agents |
-
-### Quality loop transitions
-
-| Previous agent | Result | Next action |
-|---|---|---|
-| `Spec Reviewer` | Review complete | → `Gatekeeper` |
-| `Gatekeeper` | `iterate` | → `Reviser` |
-| `Gatekeeper` | `accept` | → Resume implementation workflow (see above) |
-| `Gatekeeper` | `escalate` | → Escalate to user |
-| `Reviser` | Revision complete | → `Spec Reviewer` (next iteration) |
-
----
-
-## Quality loop control
-
-### When to start the quality loop
-
-Start the quality loop (invoke `Spec Reviewer`) when:
-
-- A new feature specification was produced by `Product`
-- An implementation plan was produced by `Architect` and affects multiple modules
-- Architectural risk is detected in an artifact
-- Artifact clarity is insufficient for Builder to proceed without clarification
-
-Do not start the quality loop for:
-- Code, tests, or configuration
-- Trivial non-product changes (dependency upgrades, single-line fixes)
-- Artifacts that have already been accepted by Gatekeeper in this workflow cycle
-
-### Loop lifecycle
-
-```
-Spec Reviewer
-      ↓
-  Gatekeeper
-      ↓ iterate
-   Reviser
-      ↓
-Spec Reviewer (next iteration)
-```
-
-1. Invoke `Spec Reviewer` with the artifact and current iteration number (start at 1)
-2. Pass `Spec Reviewer` JSON output to `Gatekeeper`
-3. If Gatekeeper returns `iterate`: invoke `Reviser` with the artifact and Gatekeeper `notes_for_reviser`, then return to step 1 with incremented iteration
-4. If Gatekeeper returns `accept`: exit loop and resume implementation workflow
-5. If Gatekeeper returns `escalate`: stop loop and escalate to user
-
-### Loop termination conditions
-
-- Maximum iterations: **3**
-- Stop immediately if Gatekeeper returns `accept`
-- Stop immediately if Gatekeeper returns `escalate`
-- Do not restart the loop after Gatekeeper `accept`
-- Do not trigger a new loop for the same artifact unless the artifact meaningfully changes. Meaningful change means structural modification of the artifact — new sections, major scope change, or significant updates to acceptance criteria. Wording improvements or minor clarifications do not qualify.
-- If the artifact changes substantially (e.g. Product rewrote the spec), reset iteration counter to 1
 
 ---
 
@@ -390,15 +249,7 @@ Iteration Manager always responds with a single JSON block.
 }
 ```
 
-Rules for specific fields:
-
-- `quality_loop_required` / `quality_loop_active` — set to `true` only when the loop applies to the current artifact
-- `quality_loop_iteration` — current iteration number (1–3) when loop is active; `null` in initial_routing, `0` in stage_transition when inactive
-- `next_action` — use `complete_workflow` when Reviewer approved and all completion conditions are met; use `escalate_to_user` when escalation is triggered
-- `escalation_reason` — populated only when `next_action: escalate_to_user`; null otherwise
-- `analytics_required` — set to `true` when Analytics Architect must run before Architect; `false` otherwise
-- `workflow_state.current_stage` — must be one of the enum values defined in Workflow state tracking; never free text
-- `workflow_state` — present in every stage_transition output; lifecycle rules for each field are defined in the State lifecycle rules section above
+Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when loop applies to current artifact. `quality_loop_iteration` = 1–3 when active, `null` in initial_routing, `0` when inactive. `next_action` = `complete_workflow` when all completion conditions met, `escalate_to_user` when escalation triggered. `escalation_reason` = populated only on escalation, `null` otherwise. `analytics_required` = `true` when Analytics Architect must run. `workflow_state.current_stage` = enum from Workflow state tracking, never free text. `workflow_state` = present in every output; lifecycle rules in State lifecycle rules above.
 
 ---
 

@@ -61,8 +61,8 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 
 | Agent | Role |
 |---|---|
-| Iteration Manager | Workflow orchestrator — routes requests, manages transitions, controls quality loops |
-| Discovery | Explores technical and market options before specification begins |
+| Iteration Manager | Workflow orchestrator — routes requests, manages transitions via modes (see `im-modes/`) |
+| Discovery | Explores options via specialized modes (see `discovery-modes/`): technical, market, references, brand, marketing |
 | Product | Turns ideas into feature specifications and task breakdowns |
 | Designer | Creates UI mockups and iterates with user feedback (optional) |
 | Analytics Architect | Defines analytics events, metrics, and instrumentation requirements |

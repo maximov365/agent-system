@@ -54,7 +54,13 @@ AGENTS.md                    # Workflow rules, agent roles, routing
 
 agents/
   README.md                  # Agent directory overview
-  discovery.md               # Explore technical options
+  discovery.md               # Discovery dispatcher (selects mode)
+  discovery-modes/           # Specialized Discovery modes
+    technical.md             #   Technical options, architecture, libraries
+    market.md                #   Competitors, market analysis, best practices
+    references.md            #   Visual/UX references, design inspiration
+    brand.md                 #   Brand positioning, naming, identity
+    marketing.md             #   Go-to-market, channels, messaging
   product.md                 # Define features and tasks
   designer.md                # UI mockups and visual prototypes
   analytics-architect.md     # Design observability
@@ -67,7 +73,11 @@ agents/
   spec-reviewer.md           # Evaluate non-code artifacts
   reviser.md                 # Fix non-code artifacts
   gatekeeper.md              # Accept/iterate/escalate decisions
-  iteration-manager.md       # Workflow orchestration
+  iteration-manager.md       # IM dispatcher (classifies, routes)
+  im-modes/                  # Iteration Manager workflow modes
+    onboarding.md            #   Onboarding transitions + assembly
+    standard-workflow.md     #   Implementation workflow transitions
+    quality-loop.md          #   Quality loop lifecycle + termination
 
 docs/
   PRD.md                     # Product requirements (you fill this)
@@ -109,8 +119,8 @@ examples/
 
 | Agent | Role |
 |---|---|
-| **Iteration Manager** | Routes requests, manages transitions, controls quality loops |
-| **Discovery** | Explores technical and market options before specification |
+| **Iteration Manager** | Routes requests, manages transitions via workflow modes (onboarding, standard, quality-loop) |
+| **Discovery** | Explores options via specialized modes: technical, market, references, brand, marketing |
 | **Product** | Turns ideas into feature specs and task breakdowns |
 | **Designer** | Creates UI mockups and iterates with user feedback (optional) |
 | **Analytics Architect** | Defines events, metrics, instrumentation |

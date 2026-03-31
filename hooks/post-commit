@@ -20,6 +20,8 @@ DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 
 FRAMEWORK_GLOBS = [
     "agents/*.md",
+    "agents/discovery-modes/*.md",
+    "agents/im-modes/*.md",
     "AGENTS.md",
     "CLAUDE.md",
     ".cursor/rules.md",

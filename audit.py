@@ -30,6 +30,8 @@ DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 
 FRAMEWORK_GLOBS = [
     "agents/*.md",
+    "agents/discovery-modes/*.md",
+    "agents/im-modes/*.md",
     "AGENTS.md",
     "CLAUDE.md",
     ".cursor/rules.md",
@@ -181,7 +183,7 @@ def check_prompts(projects: list[Path]) -> tuple[list[dict], dict]:
     scan_dirs = [ROOT] + projects
     for root_dir in scan_dirs:
         label = root_dir.name
-        for pattern in ["agents/*.md", "AGENTS.md", "CLAUDE.md", ".cursor/rules.md"]:
+        for pattern in ["agents/*.md", "agents/discovery-modes/*.md", "agents/im-modes/*.md", "AGENTS.md", "CLAUDE.md", ".cursor/rules.md"]:
             for f in root_dir.glob(pattern):
                 text = f.read_text()
                 tokens = estimate_tokens(text)
@@ -233,7 +235,7 @@ def check_refs(root_dir: Path) -> list[dict]:
     findings = []
     ref_pattern = re.compile(r"`((?:docs|agents|\.cursor)/[A-Za-z0-9_./\-]+\.(?:md|yaml|txt|py))`")
 
-    md_files = list(root_dir.glob("agents/*.md")) + list(root_dir.glob("docs/*.md"))
+    md_files = list(root_dir.glob("agents/*.md")) + list(root_dir.glob("agents/discovery-modes/*.md")) + list(root_dir.glob("agents/im-modes/*.md")) + list(root_dir.glob("docs/*.md"))
     md_files += [root_dir / "AGENTS.md", root_dir / "CLAUDE.md"]
     md_files = [f for f in md_files if f.exists()]
 

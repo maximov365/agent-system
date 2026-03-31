@@ -235,7 +235,7 @@ All agents use the same handoff block structure. The table below defines the age
 
 Iteration Manager reads the `handoff` block from the previous agent's output and uses it as follows:
 
-1. Read `status` — map to transition table in `agents/iteration-manager.md`
+1. Read `status` — map to transition table in `agents/im-modes/` (onboarding or standard-workflow)
 2. Read `blocking_issues` — if present and `status` is `escalate`, surface to user
 3. Read `workflow_state` — update internal state, check `builder_cycle_count` and `quality_loop_iteration` limits
 4. Read `next_recommended_agent` — use as default routing suggestion; override if workflow state requires it
