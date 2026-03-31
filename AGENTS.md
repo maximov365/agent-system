@@ -140,9 +140,9 @@ Guided conversational onboarding creates a new project. Agents ask structured qu
 
 ---
 
-# Quality Iteration Workflow
+# Quality Loop
 
-The Iteration Manager decides when the Quality Iteration Workflow should be used:
+The Iteration Manager decides when the Quality Loop should be used:
 
 - when a new feature spec is created
 - when an implementation plan affects multiple modules

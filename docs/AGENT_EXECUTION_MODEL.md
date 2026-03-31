@@ -179,7 +179,7 @@ Parallel workflows for different `task_id` values are allowed.
 The quality loop is controlled exclusively by Iteration Manager. No quality loop agent (Spec Reviewer, Reviser, Gatekeeper) may invoke another agent directly.
 
 Trigger conditions, loop sequence, and termination rules are defined in:
-- `AGENTS.md` — Quality Iteration Workflow and Iteration Rules sections
+- `AGENTS.md` — Quality Loop and Iteration Rules sections
 - `agents/iteration-manager.md` — Quality loop control section
 
 **Execution-specific rule:** Each loop cycle is a separate Iteration Manager → Agent → Handoff cycle. `quality_loop_iteration` is tracked in `workflow_state` and echoed in every handoff.
@@ -217,7 +217,7 @@ Iteration Manager must stop execution and escalate when any of the following occ
 | Invalid handoff block | `workflow_state` missing, unknown `status`, invalid enum, wrong format |
 | Escalation returned | Any agent sets `status: escalate` |
 | Quality loop iteration limit | `quality_loop_iteration` reached 3 without Gatekeeper acceptance |
-| Builder review cycle limit | `builder_cycle_count` reached 3 (Reviewer returned `CHANGES REQUIRED` three times) |
+| Builder review cycle limit | `builder_cycle_count` reached 3 (Reviewer `CHANGES REQUIRED` or Security Reviewer `security_failed`, combined) |
 | Missing `workflow_state` | Handoff block present but `workflow_state` field absent |
 | Forbidden stage regression | `current_stage` moved backwards outside of allowed correction cycles |
 | No meaningful progress | Two consecutive quality loop iterations did not change the set of `must_fix` issues |

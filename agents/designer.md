@@ -135,7 +135,7 @@ Produce a complete `docs/BRAND.md`:
 - ...
 ```
 
-After producing this output, append a handoff block with `artifact_type: "design"` and `status: "produced"`. The document will go through the Quality Iteration Workflow.
+After producing this output, append a handoff block with `artifact_type: "design"` and `status: "produced"`. The document will go through the quality loop.
 
 ---
 

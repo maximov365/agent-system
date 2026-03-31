@@ -75,6 +75,7 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | Spec Reviewer | Evaluates non-code artifact quality |
 | Reviser | Applies fixes to non-code artifacts based on Spec Reviewer feedback |
 | Gatekeeper | Decides whether a non-code artifact should be accepted, iterated, or escalated |
+| System Auditor | Audits framework health across downstream projects; proposes improvements (never implements) |
 
 ---
 

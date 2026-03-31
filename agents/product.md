@@ -126,7 +126,7 @@ Produce a complete `docs/PRD.md` following this structure:
 | ... | ... |
 ```
 
-After producing this output, append a handoff block with `artifact_type: "feature_spec"` and `status: "produced"`. The document will go through the Quality Iteration Workflow before being finalized.
+After producing this output, append a handoff block with `artifact_type: "feature_spec"` and `status: "produced"`. The document will go through the quality loop before being finalized.
 
 ---
 

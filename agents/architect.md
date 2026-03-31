@@ -75,7 +75,7 @@ Produce three documents:
 
 Follow the structure and level of detail shown in the existing templates in `docs/`. Each document should be complete enough for agents to work from immediately after the onboarding completes.
 
-After producing all three documents, append a single handoff block with `artifact_type: "implementation_plan"` and `status: "produced"`. The documents will go through the Quality Iteration Workflow as a set.
+After producing all three documents, append a single handoff block with `artifact_type: "implementation_plan"` and `status: "produced"`. The documents will go through the quality loop as a set.
 
 ---
 

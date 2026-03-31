@@ -219,6 +219,15 @@ def check_prompts(projects: list[Path]) -> tuple[list[dict], dict]:
     return findings, prompt_health
 
 
+EXAMPLE_PATHS = {"docs/plans/ARCH-42.md", "docs/features/FEAT-42.md"}
+
+HISTORICAL_FILES = {
+    "docs/LESSONS_LEARNED.md",
+    "docs/DECISIONS.md",
+    "docs/KNOWN_PATTERNS.md",
+}
+
+
 def check_refs(root_dir: Path) -> list[dict]:
     """Check for dead file references in markdown files."""
     findings = []
@@ -231,15 +240,19 @@ def check_refs(root_dir: Path) -> list[dict]:
     for md in md_files:
         text = md.read_text()
         refs = ref_pattern.findall(text)
-        rel_md = md.relative_to(root_dir)
+        rel_md = str(md.relative_to(root_dir))
         for ref in refs:
             target = root_dir / ref
             if not target.exists():
+                if ref in EXAMPLE_PATHS:
+                    continue
+                if rel_md in HISTORICAL_FILES:
+                    continue
                 findings.append(finding(
                     f"R-{rel_md}-{ref}", "warning", "dead_reference",
                     f"Dead reference: {ref} in {rel_md}",
                     f"File {rel_md} references `{ref}` but that file does not exist.",
-                    [str(rel_md)],
+                    [rel_md],
                     f"Update the reference in {rel_md} or create {ref}.",
                 ))
 

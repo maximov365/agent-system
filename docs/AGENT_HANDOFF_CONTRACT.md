@@ -120,7 +120,7 @@ Status values are fixed. No agent may invent new values.
 
 | Status | Meaning | Produced by |
 |---|---|---|
-| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser, Spec Reviewer |
+| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser, Spec Reviewer, System Auditor |
 | `accepted` | Artifact passed quality review | Gatekeeper (decision: accept) |
 | `revise` | Artifact has must_fix issues; send to Reviser | Spec Reviewer (verdict: revise), Gatekeeper (decision: iterate) |
 | `escalate` | Conflict or blocker requires user input | Any agent |
@@ -159,6 +159,7 @@ Status values are fixed. No agent may invent new values.
 | Discovery | recommendation complete | `produced` |
 | Analytics Architect | analytics spec complete | `produced` |
 | Reviser | revision complete | `produced` |
+| System Auditor | audit report complete | `produced` |
 
 ---
 
@@ -220,6 +221,7 @@ All agents use the same handoff block structure. The table below defines the age
 | Analytics Validator | `code` | `validation_passed`, `validation_failed`, `escalate` | Security Reviewer, Builder, null |
 | Security Reviewer | `code` | `security_passed`, `security_failed`, `escalate` | Reviewer, Builder, null |
 | Reviewer | `code` | `approved`, `changes_required`, `escalate` | null, Builder |
+| System Auditor | `design_note` | `produced`, `escalate` | null |
 | Iteration Manager | `none` | `completed`, `escalate` | null |
 
 **Notes:**
