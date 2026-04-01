@@ -1,0 +1,41 @@
+{
+  "skill_name": "iterate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Хочу добавить уведомления пользователям когда их задача переходит в статус in_review",
+      "expected_output": "Routes to Product agent with request_type feature_idea",
+      "files": [],
+      "assertions": [
+        {"text": "selected_agent is Product"},
+        {"text": "request_type is feature_idea"},
+        {"text": "Output contains valid routing JSON with mode field"},
+        {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Architect completed handoff with status produced for ARCH-15, recommends Builder. What's next?",
+      "expected_output": "Routes to Spec Reviewer (quality loop), overrides Builder recommendation",
+      "files": [],
+      "assertions": [
+        {"text": "Recognizes quality loop is required (overrides Builder recommendation)"},
+        {"text": "mode is stage_transition"},
+        {"text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15"},
+        {"text": "Does not route directly to Builder"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Нужно переписать весь pipeline на новую архитектуру",
+      "expected_output": "Escalates to user with clear reasons",
+      "files": [],
+      "assertions": [
+        {"text": "Escalates to user (next_action is escalate_to_user)"},
+        {"text": "Does not route to Builder"},
+        {"text": "Provides escalation_reason explaining why"},
+        {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format"}
+      ]
+    }
+  ]
+}

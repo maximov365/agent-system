@@ -1,0 +1,11 @@
+{
+  "eval_id": 1,
+  "run_id": "eval-1-without_skill",
+  "summary": {"pass_rate": 0.75, "passed": 3, "failed": 1, "total": 4},
+  "expectations": [
+    {"text": "selected_agent is Product", "passed": true, "evidence": "JSON contains selected_agent: Product"},
+    {"text": "request_type is feature_idea", "passed": true, "evidence": "JSON contains request_type: feature_idea"},
+    {"text": "Output contains valid routing JSON with mode field", "passed": true, "evidence": "mode: initial_routing with required fields"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "passed": false, "evidence": "Non-standard fields: from_agent/to_agent/verdict instead of agent/status/artifact_type/next_recommended_agent"}
+  ]
+}

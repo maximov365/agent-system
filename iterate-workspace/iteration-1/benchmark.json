@@ -1,0 +1,293 @@
+{
+  "metadata": {
+    "skill_name": "iterate",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-04-01T14:05:58Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 56.0,
+        "tokens": 53487,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "selected_agent is Product",
+          "passed": true,
+          "evidence": "JSON contains selected_agent: Product"
+        },
+        {
+          "text": "request_type is feature_idea",
+          "passed": true,
+          "evidence": "JSON contains request_type: feature_idea"
+        },
+        {
+          "text": "Output contains valid routing JSON with mode field",
+          "passed": true,
+          "evidence": "mode: initial_routing with all required fields"
+        },
+        {
+          "text": "Handoff block follows AGENT_HANDOFF_CONTRACT format",
+          "passed": true,
+          "evidence": "Standard handoff block with agent, artifact_type, status, workflow_state"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 72.1,
+        "tokens": 53097,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recognizes quality loop is required (overrides Builder recommendation)",
+          "passed": true,
+          "evidence": "Selected Spec Reviewer, quality_loop_active: true, iteration: 1"
+        },
+        {
+          "text": "mode is stage_transition",
+          "passed": true,
+          "evidence": "JSON contains mode: stage_transition"
+        },
+        {
+          "text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15",
+          "passed": true,
+          "evidence": "workflow_state has task_id: TASK-15, artifact_id: ARCH-15"
+        },
+        {
+          "text": "Does not route directly to Builder",
+          "passed": true,
+          "evidence": "selected_agent is Spec Reviewer"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 63.1,
+        "tokens": 50152,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Escalates to user (next_action is escalate_to_user)",
+          "passed": true,
+          "evidence": "JSON contains next_action: escalate_to_user"
+        },
+        {
+          "text": "Does not route to Builder",
+          "passed": true,
+          "evidence": "selected_agent is null"
+        },
+        {
+          "text": "Provides escalation_reason explaining why",
+          "passed": true,
+          "evidence": "References Architecture Guardrails Rules 1, 2, 9 with 4 specific reasons"
+        },
+        {
+          "text": "Handoff block follows AGENT_HANDOFF_CONTRACT format",
+          "passed": true,
+          "evidence": "status: escalate, artifact_type: none \u2014 contract-compliant"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 79.8,
+        "tokens": 52926,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "selected_agent is Product",
+          "passed": true,
+          "evidence": "JSON contains selected_agent: Product"
+        },
+        {
+          "text": "request_type is feature_idea",
+          "passed": true,
+          "evidence": "JSON contains request_type: feature_idea"
+        },
+        {
+          "text": "Output contains valid routing JSON with mode field",
+          "passed": true,
+          "evidence": "mode: initial_routing with required fields"
+        },
+        {
+          "text": "Handoff block follows AGENT_HANDOFF_CONTRACT format",
+          "passed": false,
+          "evidence": "Non-standard fields: from_agent/to_agent/verdict instead of agent/status/artifact_type/next_recommended_agent"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 85.1,
+        "tokens": 50823,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recognizes quality loop is required (overrides Builder recommendation)",
+          "passed": true,
+          "evidence": "Correctly noted quality loop is mandatory; also caught missing ARCH-15.md and TASK-15"
+        },
+        {
+          "text": "mode is stage_transition",
+          "passed": true,
+          "evidence": "JSON contains mode: stage_transition"
+        },
+        {
+          "text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15",
+          "passed": true,
+          "evidence": "workflow_state has task_id: TASK-15, artifact_id: ARCH-15"
+        },
+        {
+          "text": "Does not route directly to Builder",
+          "passed": true,
+          "evidence": "Escalated to user \u2014 did not route to Builder"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 58.3,
+        "tokens": 41356,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Escalates to user (next_action is escalate_to_user)",
+          "passed": true,
+          "evidence": "JSON contains next_action: escalate_to_user"
+        },
+        {
+          "text": "Does not route to Builder",
+          "passed": true,
+          "evidence": "selected_agent is null"
+        },
+        {
+          "text": "Provides escalation_reason explaining why",
+          "passed": true,
+          "evidence": "Lists 4 escalation triggers including pipeline boundary changes"
+        },
+        {
+          "text": "Handoff block follows AGENT_HANDOFF_CONTRACT format",
+          "passed": false,
+          "evidence": "status 'escalated' (wrong, should be 'escalate'), agent 'iteration-manager' (wrong casing), artifact_type null (wrong, should be 'none')"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 63.7333,
+        "stddev": 8.0687,
+        "min": 56.0,
+        "max": 72.1
+      },
+      "tokens": {
+        "mean": 52245.3333,
+        "stddev": 1823.3371,
+        "min": 50152,
+        "max": 53487
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.8333,
+        "stddev": 0.1443,
+        "min": 0.75,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 74.4,
+        "stddev": 14.1926,
+        "min": 58.3,
+        "max": 85.1
+      },
+      "tokens": {
+        "mean": 48368.3333,
+        "stddev": 6163.2188,
+        "min": 41356,
+        "max": 52926
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.17",
+      "time_seconds": "-10.7",
+      "tokens": "+3877"
+    }
+  },
+  "notes": []
+}

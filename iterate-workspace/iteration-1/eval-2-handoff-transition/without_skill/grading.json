@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "run_id": "eval-2-without_skill",
+  "expectations": [
+    {"text": "Recognizes quality loop is required (overrides Builder recommendation)", "passed": true, "evidence": "Explicitly states 'Architect plans always enter the quality loop. The next_recommended_agent: Builder is a suggestion that Iteration Manager overrides per workflow rules'"},
+    {"text": "mode is stage_transition", "passed": true, "evidence": "JSON contains \"mode\": \"stage_transition\""},
+    {"text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15", "passed": true, "evidence": "workflow_state contains task_id: TASK-15, artifact_id: ARCH-15"},
+    {"text": "Does not route directly to Builder", "passed": true, "evidence": "Escalated to user due to missing artifact file — did not route to Builder or any agent"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "ambiguous-escalation",
+  "prompt": "Нужно переписать весь pipeline на новую архитектуру",
+  "assertions": [
+    {"text": "Escalates to user (next_action is escalate_to_user)", "type": "exact_match"},
+    {"text": "Does not route to Builder", "type": "negation"},
+    {"text": "Provides escalation_reason explaining why", "type": "structural"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "type": "structural"}
+  ]
+}
