@@ -108,7 +108,7 @@ Iteration Manager must track workflow state across agent transitions. State must
 
 `product_spec_accepted` becomes `true` only when Gatekeeper returns `accept` for the Product feature specification artifact. It must not be set to `true` at any earlier point.
 
-`builder_cycle_count` increments by 1 each time Reviewer returns `CHANGES REQUIRED`. It also covers Security Reviewer `security_failed` cycles (Builder → Security Reviewer → Builder) within the same counter. It resets to `0` when Reviewer returns `APPROVED` or `APPROVED WITH MINOR CHANGES`. If `builder_cycle_count` reaches `3`, escalate to the user.
+`builder_cycle_count` increments by 1 each time Reviewer returns `CHANGES REQUIRED` or Design Reviewer returns `CHANGES REQUIRED`. It also covers Security Reviewer `security_failed` cycles within the same counter. It resets to `0` when Reviewer returns `APPROVED` or `APPROVED WITH MINOR CHANGES`. If `builder_cycle_count` reaches `3`, escalate to the user.
 
 `analytics_used` is set to `true` when Analytics Architect is invoked and must not revert to `false` for the same task.
 
@@ -127,7 +127,8 @@ Classify every incoming request before selecting an agent.
 | `feature_idea` | Rough feature request with unclear scope or missing acceptance criteria |
 | `analytics_required_feature` | Feature with user behavior, measurable outcomes, or observability needs |
 | `implementation_planning` | Task exists and is ready for Architect planning |
-| `approved_plan_execution` | Architect plan exists and is approved; Builder can start |
+| `approved_plan_execution` | Architect plan exists and is approved; Builder or UI Builder can start |
+| `design_review` | UI Builder completed; Design Reviewer must verify design compliance |
 | `code_review` | Builder completed implementation; code must be validated |
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
 | `copy_creation` | Feature has user-facing text; copy needs to be written or reviewed |
@@ -157,7 +158,13 @@ Classify every incoming request before selecting an agent.
 | Accepted feature specification with measurable outcomes and no analytics spec exists (`product_spec_accepted: true`) | `Analytics Architect` |
 | Task exists and is ready for planning; analytics spec exists or is not required | `Architect` |
 | Approved Architect plan exists; task has non-trivial testable logic | `Test Strategist` |
-| Approved Architect plan exists; trivial change or no testable logic | `Builder` |
+| Approved Architect plan exists; trivial change or no testable logic; task has user-facing UI | `UI Builder` |
+| Approved Architect plan exists; trivial change or no testable logic; no user-facing UI | `Builder` |
+| UI Builder completed implementation | `Design Reviewer` |
+| Design Reviewer approved; feature has user-facing strings | `UX Writer` (copy review) |
+| Design Reviewer approved; no user-facing strings; instrumentation changed | `Analytics Validator` |
+| Design Reviewer approved; no user-facing strings; no instrumentation changes | `Security Reviewer` |
+| Design Reviewer returned `CHANGES REQUIRED` | `UI Builder` (design fixes) |
 | Builder completed implementation; feature has user-facing strings | `UX Writer` (copy review) |
 | Builder completed implementation; no user-facing strings; Analytics Architect was not used | `Security Reviewer` |
 | Builder completed implementation; no user-facing strings; Analytics Architect was used and instrumentation was changed | `Analytics Validator` |
@@ -173,7 +180,8 @@ If the request is ambiguous:
 - Visual design uncertainty for an accepted spec → `Designer`
 - Task already exists → `Architect`
 
-Never route directly to `Builder` unless an approved Architect plan exists.
+Never route directly to `Builder` or `UI Builder` unless an approved Architect plan exists.
+Never skip `Design Reviewer` after `UI Builder`.
 Never skip `Security Reviewer` for code changes.
 Never skip `Reviewer` for code changes.
 Never skip `Analytics Architect` when the feature introduces measurable outcomes and no analytics spec exists.

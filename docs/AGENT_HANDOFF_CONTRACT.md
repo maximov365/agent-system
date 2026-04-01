@@ -43,7 +43,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 | `marketing_campaign` | Marketing strategy, campaign, launch kit, or marketing review produced by Marketing |
 | `illustration` | Generated image(s) with metadata produced by Illustrator via MCP tool |
 | `test_plan` | Test strategy produced by Test Strategist |
-| `code` | Production code, tests, or configuration changed by Builder |
+| `code` | Production code, tests, or configuration changed by Builder or UI Builder |
 | `none` | No artifact produced (e.g. routing-only output from Iteration Manager) |
 
 ---
@@ -52,8 +52,8 @@ The `artifact_type` field must be one of the following values. Agents must not i
 
 `artifact_path` must follow these rules depending on artifact type:
 
-- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `ux_copy`, `marketing_campaign`, `illustration`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
-- **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
+- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
+- **Code** — array of repository-relative file paths changed by Builder or UI Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
 
@@ -123,17 +123,17 @@ Status values are fixed. No agent may invent new values.
 
 | Status | Meaning | Produced by |
 |---|---|---|
-| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, Reviser, Spec Reviewer, System Auditor |
+| `produced` | Agent completed its artifact; no blocking issues | Discovery, Product, Designer, Analytics Architect, Architect, Test Strategist, Builder, UI Builder, Reviser, Spec Reviewer, System Auditor |
 | `accepted` | Artifact passed quality review | Gatekeeper (decision: accept) |
 | `revise` | Artifact has must_fix issues; send to Reviser | Spec Reviewer (verdict: revise), Gatekeeper (decision: iterate) |
 | `escalate` | Conflict or blocker requires user input | Any agent |
-| `approved` | Code implementation approved; no changes required | Reviewer (APPROVED or APPROVED WITH MINOR CHANGES) |
-| `changes_required` | Code implementation must be corrected by Builder | Reviewer (CHANGES REQUIRED) |
+| `approved` | Code implementation approved; no changes required | Reviewer (APPROVED or APPROVED WITH MINOR CHANGES), Design Reviewer (APPROVED or APPROVED WITH MINOR NOTES) |
+| `changes_required` | Code implementation must be corrected by Builder or UI Builder | Reviewer (CHANGES REQUIRED), Design Reviewer (CHANGES REQUIRED) |
 | `completed` | Workflow for this task is fully complete | Iteration Manager only |
 | `validation_passed` | Analytics instrumentation verified | Analytics Validator (verdict: accept) |
 | `validation_failed` | Analytics instrumentation has must_fix issues | Analytics Validator (verdict: revise) |
 | `security_passed` | No blocking security issues found | Security Reviewer (verdict: pass) |
-| `security_failed` | Security issues require Builder fixes | Security Reviewer (verdict: fail) |
+| `security_failed` | Security issues require Builder or UI Builder fixes | Security Reviewer (verdict: fail) |
 | `changes_suggested` | Non-blocking copy or content improvements suggested | UX Writer (copy review), Marketing (marketing review) |
 
 **Mapping from agent-native verdicts to handoff status:**
@@ -156,6 +156,10 @@ Status values are fixed. No agent may invent new values.
 | Security Reviewer | `verdict: fail` | `security_failed` |
 | Security Reviewer | `verdict: escalate` | `escalate` |
 | Builder | implementation complete | `produced` |
+| UI Builder | implementation complete | `produced` |
+| Design Reviewer | `APPROVED` | `approved` |
+| Design Reviewer | `APPROVED WITH MINOR NOTES` | `approved` |
+| Design Reviewer | `CHANGES REQUIRED` | `changes_required` |
 | Designer | design approved by user | `produced` |
 | Test Strategist | test plan complete | `produced` |
 | Architect | plan complete | `produced` |
@@ -200,7 +204,9 @@ Every handoff must carry the current `workflow_state`. Iteration Manager reads t
 | Gatekeeper (accept for Product spec) | `product_spec_accepted` | Set to `true` |
 | Analytics Architect | `analytics_used` | Set to `true` |
 | Reviewer (approved) | `builder_cycle_count` | Reset to `0` |
+| Design Reviewer (approved) | `builder_cycle_count` | Reset to `0` |
 | Reviewer (changes_required) | `builder_cycle_count` | Increment by `1` |
+| Design Reviewer (changes_required) | `builder_cycle_count` | Increment by `1` |
 | Security Reviewer (security_failed) | `builder_cycle_count` | Increment by `1` |
 | Iteration Manager (onboarding) | `onboarding_phase` | Advance after each phase completes; `null` when not onboarding |
 | Any agent starting quality loop | `quality_loop_iteration` | Set to `1` on first invocation; increment on each Reviser cycle |
@@ -224,19 +230,23 @@ All agents use the same handoff block structure. The table below defines the age
 | Illustrator | `illustration` | `produced`, `blocked`, `escalate` | Designer (review), Marketing (review) |
 | Analytics Architect | `analytics_spec` | `produced`, `escalate` | Architect, Spec Reviewer |
 | Architect | `implementation_plan` | `produced`, `escalate` | Spec Reviewer |
-| Test Strategist | `test_plan` | `produced`, `escalate` | Builder |
+| Test Strategist | `test_plan` | `produced`, `escalate` | Builder, UI Builder |
 | Builder | `code` | `produced`, `escalate` | Analytics Validator, Security Reviewer |
+| UI Builder | `code` | `produced`, `escalate` | Design Reviewer |
+| Design Reviewer | `code` | `approved`, `changes_required`, `escalate` | Security Reviewer, Reviewer, UI Builder |
 | Spec Reviewer | _same as reviewed artifact_ | `revise`, `escalate`, `produced` | Gatekeeper |
 | Reviser | _same as revised artifact_ | `produced`, `escalate` | Spec Reviewer |
-| Gatekeeper | _same as reviewed artifact_ | `accepted`, `revise`, `escalate` | Reviser, Product, Designer, Architect, Analytics Architect, Test Strategist, Builder, null |
+| Gatekeeper | _same as reviewed artifact_ | `accepted`, `revise`, `escalate` | Reviser, Product, Designer, Architect, Analytics Architect, Test Strategist, Builder, UI Builder, null |
 | Analytics Validator | `code` | `validation_passed`, `validation_failed`, `escalate` | Security Reviewer, Builder, null |
-| Security Reviewer | `code` | `security_passed`, `security_failed`, `escalate` | Reviewer, Builder, null |
-| Reviewer | `code` | `approved`, `changes_required`, `escalate` | null, Builder |
+| Security Reviewer | `code` | `security_passed`, `security_failed`, `escalate` | Reviewer, Builder, UI Builder, null |
+| Reviewer | `code` | `approved`, `changes_required`, `escalate` | null, Builder, UI Builder |
 | System Auditor | `design_note` | `produced`, `escalate` | null |
 | Iteration Manager | `none` | `completed`, `escalate` | null |
 
 **Notes:**
 - Builder sets `next_recommended_agent` to `Analytics Validator` when instrumentation was changed, or `Security Reviewer` when it was not.
+- UI Builder always sets `next_recommended_agent` to `Design Reviewer`.
+- Design Reviewer sets `next_recommended_agent` to `UI Builder` when `CHANGES REQUIRED`, or to `Security Reviewer` / `Reviewer` when approved.
 - Spec Reviewer always routes to Gatekeeper. Gatekeeper reads the review output and decides `accept`, `iterate`, or `escalate`.
 - `artifact_path` for `code` is a JSON array of file paths; for all other types it is a single repository-relative path or short identifier.
 
