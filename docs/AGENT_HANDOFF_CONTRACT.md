@@ -41,6 +41,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 | `design` | UI mockups and design artifact produced by Designer |
 | `ux_copy` | User-facing copy document or copy review produced by UX Writer |
 | `marketing_campaign` | Marketing strategy, campaign, launch kit, or marketing review produced by Marketing |
+| `illustration` | Generated image(s) with metadata produced by Illustrator via MCP tool |
 | `test_plan` | Test strategy produced by Test Strategist |
 | `code` | Production code, tests, or configuration changed by Builder |
 | `none` | No artifact produced (e.g. routing-only output from Iteration Manager) |
@@ -51,7 +52,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 
 `artifact_path` must follow these rules depending on artifact type:
 
-- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
+- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `ux_copy`, `marketing_campaign`, `illustration`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
 - **Code** — array of repository-relative file paths changed by Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -94,7 +95,7 @@ Every agent appends the following JSON block at the end of its output, after its
 {
   "handoff": {
     "agent": "<agent name>",
-    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | ux_copy | marketing_campaign | test_plan | code | none",
+    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | ux_copy | marketing_campaign | illustration | test_plan | code | none",
     "artifact_path": "<path or title; JSON array of paths when artifact_type is code>",
     "status": "<see Allowed statuses>",
     "next_recommended_agent": "<agent name, or null>",
@@ -133,6 +134,7 @@ Status values are fixed. No agent may invent new values.
 | `validation_failed` | Analytics instrumentation has must_fix issues | Analytics Validator (verdict: revise) |
 | `security_passed` | No blocking security issues found | Security Reviewer (verdict: pass) |
 | `security_failed` | Security issues require Builder fixes | Security Reviewer (verdict: fail) |
+| `changes_suggested` | Non-blocking copy or content improvements suggested | UX Writer (copy review), Marketing (marketing review) |
 
 **Mapping from agent-native verdicts to handoff status:**
 
@@ -162,6 +164,10 @@ Status values are fixed. No agent may invent new values.
 | Analytics Architect | analytics spec complete | `produced` |
 | Reviser | revision complete | `produced` |
 | System Auditor | audit report complete | `produced` |
+| UX Writer | `verdict: all_clear` | `approved` |
+| UX Writer | `verdict: changes_suggested` | `changes_suggested` |
+| Marketing | `verdict: all_clear` | `approved` |
+| Marketing | `verdict: changes_suggested` | `changes_suggested` |
 
 ---
 
@@ -215,6 +221,7 @@ All agents use the same handoff block structure. The table below defines the age
 | Designer | `design` | `produced`, `escalate` | UX Writer, Analytics Architect, Architect |
 | UX Writer | `ux_copy` | `produced`, `approved`, `changes_suggested`, `escalate` | Analytics Architect, Architect, Builder |
 | Marketing | `marketing_campaign` | `produced`, `approved`, `changes_suggested`, `escalate` | UX Writer (tone review), Designer (visual briefs), Spec Reviewer |
+| Illustrator | `illustration` | `produced`, `blocked`, `escalate` | Designer (review), Marketing (review) |
 | Analytics Architect | `analytics_spec` | `produced`, `escalate` | Architect, Spec Reviewer |
 | Architect | `implementation_plan` | `produced`, `escalate` | Spec Reviewer |
 | Test Strategist | `test_plan` | `produced`, `escalate` | Builder |
