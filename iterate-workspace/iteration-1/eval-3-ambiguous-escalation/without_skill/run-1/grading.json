@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "run_id": "eval-3-without_skill",
+  "summary": {"pass_rate": 0.75, "passed": 3, "failed": 1, "total": 4},
+  "expectations": [
+    {"text": "Escalates to user (next_action is escalate_to_user)", "passed": true, "evidence": "JSON contains next_action: escalate_to_user"},
+    {"text": "Does not route to Builder", "passed": true, "evidence": "selected_agent is null"},
+    {"text": "Provides escalation_reason explaining why", "passed": true, "evidence": "Lists 4 escalation triggers including pipeline boundary changes"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "passed": false, "evidence": "status 'escalated' (wrong, should be 'escalate'), agent 'iteration-manager' (wrong casing), artifact_type null (wrong, should be 'none')"}
+  ]
+}

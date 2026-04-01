@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "run_id": "eval-2-with_skill",
+  "expectations": [
+    {"text": "Recognizes quality loop is required (overrides Builder recommendation)", "passed": true, "evidence": "Selected Spec Reviewer, quality_loop_active: true, quality_loop_iteration: 1. Explicitly states 'standard workflow requires all Architect plans to pass through the quality loop'"},
+    {"text": "mode is stage_transition", "passed": true, "evidence": "JSON contains \"mode\": \"stage_transition\""},
+    {"text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15", "passed": true, "evidence": "workflow_state contains task_id: TASK-15, artifact_id: ARCH-15"},
+    {"text": "Does not route directly to Builder", "passed": true, "evidence": "selected_agent is Spec Reviewer, not Builder"}
+  ]
+}

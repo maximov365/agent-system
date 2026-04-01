@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "run_id": "eval-3-with_skill",
+  "summary": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+  "expectations": [
+    {"text": "Escalates to user (next_action is escalate_to_user)", "passed": true, "evidence": "JSON contains next_action: escalate_to_user"},
+    {"text": "Does not route to Builder", "passed": true, "evidence": "selected_agent is null"},
+    {"text": "Provides escalation_reason explaining why", "passed": true, "evidence": "References Architecture Guardrails Rules 1, 2, 9 with 4 specific reasons"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "passed": true, "evidence": "status: escalate, artifact_type: none — contract-compliant"}
+  ]
+}

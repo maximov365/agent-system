@@ -1,0 +1,22 @@
+[
+  {"query": "хочу добавить поиск по задачам в интерфейсе — пока не знаю как это должно выглядеть", "should_trigger": true},
+  {"query": "architect вернул handoff с status produced для ARCH-7, recommends Test Strategist. что дальше?", "should_trigger": true},
+  {"query": "нужно переписать модуль аутентификации, там сейчас legacy код", "should_trigger": true},
+  {"query": "давай разберёмся какой подход лучше для кеширования — redis или in-memory?", "should_trigger": true},
+  {"query": "builder закончил, reviewer вернул CHANGES REQUIRED второй раз. что делать?", "should_trigger": true},
+  {"query": "хочу сделать email-кампанию для запуска нового фичера", "should_trigger": true},
+  {"query": "проведи аудит системы — проверь что все агенты работают правильно", "should_trigger": true},
+  {"query": "нужно добавить аналитику для трекинга conversion rate на странице онбординга", "should_trigger": true},
+  {"query": "product agent написал спек для FEAT-12, но там много открытых вопросов", "should_trigger": true},
+  {"query": "architect plan готов, но там нет тестов — нужно добавить test strategy", "should_trigger": true},
+  {"query": "есть баг: при переходе задачи в in_review уведомление не отправляется", "should_trigger": true},
+  {"query": "можешь объяснить как работает quality loop в AGENTS.md?", "should_trigger": false},
+  {"query": "напиши мне python скрипт для парсинга CSV файла с транзакциями", "should_trigger": false},
+  {"query": "переведи этот текст на английский: Итерационный менеджер координирует агентов", "should_trigger": false},
+  {"query": "какой синтаксис у asyncio gather в python 3.11?", "should_trigger": false},
+  {"query": "помоги написать unit тест для функции calculate_discount(price, percentage)", "should_trigger": false},
+  {"query": "сгенерируй мне 10 вариантов названия для SaaS продукта в сфере HR", "should_trigger": false},
+  {"query": "объясни разницу между REST и GraphQL — хочу понять какой выбрать", "should_trigger": false},
+  {"query": "поправь грамматику в этом тексте для лендинга", "should_trigger": false},
+  {"query": "нарисуй диаграмму архитектуры нашего приложения", "should_trigger": false}
+]

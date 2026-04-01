@@ -1,0 +1,11 @@
+{
+  "eval_id": 1,
+  "eval_name": "feature-idea-routing",
+  "prompt": "Хочу добавить уведомления пользователям когда их задача переходит в статус in_review",
+  "assertions": [
+    {"text": "selected_agent is Product", "type": "exact_match"},
+    {"text": "request_type is feature_idea", "type": "exact_match"},
+    {"text": "Output contains valid routing JSON with mode field", "type": "structural"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "type": "structural"}
+  ]
+}

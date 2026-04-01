@@ -1,0 +1,10 @@
+{
+  "eval_id": 1,
+  "run_id": "eval-1-with_skill",
+  "expectations": [
+    {"text": "selected_agent is Product", "passed": true, "evidence": "JSON contains \"selected_agent\": \"Product\""},
+    {"text": "request_type is feature_idea", "passed": true, "evidence": "JSON contains \"request_type\": \"feature_idea\""},
+    {"text": "Output contains valid routing JSON with mode field", "passed": true, "evidence": "JSON contains \"mode\": \"initial_routing\" with all required fields"},
+    {"text": "Handoff block follows AGENT_HANDOFF_CONTRACT format", "passed": true, "evidence": "Standard handoff block with agent, artifact_type, status, workflow_state fields present"}
+  ]
+}

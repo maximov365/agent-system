@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "handoff-transition-routing",
+  "prompt": "Architect завершил работу. Вот handoff: {Architect produced ARCH-15, recommends Builder}. Что дальше?",
+  "assertions": [
+    {"text": "Recognizes quality loop is required (overrides Builder recommendation)", "type": "semantic"},
+    {"text": "mode is stage_transition", "type": "exact_match"},
+    {"text": "workflow_state preserves task_id TASK-15 and artifact_id ARCH-15", "type": "exact_match"},
+    {"text": "Does not route directly to Builder", "type": "negation"}
+  ]
+}
