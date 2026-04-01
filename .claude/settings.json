@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"REMINDER: This is an agent-system project. Read AGENTS.md and docs/ before starting work. Use /iterate for workflow routing.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Loading agent-system context..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreCompact\",\"additionalContext\":\"BEFORE COMPACTING: Preserve current workflow_state (task_id, current_stage, builder_cycle_count, quality_loop_iteration, analytics_used, product_spec_accepted). Also preserve which agent was last active and any blocking_issues.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Preserving workflow state..."
+          }
+        ]
+      }
+    ]
+  }
+}
