@@ -46,21 +46,28 @@ After each agent completes, determine the next step based on the agent's output 
 | `Analytics Architect` → Quality loop | Gatekeeper `accept` | → `Architect` |
 | `Architect` | Implementation plan produced | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
 | `Architect` → Quality loop | Gatekeeper `accept`; task has non-trivial testable logic | → `Test Strategist` |
-| `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic | → `Builder` |
-| `Test Strategist` | Test plan produced | → `Builder` |
+| `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic; task has user-facing UI | → `UI Builder` |
+| `Architect` → Quality loop | Gatekeeper `accept`; trivial change or no testable logic; no user-facing UI | → `Builder` |
+| `Test Strategist` | Test plan produced; task has user-facing UI | → `UI Builder` |
+| `Test Strategist` | Test plan produced; no user-facing UI | → `Builder` |
+| `UI Builder` | Implementation complete | → `Design Reviewer` |
+| `Design Reviewer` | `APPROVED` or `APPROVED WITH MINOR NOTES`; feature has user-facing strings | → `UX Writer` (copy review) |
+| `Design Reviewer` | `APPROVED` or `APPROVED WITH MINOR NOTES`; no user-facing strings; instrumentation changed | → `Analytics Validator` |
+| `Design Reviewer` | `APPROVED` or `APPROVED WITH MINOR NOTES`; no user-facing strings; no instrumentation changes | → `Security Reviewer` |
+| `Design Reviewer` | `CHANGES REQUIRED` | → `UI Builder` (design fixes required) |
 | `Builder` | Implementation complete; feature has user-facing strings | → `UX Writer` (copy review) |
 | `Builder` | Implementation complete; no user-facing strings; instrumentation changed | → `Analytics Validator` |
 | `Builder` | Implementation complete; no user-facing strings; no instrumentation changes | → `Security Reviewer` |
-| `UX Writer` (copy review) | `all_clear` or `changes_suggested` (minor) | → `Analytics Validator` (if instrumentation changed) or → `Security Reviewer` |
-| `UX Writer` (copy review) | `changes_suggested` (significant) | → `Builder` (copy fixes required) |
+| `UX Writer` (copy review) | `approved` or `changes_suggested` (minor) | → `Analytics Validator` (if instrumentation changed) or → `Security Reviewer` |
+| `UX Writer` (copy review) | `changes_suggested` (significant) | → `Builder` or `UI Builder` (copy fixes required; route to whichever built the feature) |
 | `Analytics Validator` | `accept` | → `Security Reviewer` |
-| `Analytics Validator` | `revise` | → `Builder` (instrumentation fixes required) |
+| `Analytics Validator` | `revise` | → `Builder` or `UI Builder` (instrumentation fixes required; route to whichever built the feature) |
 | `Analytics Validator` | `escalate` | → Escalate to user |
 | `Security Reviewer` | `security_passed` | → `Reviewer` |
-| `Security Reviewer` | `security_failed` | → `Builder` (security fixes required) |
+| `Security Reviewer` | `security_failed` | → `Builder` or `UI Builder` (security fixes required; route to whichever built the feature) |
 | `Security Reviewer` | `escalate` | → Escalate to user |
 | `Reviewer` | `APPROVED` or `APPROVED WITH MINOR CHANGES` | → Confirm workflow completion |
-| `Reviewer` | `CHANGES REQUIRED` | → `Builder` (corrections required) |
+| `Reviewer` | `CHANGES REQUIRED` | → `Builder` or `UI Builder` (corrections required; route to whichever built the feature) |
 | `Marketing` | Strategy produced | → Quality loop (invoke `Spec Reviewer`) if complex; otherwise → present to user |
 | `Marketing` | Campaign / launch kit produced | → `UX Writer` (tone review) if brand consistency needed; otherwise → present to user |
 | `Marketing` → Quality loop | Gatekeeper `accept` | → Present to user; proceed to campaign creation if requested |

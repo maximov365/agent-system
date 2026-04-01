@@ -9,11 +9,13 @@ The system supports both:
 1. **Deterministic implementation workflow**
 2. **Quality loops for specifications and plans**
 
-All production code implementation must follow the:
+All production code implementation must follow one of two cycles:
 
-Architect → [Test Strategist] → Builder → [Analytics Validator] → Security Reviewer → Reviewer
+**Non-UI tasks:** Architect → [Test Strategist] → Builder → [Analytics Validator] → Security Reviewer → Reviewer
 
-cycle. Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic. Analytics Validator is conditional on Analytics Architect having been used.
+**UI tasks:** Architect → [Test Strategist] → UI Builder → Design Reviewer → [Analytics Validator] → Security Reviewer → Reviewer
+
+Test Strategist is optional — Iteration Manager invokes it when the task has non-trivial testable logic. Analytics Validator is conditional on Analytics Architect having been used. Design Reviewer is mandatory for UI Builder output — it verifies pixel-perfect compliance with Designer mockups.
 
 Earlier steps (Discovery, Product, Designer, Analytics Architect) are used to clarify scope, product design, visual direction, and measurement before implementation. When Analytics Architect is used, Analytics Validator verifies instrumentation after Builder and before Security Reviewer.
 
@@ -50,7 +52,9 @@ The project prioritizes:
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
 | **Architect** | `agents/architect.md` | Propose minimal implementation plans; define files, risks, and acceptance criteria | Write production code |
 | **Test Strategist** | `agents/test-strategist.md` | Define test strategy (levels, edge cases, failure modes) for approved plans | Write code; modify the implementation plan |
-| **Builder** | `agents/builder.md` | Implement the approved Architect plan with minimal file changes | Expand scope beyond the approved plan |
+| **Builder** | `agents/builder.md` | Implement non-UI parts of the approved Architect plan (backend, pipelines, APIs, config) | Expand scope; implement user-facing UI |
+| **UI Builder** | `agents/ui-builder.md` | Implement user-facing UI with pixel-perfect fidelity to Designer mockups | Expand scope; make design decisions; deviate from mockups |
+| **Design Reviewer** | `agents/design-reviewer.md` | Compare UI implementation against Designer mockups; approve or request changes | Write code; modify designs; make design decisions |
 | **Security Reviewer** | `agents/security-reviewer.md` | Check for vulnerabilities, input validation, secrets handling, data exposure | Implement fixes; review architecture or scope |
 | **Analytics Validator** | `agents/analytics-validator.md` | Verify analytics instrumentation matches the Analytics Specification | Modify implementation logic |
 | **Reviewer** | `agents/reviewer.md` | Verify implementation follows the plan; approve or request changes | Implement new features |
@@ -66,8 +70,10 @@ The project prioritizes:
 - **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
 - **Marketing** is optional — runs after Product spec is accepted (or after Discovery marketing mode), on demand for campaigns, or before launch. Works with UX Writer for tone consistency and Designer for visual briefs.
 - **Analytics Architect** must run before Architect when required. Architect must include instrumentation in the plan. Architect must not remove or weaken defined analytics events.
-- **Test Strategist** is optional — runs after Architect plan is accepted and before Builder, only for non-trivial testable logic.
-- **Security Reviewer** runs after Builder (or after Analytics Validator) and before Reviewer for all code changes.
+- **Test Strategist** is optional — runs after Architect plan is accepted and before Builder or UI Builder, only for non-trivial testable logic.
+- **UI Builder** is used instead of Builder when the task has user-facing UI implementation. Follows Designer mockups with pixel-perfect precision.
+- **Design Reviewer** is mandatory after UI Builder. Compares implementation against Designer mockups. Routes back to UI Builder on `CHANGES REQUIRED`, or forward to Security Reviewer / Reviewer on approval.
+- **Security Reviewer** runs after Builder/Design Reviewer (or after Analytics Validator) and before Reviewer for all code changes.
 - **Analytics Validator** runs after Builder and before Security Reviewer when instrumentation was changed.
 - **Reviewer** is the final mandatory step for all code changes.
 - **Iteration Manager** also appends structured entries to `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` after completed workflows.
@@ -90,7 +96,9 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Feature with measurable outcomes | Analytics Architect | No user-facing behavior, no observability; analytics already exist |
 | Implementation planning needed | Architect | — |
 | Accepted Architect plan, non-trivial testable logic | Test Strategist | Trivial change, no testable logic |
-| Approved plan, ready for implementation | Builder | No approved plan exists |
+| Approved plan, ready for UI implementation | UI Builder | No approved plan; no user-facing UI |
+| Approved plan, ready for non-UI implementation | Builder | No approved plan exists |
+| UI Builder completed, design verification needed | Design Reviewer | Non-UI task (Builder was used) |
 | Builder completed, instrumentation changed | Analytics Validator | Analytics Architect was not used |
 | Builder completed, code changes | Security Reviewer | Non-code changes only |
 | Security Reviewer passed, code must be validated | Reviewer | — |
@@ -98,7 +106,8 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | System audit, framework review, health check | System Auditor | — |
 
 **Hard rules:**
-- Never start with Builder unless an approved Architect plan exists.
+- Never start with Builder or UI Builder unless an approved Architect plan exists.
+- Never skip Design Reviewer after UI Builder.
 - Never skip Security Reviewer for code changes.
 - Never skip Reviewer for code changes.
 
@@ -110,11 +119,13 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
 Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
+
+Design Reviewer runs only after UI Builder (not after Builder). UI Builder is used when the task has user-facing UI; Builder handles all other implementation.
 
 Brackets indicate optional steps. Designer runs only for features with user-facing UI. UX Writer runs when the feature has user-facing text (after Designer or after Product if no Designer); also runs after Builder to review copy in code. Test Strategist runs only for tasks with non-trivial testable logic. Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
