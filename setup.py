@@ -42,6 +42,7 @@ TEMPLATE_GLOBS = [
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
     "docs/TASK_TEMPLATE.md",
+    "docs/DEPLOY_CONTRACTS.md",
 ]
 
 

@@ -39,8 +39,17 @@ FRAMEWORK_GLOBS = [
     "docs/ARCHITECTURE_CHECKLIST.md",
     "docs/TASK_TEMPLATE.md",
     "docs/ONBOARDING.md",
+    "docs/MCP_TOOLS.md",
     "setup.py",
     "requirements-framework.txt",
+]
+
+# Seed files: copied only when they do NOT exist in the target project.
+# These are scaffolds that projects fill in with project-specific content.
+# Once created, they are never overwritten by sync.
+SEED_GLOBS = [
+    "docs/PIPELINE_CONTRACTS.md",
+    "docs/DEPLOY_CONTRACTS.md",
 ]
 
 GITIGNORE_MARKER_START = "# >>> agent-system framework (managed by sync.py) >>>"
@@ -58,6 +67,7 @@ GITIGNORE_ENTRIES = [
     "/docs/ARCHITECTURE_CHECKLIST.md",
     "/docs/TASK_TEMPLATE.md",
     "/docs/ONBOARDING.md",
+    "/docs/MCP_TOOLS.md",
     "/setup.py",
     "/requirements-framework.txt",
     "/.agent-system-version",
@@ -74,6 +84,13 @@ def get_version() -> str:
 def collect_framework_files() -> list[Path]:
     paths = []
     for pattern in FRAMEWORK_GLOBS:
+        paths.extend(ROOT.glob(pattern))
+    return sorted(set(paths))
+
+
+def collect_seed_files() -> list[Path]:
+    paths = []
+    for pattern in SEED_GLOBS:
         paths.extend(ROOT.glob(pattern))
     return sorted(set(paths))
 
@@ -267,6 +284,15 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
     files = collect_framework_files()
     new, updated, unchanged = classify_changes(ROOT, target, files)
 
+    # Seed files: only copy if they don't exist in target
+    seed_files = collect_seed_files()
+    seeded = []
+    for src in seed_files:
+        rel = src.relative_to(ROOT)
+        tgt = target / rel
+        if not tgt.exists():
+            seeded.append(rel)
+
     old_version_file = target / ".agent-system-version"
     old_version = old_version_file.read_text().strip() if old_version_file.exists() else "none"
 
@@ -274,9 +300,13 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
     print(f"  Source:  {ROOT}")
     print(f"  Target:  {target}")
     print(f"  Version: {old_version} -> {version}")
-    print(f"\n  {len(new)} new, {len(updated)} updated, {len(unchanged)} unchanged")
+    print(f"\n  {len(new)} new, {len(updated)} updated, {len(unchanged)} unchanged", end="")
+    if seeded:
+        print(f", {len(seeded)} seeded")
+    else:
+        print()
 
-    if not new and not updated:
+    if not new and not updated and not seeded:
         print("\n  Already up to date.")
         return True
 
@@ -284,6 +314,11 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
         print(f"\n  New files:")
         for rel in new:
             print(f"    + {rel}")
+
+    if seeded:
+        print(f"\n  Seeded files (first-time only):")
+        for rel in seeded:
+            print(f"    * {rel}")
 
     if updated:
         print(f"\n  Updated files:")
@@ -306,12 +341,12 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> b
         print(f"\n  Dry run — no files written.")
         return True
 
-    for rel in new + updated:
+    for rel in new + updated + seeded:
         copy_file(ROOT, target, rel)
 
     write_version(target, version)
 
-    print(f"\n  Copied {len(new) + len(updated)} file(s).")
+    print(f"\n  Copied {len(new) + len(updated) + len(seeded)} file(s).")
     print(f"  Version file: .agent-system-version -> {version}")
 
     untracked = untrack_framework_files(target)
