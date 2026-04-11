@@ -31,6 +31,7 @@ FRAMEWORK_GLOBS = [
     "docs/ARCHITECTURE_CHECKLIST.md",
     "docs/TASK_TEMPLATE.md",
     "docs/ONBOARDING.md",
+    "docs/MCP_TOOLS.md",
     "setup.py",
     "requirements-framework.txt",
 ]

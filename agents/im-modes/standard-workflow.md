@@ -36,8 +36,14 @@ After each agent completes, determine the next step based on the agent's output 
 | `Product` → Quality loop | Gatekeeper `accept`; no UI but has user-facing text | → `UX Writer` (copy creation) |
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; feature has measurable outcomes | → `Analytics Architect` |
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; no analytics needed | → `Architect` |
-| `Designer` | Design approved by user; feature has user-facing text | → `UX Writer` (copy creation) |
-| `Designer` | Design approved by user; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Designer` | Design output includes visual briefs for illustration | → `Illustrator` (generate images; return to Designer for review) |
+| `Designer` | Design approved by user; feature has motion/animation | → `Animator` |
+| `Designer` | Design approved by user; no animation; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Designer` | Design approved by user; no animation; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Animator` | Animation spec approved by user; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Animator` | Animation spec approved by user; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Illustrator` | Images generated successfully | → Return to requesting agent (`Designer` or `Marketing`) for review |
+| `Illustrator` | MCP tool unavailable or generation failed | → Escalate to user (suggest MCP setup or alternative approach) |
 | `UX Writer` | Copy document produced; complex (multiple screens or high brand risk) | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
 | `UX Writer` | Copy document produced; simple (single screen or low risk) | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
 | `UX Writer` → Quality loop | Gatekeeper `accept` | → `Analytics Architect` (if measurable outcomes) or → `Architect` |

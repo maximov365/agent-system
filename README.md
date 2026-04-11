@@ -66,6 +66,7 @@ agents/
   designer.md                # UI mockups and visual prototypes
   ux-writer.md               # User-facing copy and tone of voice
   marketing.md               # Marketing strategy, campaigns, launch kits
+  illustrator.md             # Image generation via MCP (tool-agent)
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
   test-strategist.md         # Define test strategy
@@ -95,6 +96,7 @@ docs/
   KNOWN_PATTERNS.md          # Validated patterns (IM appends; all agents read)
   FEATURE_MAP.md             # Capability index (you fill this)
   BRAND.md                   # Brand guide (optional)
+  MCP_TOOLS.md               # MCP tool configuration for tool-agents
   TASK_TEMPLATE.md           # Template for new tasks
   AGENT_HANDOFF_CONTRACT.md  # Agent communication format
   AGENT_EXECUTION_MODEL.md   # Execution mechanics
@@ -134,6 +136,7 @@ examples/
 | **Designer** | Creates UI mockups and iterates with user feedback (optional) |
 | **UX Writer** | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
 | **Marketing** | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
+| **Illustrator** | Generates images via MCP tools (Nano Banana, etc.) from visual briefs (tool-agent) |
 | **Analytics Architect** | Defines events, metrics, instrumentation |
 | **Architect** | Plans implementation before coding |
 | **Test Strategist** | Defines test strategy before implementation (optional) |

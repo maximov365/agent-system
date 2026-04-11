@@ -47,6 +47,8 @@ The project prioritizes:
 | **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing | Write production code |
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
+| **Animator** | `agents/animator.md` | Define motion design, animations, and transitions for approved UI designs | Write code; change visual design; make product decisions |
+| **Illustrator** | `agents/illustrator.md` | Generate images via MCP tools (Nano Banana, etc.) from visual briefs | Make design decisions; write code; choose what to create |
 | **UX Writer** | `agents/ux-writer.md` | Write and review all user-facing text; ensure consistent tone of voice | Write code; change scope; make design decisions |
 | **Marketing** | `agents/marketing.md` | Analyze product, define marketing strategy, create campaigns, ad copy, email sequences, launch kits | Write code; change product scope; make design decisions |
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
@@ -66,7 +68,9 @@ The project prioritizes:
 
 **Sequencing notes:**
 
-- **Designer** is optional — runs after Product spec is accepted and before UX Writer or Architect, only when the feature has user-facing UI.
+- **Designer** is optional — runs after Product spec is accepted and before Animator/UX Writer or Architect, only when the feature has user-facing UI.
+- **Animator** is optional — runs after Designer when the feature has motion, animations, or transitions. Skipped for static designs.
+- **Illustrator** is a tool-agent — runs when Designer or Marketing produces visual briefs requiring image generation. Returns images to the requesting agent for review. Requires MCP image generation tool (see `docs/MCP_TOOLS.md`).
 - **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
 - **Marketing** is optional — runs after Product spec is accepted (or after Discovery marketing mode), on demand for campaigns, or before launch. Works with UX Writer for tone consistency and Designer for visual briefs.
 - **Analytics Architect** must run before Architect when required. Architect must include instrumentation in the plan. Architect must not remove or weaken defined analytics events.
@@ -89,6 +93,8 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Technical uncertainty, market research | Discovery | — |
 | Rough feature idea, unclear scope | Product | — |
 | Accepted spec with user-facing UI | Designer | Backend-only, API-only, trivial UI |
+| Design approved, feature has motion/animation | Animator | Static design; no animation needed |
+| Designer or Marketing produced visual briefs | Illustrator | No image generation needed; no MCP tool configured |
 | Design approved, feature has user-facing text | UX Writer | No user-facing text; backend-only |
 | Standalone copy request (release notes, emails) | UX Writer | — |
 | Builder completed, feature has user-facing text | UX Writer (copy review) | No user-facing strings in code |
@@ -119,7 +125,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [Animator] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 

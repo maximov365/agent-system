@@ -39,6 +39,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 | `decision_note` | Technical decision record for `docs/DECISIONS.md` |
 | `analytics_spec` | Analytics specification produced by Analytics Architect |
 | `design` | UI mockups and design artifact produced by Designer |
+| `animation` | Motion design, animation specifications, and transition details produced by Animator |
 | `ux_copy` | User-facing copy document or copy review produced by UX Writer |
 | `marketing_campaign` | Marketing strategy, campaign, launch kit, or marketing review produced by Marketing |
 | `illustration` | Generated image(s) with metadata produced by Illustrator via MCP tool |
@@ -52,7 +53,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 
 `artifact_path` must follow these rules depending on artifact type:
 
-- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
+- **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `animation`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
 - **Code** — array of repository-relative file paths changed by Builder or UI Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -95,7 +96,7 @@ Every agent appends the following JSON block at the end of its output, after its
 {
   "handoff": {
     "agent": "<agent name>",
-    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | ux_copy | marketing_campaign | illustration | test_plan | code | none",
+    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | test_plan | code | none",
     "artifact_path": "<path or title; JSON array of paths when artifact_type is code>",
     "status": "<see Allowed statuses>",
     "next_recommended_agent": "<agent name, or null>",
@@ -160,6 +161,7 @@ Status values are fixed. No agent may invent new values.
 | Design Reviewer | `APPROVED` | `approved` |
 | Design Reviewer | `APPROVED WITH MINOR NOTES` | `approved` |
 | Design Reviewer | `CHANGES REQUIRED` | `changes_required` |
+| Animator | animation spec complete | `produced` |
 | Designer | design approved by user | `produced` |
 | Test Strategist | test plan complete | `produced` |
 | Architect | plan complete | `produced` |
@@ -224,7 +226,8 @@ All agents use the same handoff block structure. The table below defines the age
 |---|---|---|---|
 | Discovery | `design_note` | `produced`, `escalate` | Product, Architect, null |
 | Product | `feature_spec` | `produced`, `escalate` | Spec Reviewer |
-| Designer | `design` | `produced`, `escalate` | UX Writer, Analytics Architect, Architect |
+| Designer | `design` | `produced`, `escalate` | Animator, UX Writer, Analytics Architect, Architect |
+| Animator | `animation` | `produced`, `escalate` | UX Writer, Analytics Architect, Architect |
 | UX Writer | `ux_copy` | `produced`, `approved`, `changes_suggested`, `escalate` | Analytics Architect, Architect, Builder |
 | Marketing | `marketing_campaign` | `produced`, `approved`, `changes_suggested`, `escalate` | UX Writer (tone review), Designer (visual briefs), Spec Reviewer |
 | Illustrator | `illustration` | `produced`, `blocked`, `escalate` | Designer (review), Marketing (review) |
@@ -247,6 +250,7 @@ All agents use the same handoff block structure. The table below defines the age
 - Builder sets `next_recommended_agent` to `Analytics Validator` when instrumentation was changed, or `Security Reviewer` when it was not.
 - UI Builder always sets `next_recommended_agent` to `Design Reviewer`.
 - Design Reviewer sets `next_recommended_agent` to `UI Builder` when `CHANGES REQUIRED`, or to `Security Reviewer` / `Reviewer` when approved.
+- Designer sets `next_recommended_agent` to `Animator` when the feature has motion/animation, otherwise to `UX Writer`, `Analytics Architect`, or `Architect`.
 - Spec Reviewer always routes to Gatekeeper. Gatekeeper reads the review output and decides `accept`, `iterate`, or `escalate`.
 - `artifact_path` for `code` is a JSON array of file paths; for all other types it is a single repository-relative path or short identifier.
 

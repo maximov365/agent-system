@@ -132,6 +132,7 @@ Classify every incoming request before selecting an agent.
 | `code_review` | Builder completed implementation; code must be validated |
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
 | `copy_creation` | Feature has user-facing text; copy needs to be written or reviewed |
+| `illustration_needed` | Visual briefs produced by Designer or Marketing; image generation required |
 | `standalone_copy` | Release notes, emails, notifications, or other copy request |
 | `marketing_strategy` | Marketing strategy, campaign creation, launch preparation, or marketing review |
 | `non_code_artifact_improvement` | Feature spec, task breakdown, or plan needs quality review |
@@ -151,7 +152,9 @@ Classify every incoming request before selecting an agent.
 | Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
-| Design approved (or no Designer); feature has user-facing text | `UX Writer` |
+| Design approved; feature has motion, animation, or transitions | `Animator` |
+| Designer or Marketing produced visual briefs needing image generation | `Illustrator` |
+| Design/animation approved (or no Designer); feature has user-facing text | `UX Writer` |
 | Standalone copy request (release notes, emails, notifications) | `UX Writer` |
 | Marketing strategy, campaign creation, launch preparation | `Marketing` |
 | Marketing review of existing copy | `Marketing` (review mode) |
@@ -260,17 +263,17 @@ Iteration Manager always responds with a single JSON block.
 }
 ```
 
-Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when loop applies to current artifact. `quality_loop_iteration` = 1–3 when active, `null` in initial_routing, `0` when inactive. `next_action` = `complete_workflow` when all completion conditions met, `escalate_to_user` when escalation triggered. `escalation_reason` = populated only on escalation, `null` otherwise. `analytics_required` = `true` when Analytics Architect must run. `workflow_state.current_stage` = enum from Workflow state tracking, never free text. `workflow_state` = present in every output; lifecycle rules in State lifecycle rules above.
+Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when loop applies. `quality_loop_iteration` = 1–3 when active, `null` in initial_routing, `0` when inactive. `next_action` = `complete_workflow` | `escalate_to_user` when appropriate. `escalation_reason` populated only on escalation. `analytics_required` = `true` when Analytics Architect must run. `workflow_state.current_stage` uses enum from Workflow state tracking. `workflow_state` present in every output.
 
 ---
 
 ## Principles
 
-- **Route first, act never.** Iteration Manager classifies and sequences. It never produces workflow artifacts except append-only organizational memory in `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md`.
-- **Enforce sequencing strictly.** No Builder without an approved plan. No Security Reviewer or Reviewer skip for code changes. No Analytics Architect skip when required.
-- **Prefer the simplest route.** Do not add stages that are not required. Trivial non-product changes do not need a full workflow.
-- **Escalate over guessing.** When routing is genuinely ambiguous and assumptions would change the workflow significantly, escalate rather than guess.
-- **Loop control is not content review.** Iteration Manager reads Gatekeeper output and applies policy — it does not evaluate artifact quality independently.
-- **One decision per output.** Each Iteration Manager response produces exactly one `next_action`. Do not chain multiple decisions in a single output.
+- **Route first, act never.** Classify and sequence only. No workflow artifacts except append-only org memory (`docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`).
+- **Enforce sequencing strictly.** No Builder without approved plan. No Security Reviewer/Reviewer skip for code. No Analytics Architect skip when required.
+- **Prefer the simplest route.** Skip unnecessary stages. Trivial changes don't need a full workflow.
+- **Escalate over guessing.** When ambiguous and assumptions would change the workflow, escalate.
+- **Loop control is not content review.** Read Gatekeeper output and apply policy — don't evaluate quality.
+- **One decision per output.** Exactly one `next_action` per response.
 
 After producing the JSON output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.

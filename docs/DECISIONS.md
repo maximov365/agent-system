@@ -333,3 +333,94 @@ Option 2: Standalone Marketing agent.
 - IM routing updated for `marketing_strategy` request type
 - Standard workflow transitions include Marketing → Quality loop and Marketing → UX Writer paths
 - Spec Reviewer, Reviser, Gatekeeper updated to handle `marketing_campaign` artifacts
+
+---
+
+## DEC-011: Illustrator as a tool-agent with MCP integration
+
+**Date:** 2026-03-29
+**Status:** Accepted
+
+### Context
+
+The system needs image generation capabilities. Designer creates mockups and visual direction but cannot generate actual images. The user wants multi-model work — specifically using Google Nano Banana 2 for image generation while the rest of the system runs on Claude.
+
+### Options considered
+
+1. **Designer uses MCP directly** — add image generation capability to Designer agent
+2. **Separate Illustrator tool-agent** — new agent type that bridges the system with external models via MCP
+3. **External workflow** — generate images outside the agent system manually
+
+### Decision
+
+Option 2: Separate Illustrator tool-agent.
+
+### Rationale
+
+- Clean separation: Designer thinks (visual direction), Illustrator executes (image generation)
+- Model-agnostic: can switch between Nano Banana, DALL-E, FLUX without changing Designer
+- Establishes the "tool-agent" pattern — reusable for future external model integrations (voice, video, 3D)
+- MCP servers run locally via npx — no infrastructure needed
+- Designer remains focused on UI/UX without MCP tool dependencies
+- Illustrator handles graceful degradation when MCP tool is unavailable
+
+### Implications
+
+- New `agents/illustrator.md` agent definition (tool-agent type)
+- New `docs/MCP_TOOLS.md` — MCP tool configuration guide
+- New `illustration` artifact type in handoff contract
+- Designer updated with "Visual brief format" section
+- Workflow: Designer → Illustrator → Designer (review loop)
+- Illustrator can also serve Marketing for campaign visuals
+- `.cursor/mcp.json` is project-specific and should be gitignored if it contains API keys
+
+---
+
+## DEC-012: OmniRoute as future multi-model infrastructure (deferred)
+
+**Date:** 2026-03-29
+**Status:** Researched — deferred
+
+### Context
+
+The agent system currently runs on Claude (via Cursor) with a single MCP integration for image generation (Nano Banana 2). As the system grows (more tool-agents, higher usage, more downstream projects), multi-model routing, cost optimization, and fallback resilience may become necessary.
+
+[OmniRoute](https://github.com/diegosouzapw/OmniRoute) (MIT, 1.6k stars) is an open-source AI gateway that provides: unified endpoint for 67+ providers, automatic fallback chains (Subscription → API Key → Cheap → Free), format translation (OpenAI ↔ Claude ↔ Gemini), multi-account round-robin, MCP server, cost tracking, circuit breakers.
+
+### Options considered
+
+1. **Adopt OmniRoute now** — run as local proxy, route all agent traffic through it
+2. **Defer** — keep current architecture (Claude + individual MCP servers), adopt later when needed
+3. **Ignore** — stay single-model permanently
+
+### Decision
+
+Option 2: Defer. Record for future consideration.
+
+### Rationale
+
+**Useful for:**
+- Multi-model routing for tool-agents (Illustrator, future voice/video agents)
+- Free providers for draft tasks (Marketing first drafts, UX Writer iterations, Discovery research)
+- Fallback chains when Claude hits rate limits mid-workflow
+- Image generation via unified `/v1/images/generations` (10+ providers)
+
+**Not useful yet because:**
+- Agent prompts are optimized for Claude; other models may not follow complex role instructions reliably
+- Two downstream projects don't justify the infrastructure overhead
+- Current MCP-per-tool approach is simpler and sufficient
+- Adding a proxy layer increases debugging complexity
+
+**Triggers to revisit:**
+- 3+ tool-agents requiring different external models
+- Claude costs become a concern (free providers for low-stakes tasks)
+- Rate limits disrupt workflows regularly
+- Need for model A/B testing across agents
+
+**Planned integrations (pre-OmniRoute or via OmniRoute):**
+
+1. **Perplexity API** — for Discovery agent research tasks (technical, market, competitive, legal modes). Perplexity provides real-time web search + LLM synthesis, which is stronger than Claude's knowledge cutoff for current data. Can be integrated as a standalone MCP server or routed through OmniRoute.
+
+2. **Multi-model translation for Unfolda** — OmniRoute enables testing and selecting optimal models per language pair for Unfolda's translation pipeline. Current state: all 3 quality tiers use Claude (Haiku/Sonnet/Opus). Opportunity: express tier could use cheaper models (DeepSeek, GLM, Kimi) at comparable quality for certain language pairs; standard tier could use Gemini Pro at ~3x lower cost. OmniRoute's Translator Playground enables side-by-side comparison. Architecturally Unfolda is ready — env vars (`TRANSLATION_MODEL_EXPRESS/STANDARD/PREMIUM`) and single-provider adapter pattern support swapping. This is a natural post-MVP step.
+
+3. **Fallback chains for long workflows** — both Voxema (local LLM summarization) and Unfolda (100K word book translation taking 20-30 min) benefit from automatic fallback when provider rate limits or outages interrupt mid-workflow.

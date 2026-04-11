@@ -15,3 +15,4 @@
 | TASK-007 | UX Writer agent for consistent user-facing copy | completed | medium | small |
 | TASK-008 | Deploy Contracts + CI templates + Architect/Reviewer extensions | completed | high | medium |
 | TASK-009 | Marketing Agent — strategy, campaigns, launch kits | completed | medium | small |
+| TASK-010 | Illustrator tool-agent + MCP integration + Designer visual briefs | completed | medium | small |

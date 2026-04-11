@@ -210,3 +210,20 @@ Use one block per closed workflow. Keep it factual and short.
 - Clean separation between Discovery marketing mode (research) and Marketing agent (campaign creation) avoids role confusion
 - Reused existing patterns: standalone agent with operating modes, quality loop integration, UX Writer collaboration
 - Marketing agent is fully on-demand — no mandatory insertion into the standard workflow, keeping it lightweight
+
+---
+
+## TASK-010: Illustrator tool-agent + MCP integration (2026-03-29)
+
+### What went wrong
+- Nothing significant. First "tool-agent" — a new agent pattern that bridges to external AI models via MCP. Required new documentation (`docs/MCP_TOOLS.md`) since no prior pattern existed for external tool dependencies.
+
+### Repeated review themes
+- Artifact type enum continues growing (now 13 values). Programmatic enum validation in audit.py would catch drift earlier.
+- New agent requires 6–8 file updates (same observation as TASK-009). "Add new agent" checklist is increasingly justified.
+
+### What worked well
+- Tool-agent pattern is clean: Illustrator receives a brief, calls MCP, returns results. No design decision authority — that stays with Designer.
+- MCP servers run locally via npx — zero infrastructure. API key is the only requirement.
+- Visual brief format in Designer gives Illustrator unambiguous input, reducing prompt engineering at the Illustrator level.
+- Pattern is reusable for future tool-agents (voice generation, video, 3D, browser automation).

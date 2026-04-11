@@ -156,14 +156,15 @@ Before designing, extract from the Product specification:
 Generate visual mockups using the most effective approach available:
 
 - **HTML/CSS prototypes** — interactive, best for layout and flow (preferred when feasible)
-- **Image generation** — static mockups for visual concepts, illustrations, or complex layouts
 - **Text-based wireframes** — ASCII/markdown wireframes when visual tools are unavailable
+- **Illustrator briefs** — when illustrations, icons, hero images, or marketing visuals are needed, produce a structured visual brief and hand off to Illustrator (see Visual brief format below)
 
 For each screen or state, provide:
 
 - A visual mockup (image or HTML)
 - A brief description of what the user sees and can do
 - Notes on interaction behavior (hover, click, transitions)
+- Visual briefs for any illustrations that Illustrator should generate
 
 ### 3. Present to user
 
@@ -215,6 +216,27 @@ When no brand guide exists, use clean, modern defaults:
 - Clear visual hierarchy
 
 Use `project.config.yaml` UX copy examples (if defined) for placeholder text in mockups.
+
+---
+
+## Visual brief format
+
+When illustrations or generated images are needed, include a visual brief in the design output. Illustrator (a tool-agent powered by an external image generation model) will execute these briefs.
+
+```text
+### Visual Brief — <description>
+- Subject: <what the image should show>
+- Style: <photographic / illustration / flat vector / 3D / icon / etc.>
+- Colors: <specific hex values from BRAND.md, or "brand palette">
+- Aspect ratio: <1:1 / 16:9 / 9:16 / 3:2 / custom>
+- Resolution tier: <fast (iteration) / balanced / maximum (final asset)>
+- References: <paths to reference images, or "none">
+- Text overlay: <text that should appear on the image, or "none">
+- Avoid: <what should NOT be in the image>
+- Context: <where this image will be used — hero section, app icon, card, etc.>
+```
+
+Multiple briefs can be included in a single design output. Each brief becomes a separate Illustrator task.
 
 ---
 

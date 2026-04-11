@@ -89,3 +89,10 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** Define the agent with multiple operating modes (strategy, campaign, review). Route via IM on demand or at specific workflow points. Integrate with the quality loop for complex artifacts. Connect to UX Writer for tone consistency and Designer for visual briefs. Do not insert as mandatory step in the standard implementation workflow.
 - **Why it worked:** Marketing Agent can run independently (user request), after Product spec (strategy), or before launch (launch kit) without blocking the implementation pipeline. Quality loop handles complex strategies; simple campaigns go directly to the user.
 - **Related:** `docs/DECISIONS.md` DEC-010.
+
+## Pattern: Tool-agents for external model integration via MCP
+
+- **Context:** The agent system runs on a single LLM (Claude), but some tasks benefit from specialized external models (image generation, voice synthesis, video, etc.). Adding these capabilities directly to existing agents creates MCP tool dependencies and bloats their definitions.
+- **Approach:** Define a "tool-agent" — a lightweight agent that receives a structured brief from another agent, calls an external model via MCP, and returns results to the requesting agent for review. The tool-agent has no decision authority; it executes briefs. The requesting agent (e.g., Designer) owns creative direction and reviews results. MCP configuration is documented in `docs/MCP_TOOLS.md` and is project-specific (`.cursor/mcp.json`).
+- **Why it worked:** Clean separation of concerns — Designer thinks, Illustrator generates. Model-agnostic — switching from Nano Banana to DALL-E requires only MCP config change, not agent redesign. Graceful degradation — if MCP tool is unavailable, Illustrator returns `blocked` status. Pattern scales to any external model (voice, video, 3D) by creating new tool-agents with the same brief→execute→review workflow.
+- **Related:** `docs/DECISIONS.md` DEC-011.
