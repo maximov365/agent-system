@@ -54,6 +54,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 `artifact_path` must follow these rules depending on artifact type:
 
 - **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `animation`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
+- **Illustrations** (`illustration`) — array of repository-relative paths to generated image files, e.g. `["assets/hero.png", "assets/icon.png"]`
 - **Code** — array of repository-relative file paths changed by Builder or UI Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -135,6 +136,7 @@ Status values are fixed. No agent may invent new values.
 | `validation_failed` | Analytics instrumentation has must_fix issues | Analytics Validator (verdict: revise) |
 | `security_passed` | No blocking security issues found | Security Reviewer (verdict: pass) |
 | `security_failed` | Security issues require Builder or UI Builder fixes | Security Reviewer (verdict: fail) |
+| `blocked` | Agent cannot proceed due to missing tool or dependency | Illustrator (MCP tool unavailable) |
 | `changes_suggested` | Non-blocking copy or content improvements suggested | UX Writer (copy review), Marketing (marketing review) |
 
 **Mapping from agent-native verdicts to handoff status:**
@@ -162,6 +164,8 @@ Status values are fixed. No agent may invent new values.
 | Design Reviewer | `APPROVED WITH MINOR NOTES` | `approved` |
 | Design Reviewer | `CHANGES REQUIRED` | `changes_required` |
 | Animator | animation spec complete | `produced` |
+| Illustrator | images generated | `produced` |
+| Illustrator | MCP tool unavailable | `blocked` |
 | Designer | design approved by user | `produced` |
 | Test Strategist | test plan complete | `produced` |
 | Architect | plan complete | `produced` |
@@ -179,7 +183,7 @@ Status values are fixed. No agent may invent new values.
 
 ## Blocking issues
 
-When `status` is `escalate`, `changes_required`, `revise`, `validation_failed`, or `security_failed`, populate `blocking_issues` with structured entries. Leave the array empty for all other statuses.
+When `status` is `escalate`, `changes_required`, `revise`, `validation_failed`, `security_failed`, or `blocked`, populate `blocking_issues` with structured entries. Leave the array empty for all other statuses.
 
 ```json
 "blocking_issues": [
