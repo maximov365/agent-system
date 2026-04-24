@@ -24,6 +24,35 @@ Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat
 
 Full onboarding guide: [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
 
+### One-time setup (after cloning agent-system)
+
+```bash
+bash /path/to/agent-system/install-slash-commands.sh
+```
+
+Installs the `/init-downstream` user-level Claude Code slash command. Re-run after every framework `git pull` to pick up updates.
+
+### Deploy a new downstream project (recommended flow)
+
+```bash
+mkdir -p /path/to/your-project && cd /path/to/your-project
+claude
+```
+
+Then in the Claude Code session:
+
+```
+/init-downstream "Your Project Name"
+```
+
+This will:
+1. Create `project.config.yaml` with the project name
+2. Register the path in `agent-system/downstream.projects`
+3. Sync framework files and render templates
+4. Offer to start the onboarding workflow (Discovery intake mode)
+
+### Manual setup (alternative)
+
 1. Edit `project.config.yaml` with your project details
 2. Run `python setup.py` to render all templates
 3. Start working — Claude/Cursor will follow the agent workflow automatically
