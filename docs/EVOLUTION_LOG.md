@@ -507,4 +507,78 @@ This methodology change takes effect on the next `/ai-landscape-review` invocati
 
 ---
 
+## Adoption Notes — 2026-04-24 (review #4 outcomes)
+
+Five decisions executed with explicit zero-degradation checks.
+
+### #18 ✅ Closed F4 — Claude Mythos Preview GA monitoring
+
+- **Action:** Status updated in-line in Review #4 entry above. F4 is **permanently closed**.
+- **Quality risk check:** zero — removes a stale monitoring item, no agent behavior change.
+
+### #19 ✅ Investigated Anthropic Agent-Based Code Review (CCR) — complementary to our Reviewer, not replacement
+
+- **What it is:** Multi-agent PR review system by Anthropic, research preview for Team and Enterprise Claude Code users. Feature ships with `/ultrareview` command (CLI ≥2.1.86) since April 22, 2026. Launches a fleet of specialized cloud agents that analyze diff + surrounding code in parallel on Anthropic infrastructure. Each agent targets a different issue class (logic errors, security, edge cases, regressions); a verification step filters false positives; findings posted as inline PR comments with severity. Free tier: Pro/Max users get 3 free reviews by May 5, 2026.
+- **Performance data:** Before CCR, 16% of Anthropic-internal PRs received substantive review comments. After: 54%. Average review cost $15-25, completion time ~20 min.
+- **Source:** [Anthropic Code Review blog](https://claude.com/blog/code-review), [Claude Code docs — Code Review](https://code.claude.com/docs/en/code-review), [InfoQ article](https://www.infoq.com/news/2026/04/claude-code-review/), [DevOps.com analysis](https://devops.com/anthropic-code-review-dispatches-agent-teams-to-catch-the-bugs-that-skim-reads-miss/), [Claude Code `/ultrareview` launch](https://pasqualepillitteri.it/en/news/1301/claude-code-ultrareview-agents-cloud-2026)
+- **Comparison to our Reviewer + Spec Reviewer:**
+
+  | Dimension | Anthropic CCR | Our Reviewer + Spec Reviewer |
+  |---|---|---|
+  | Scope | Code PRs only (git diff-based) | Any artifact (code, specs, designs, plans, copy) |
+  | Execution | Parallel multi-agent on Anthropic cloud | Sequential single-agent in Claude Code session |
+  | Specialization | Multiple specialized agents (logic/security/edges) | Single Reviewer covering 6 priorities + specialized Security Reviewer / Analytics Validator |
+  | Trigger | PR open/push or `/ultrareview` / `@claude review` | IM routing after Builder completes |
+  | Cost | $15–25 per PR review | Per Claude Code session cost (part of workflow) |
+  | Environment | GitHub/Anthropic cloud | Local Claude Code |
+  | Delivery | Inline PR comments + severity | Handoff JSON + next_recommended_agent |
+
+- **Recommendation: adopt as COMPLEMENT, not replacement.** Anthropic CCR is stronger at code-specific review (parallel specialists, verification step, proven 3× catch-rate improvement). Our Reviewer + Spec Reviewer remain essential for NON-code artifacts (feature specs, design reviews, architecture plans, marketing copy) and for workflow-integrated completion verification (plan adherence check, task scope). Document `/ultrareview` as an **optional post-merge code quality enhancement** in `docs/MCP_TOOLS.md` (or new `docs/EXTERNAL_REVIEWERS.md`).
+- **Quality risk check:** zero — investigation only, no code changes. If we later add CCR integration as optional note, still zero — it's an EXTERNAL tool users can invoke, doesn't change our agent definitions.
+
+### #20 ✅ Investigated Claude Code Agent Teams — architectural option, not adopting
+
+- **What it is:** Experimental native multi-agent feature in Claude Code (shipped with Opus 4.6). Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variable or settings.json flag. One session acts as team lead (coordinating + assigning), teammates work in their own context windows and communicate via shared task list + messaging.
+- **Best-fit use cases (per Anthropic):** parallel research/review with teammates on different aspects, new modules with teammates owning separate pieces, debugging with competing hypotheses, cross-layer coordination (frontend+backend+tests).
+- **Stress test validation:** 16 agents wrote a Rust-based C compiler (100K lines, builds Linux) over ~2,000 Claude Code sessions.
+- **Source:** [Claude Code Agent Teams docs](https://code.claude.com/docs/en/agent-teams), [Anthropic Engineering: Building a C compiler](https://www.anthropic.com/engineering/building-c-compiler), [SitePoint setup guide](https://www.sitepoint.com/anthropic-claude-code-agent-teams/)
+- **Mapping to our framework:**
+
+  | Claude Code Agent Teams concept | Our framework equivalent |
+  |---|---|
+  | Team lead session | Iteration Manager |
+  | Teammates with own context | Specialized agents (Builder, UI Builder, etc.) |
+  | Shared task list | `docs/TASKS.md` + workflow_state |
+  | Inter-agent messaging | Handoff blocks |
+  | Parallel execution | **Missing** — we're sequential |
+
+- **Recommendation: DO NOT adopt now.** Reasons:
+  1. **Feature is experimental** — flag-gated, no stable API contract. Violates our backward-compatibility principle for integrations.
+  2. **Parallel execution requires workflow_state redesign** — current `workflow_state.current_stage` is a single enum assuming linear progress. Parallel branches need tracking structure we don't have.
+  3. **Quality loop semantics unclear for parallel outputs** — if 3 Builder agents work in parallel, which output does Reviewer evaluate? Do they merge? What's Gatekeeper's input?
+  4. **No current pain point it solves** — our workflows are task-bounded and sequential execution hasn't hurt any active downstream.
+- **When to revisit:** If/when a downstream has a workflow that genuinely benefits from parallelism (e.g., full-stack feature: independent backend + frontend + tests + docs tracks that converge). Start a dedicated architectural discovery at that point.
+- **Documentation:** F27/F28 remain as watch-list items; not adding to KNOWN_PATTERNS yet (it's not a validated pattern for our system).
+- **Quality risk check:** zero — investigation only. Actively declining to integrate experimental feature is the conservative choice.
+
+### #21 ✅ Updated benchmark reference: SWE-Bench Pro as primary
+
+- **Action:** Tier 4 in `agents/discovery-modes/ai-landscape.md` now references **SWE-Bench Pro as primary**, with a note that SWE-bench Verified is saturating and has confirmed gold-patch leakage (OpenAI dropped reporting; 59.4% of hardest-unsolved problems had flawed test cases). Added SWE-bench Live and llm-stats.com aggregator.
+- **Historical log entries (F4, F13, summary) intentionally NOT retroactively edited** — they accurately reflect what we knew at the time. Only forward-looking methodology was updated.
+- **Quality risk check:** zero — methodology reference update, no agent behavior change. Future reviews will use better benchmark.
+
+### #22 ✅ Added Claude Managed Agents pattern to KNOWN_PATTERNS.md
+
+- **Action:** New pattern "Hosted managed runtime for long-horizon autonomous agents" added to `docs/KNOWN_PATTERNS.md`. Documents Anthropic Claude Managed Agents (public beta April 2026) + OpenAI Agents SDK sandboxing as options for autonomous long-running workloads. Explicitly flagged as NOT needed today; only adopt when workload is genuinely autonomous and long-horizon.
+- **Quality risk check:** zero — additive documentation, no existing agent or pattern changed. Flagged as opt-in future option.
+
+### Summary
+
+- 5 of 7 "yes"-recommended decisions from review #4 executed (18, 19, 20, 21, 22).
+- 2 "maybe" decisions explicitly deferred (23 Claude Design comparison, 24 Vercel Open Agents in MCP_TOOLS) — no active signal requiring them yet.
+- **Quality degradation check across all 5 changes:** zero. Each change is either (a) doc closure, (b) investigation report, (c) additive documentation, or (d) benchmark reference update. Zero agent behavior changes, zero handoff contract changes, zero workflow changes. Backward compatibility preserved.
+- **Open watch items carried forward:** F27/F28 (parallel multi-agent architectural question), F30 (Anthropic CCR as optional post-merge tool), F34 (OpenAI Agents SDK evolution), F35 (Vercel Open Agents), F36 (OpenHands), F38 (Anthropic Agentic Coding Trends quarterly read).
+
+---
+
 

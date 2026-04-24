@@ -56,11 +56,15 @@ Use WebSearch and WebFetch to investigate the following sources. Spend ~5–10 w
 - Hugging Face papers — top trending recent
 
 ### Tier 4 — Benchmarks & evaluations
-- SWE-bench leaderboard — software engineering agent performance
+
+- **[SWE-Bench Pro](https://labs.scale.com/leaderboard/swe_bench_pro_public)** — primary software-engineering benchmark (OpenAI dropped SWE-bench Verified reporting in early 2026 after audit found 59.4% of hardest unsolved problems had flawed test cases / gold-patch leakage)
+- SWE-bench Verified — still used by some vendors but treat results with skepticism (saturating, contamination confirmed)
+- SWE-bench Live — realistic agent-in-real-repo evaluation
 - AgentBench — agent capabilities
 - HELM — holistic LLM evaluation
 - ARC-AGI — reasoning benchmarks
 - WebArena, OSWorld — agent operating in environments
+- [llm-stats.com](https://llm-stats.com/) — cross-vendor leaderboard aggregator
 
 ### Tier 5 — Community & news
 
