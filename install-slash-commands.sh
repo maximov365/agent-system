@@ -36,11 +36,14 @@ for src in "$SOURCE_DIR"/*.md; do
   name="$(basename "$src")"
   target="$TARGET_DIR/$name"
 
-  if [ -f "$target" ] && cmp -s "$src" "$target"; then
+  # Substitute placeholders so each user gets THEIR agent-system path baked in
+  rendered="$(sed "s|{{AGENT_SYSTEM_ROOT}}|$SCRIPT_DIR|g" "$src")"
+
+  if [ -f "$target" ] && [ "$(cat "$target")" = "$rendered" ]; then
     echo "  = $name (unchanged)"
   else
-    cp "$src" "$target"
-    echo "  ✓ $name (installed)"
+    printf '%s' "$rendered" > "$target"
+    echo "  ✓ $name (installed, AGENT_SYSTEM_ROOT=$SCRIPT_DIR)"
     count=$((count + 1))
   fi
 done

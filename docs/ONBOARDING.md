@@ -82,48 +82,45 @@ Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat
 
 ---
 
-## Scenario A — Guided onboarding (recommended)
+## Scenario A — Guided onboarding via `/init-downstream` (recommended)
 
-The fastest way to start. You create a minimal project, sync framework files, and then the agent system guides you through creating all project documents via conversation.
+One Claude Code slash command does everything: creates the project config, registers the project in the framework, syncs framework files, renders templates, and offers to start the guided onboarding workflow.
 
-### 1. Create a repository and bootstrap
-
-```bash
-mkdir my-project && cd my-project
-git init
-cp /path/to/agent-system/project.config.yaml ./project.config.yaml
-```
-
-You do **not** need to fill in `project.config.yaml` — the agents will populate it during onboarding.
-
-### 2. Sync framework files and render
+### Prerequisite (one-time per machine)
 
 ```bash
-# From agent-system directory:
-python sync.py --target /path/to/my-project
-
-# In your project:
-cd my-project
+# Clone agent-system anywhere
+git clone https://github.com/maximov365/agent-system.git ~/projects/agent-system
+cd ~/projects/agent-system
 pip install -r requirements-framework.txt
-python setup.py
+bash install-slash-commands.sh
 ```
 
-### 3. Create empty doc stubs and commit
+The install script bakes your local `agent-system` path into the slash command, so each machine resolves the framework correctly. Re-run after `git pull` to update commands.
+
+### Deploy a new project
 
 ```bash
-mkdir -p docs
-for f in PRD.md ARCHITECTURE.md PIPELINE_CONTRACTS.md FEATURE_MAP.md TASKS.md DECISIONS.md LESSONS_LEARNED.md KNOWN_PATTERNS.md; do
-  [ ! -f "docs/$f" ] && echo "<!-- placeholder -->" > "docs/$f"
-done
-git add -A
-git commit -m "chore: bootstrap agent system v$(cat .agent-system-version)"
+mkdir -p ~/projects/my-project && cd ~/projects/my-project
+claude
 ```
 
-### 4. Start the guided onboarding
+In the Claude Code session:
 
-Open the project in Cursor and say:
+```
+/init-downstream "My Project"
+```
 
-> **"Запускаем новый проект"** (or "Start a new project")
+The command:
+1. Creates `project.config.yaml` with the project name
+2. Registers the path in `agent-system/downstream.projects` (so future framework commits auto-sync to this project)
+3. Runs `sync.py --target . --render` to copy framework files and substitute the project name
+4. Verifies the deployment
+5. Asks: **"Start onboarding (Discovery intake mode)?"**
+
+Reply **"yes"** to begin onboarding (or **"later"** to defer).
+
+### What the onboarding does
 
 The Iteration Manager detects that project docs are empty stubs and starts the **Onboarding Workflow** (defined in `AGENTS.md`):
 

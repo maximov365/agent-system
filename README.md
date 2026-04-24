@@ -24,13 +24,27 @@ Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat
 
 Full onboarding guide: [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
 
-### One-time setup (after cloning agent-system)
+### One-time setup (per machine)
+
+Prerequisites: Python 3.9+, Git, [Claude Code](https://docs.claude.com/claude-code).
 
 ```bash
-bash /path/to/agent-system/install-slash-commands.sh
+# 1. Clone the framework anywhere you like
+git clone https://github.com/maximov365/agent-system.git ~/projects/agent-system
+cd ~/projects/agent-system
+
+# 2. Install Python deps
+pip install -r requirements-framework.txt
+
+# 3. Install the /init-downstream Claude Code slash command
+bash install-slash-commands.sh
+
+# 4. (Optional) Enable post-commit auto-sync of downstream projects
+ln -sf "$(pwd)/hooks/post-commit" .git/hooks/post-commit
+ln -sf "$(pwd)/hooks/pre-commit" .git/hooks/pre-commit
 ```
 
-Installs the `/init-downstream` user-level Claude Code slash command. Re-run after every framework `git pull` to pick up updates.
+The install script bakes your local `agent-system` path into the slash command, so each machine resolves the framework correctly. Re-run `bash install-slash-commands.sh` after every framework `git pull` to pick up updated commands.
 
 ### Deploy a new downstream project (recommended flow)
 

@@ -15,11 +15,11 @@ Execute the following steps in order. Stop and report any error.
 
 - `TARGET_DIR` = current working directory (use `pwd` via Bash)
 - `PROJECT_NAME` = the user-supplied argument (`$ARGUMENTS`); strip surrounding quotes if present
-- `AGENT_SYSTEM_ROOT` = `/Users/dm/projects/agent-system`
+- `AGENT_SYSTEM_ROOT` = `{{AGENT_SYSTEM_ROOT}}`
 
 If `PROJECT_NAME` is empty or only whitespace, stop and ask the user for a name.
 
-If `AGENT_SYSTEM_ROOT` does not exist, stop and report. Suggest the user clone it first: `git clone https://github.com/maximov365/agent-system.git /Users/dm/projects/agent-system`.
+If `AGENT_SYSTEM_ROOT` does not exist, stop and report. Suggest the user clone it first: `git clone https://github.com/maximov365/agent-system.git {{AGENT_SYSTEM_ROOT}}`.
 
 ### 2. Refuse to overwrite an existing downstream
 
