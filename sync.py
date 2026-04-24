@@ -70,6 +70,8 @@ GITIGNORE_ENTRIES = [
     "/docs/TASK_TEMPLATE.md",
     "/docs/ONBOARDING.md",
     "/docs/MCP_TOOLS.md",
+    "/docs/CLAUDE_SKILLS.md",
+    "/docs/METRICS.md",
     "/setup.py",
     "/requirements-framework.txt",
     "/.agent-system-version",

@@ -1,6 +1,6 @@
 # Framework Metrics
 
-**Snapshot:** 2026-04-24T11:20:14Z
+**Snapshot:** 2026-04-24T11:40:48Z
 **Framework version:** 1.0.23
 
 This file is regenerated on every `python3 metrics.py` run. Append-only history is in `docs/METRICS_HISTORY.jsonl`. See `metrics.py` for the schema.
@@ -52,8 +52,8 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 
 | Metric | Value |
 |---|---|
-| Commits (7d) | 9 |
-| Commits (30d) | 42 |
+| Commits (7d) | 10 |
+| Commits (30d) | 43 |
 | Version bumps (30d) | 24 |
 | Version bumps (90d) | 24 |
 
@@ -68,14 +68,26 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 
 ---
 
-## Pending (Phase 2 — needs IM instrumentation)
+## Tier 1 — Workflow telemetry (from Claude Code transcripts)
 
-These metrics require Iteration Manager to log per-workflow telemetry. Not available yet:
+| Metric | Value |
+|---|---|
+| Sessions scanned | 10 |
+| Projects with activity | 9 |
+| Workflows tracked (with task_id) | 0 |
+| Workflow tracking | _no handoff blocks yet — agents haven't emitted them in recorded sessions_ |
+| Cost (last 7 days) | $80.73 |
+| Cost (last 30 days) | $295.94 |
 
-- `workflow_completion_rate`
-- `avg_quality_loop_iterations`
-- `avg_builder_cycles`
-- `token_cost_per_workflow`
+**Cost breakdown (30d, top 5 projects):**
+
+| Project | Input tok | Output tok | Cache read | Cost USD |
+|---|---|---|---|---|
+| probey | 14,923 | 320,829 | 409,974,029 | $138.41 |
+| Voxema (worktree:inspiring chaum) | 5,607 | 433,870 | 114,591,683 | $68.89 |
+| ecom scout | 18,258 | 239,273 | 72,725,661 | $42.57 |
+| agent system (worktree:brave bouman) | 29,121 | 151,001 | 53,959,737 | $38.16 |
+| x5club (worktree:jolly raman) | 298 | 114,573 | 13,013,442 | $7.91 |
 
 ---
 

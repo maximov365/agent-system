@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.agent-system.weekly-review</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>osascript -e 'display notification "Run /metrics and /ai-landscape-review in Claude Code" with title "Agent System Weekly Review" sound name "Glass"' &amp;&amp; echo "$(date) — weekly review reminder fired" &gt;&gt; "{{AGENT_SYSTEM_ROOT}}/docs/.weekly-review.log"</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>8</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/agent-system-weekly-review.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/agent-system-weekly-review.error.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

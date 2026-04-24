@@ -253,23 +253,215 @@ def run_audit_summary() -> dict:
         return {"available": False, "error": str(e)}
 
 
-def collect_snapshot() -> dict:
+def compute_workflow_telemetry(project_filter: str | None = None) -> dict:
+    """Phase 2 metrics from Claude Code transcripts. Delegates to metrics_workflow."""
+    try:
+        sys.path.insert(0, str(ROOT))
+        import metrics_workflow
+        return metrics_workflow.collect(filter_project=project_filter)
+    except Exception as e:
+        return {"available": False, "error": str(e)}
+
+
+def compute_project_knowledge(project_root: Path) -> dict:
+    """Like compute_knowledge() but for a downstream project's docs."""
+    lessons = project_root / "docs" / "LESSONS_LEARNED.md"
+    patterns = project_root / "docs" / "KNOWN_PATTERNS.md"
+
+    def count(path: Path, marker: str) -> int:
+        if not path.exists():
+            return 0
+        return sum(1 for line in path.read_text().splitlines() if line.startswith(marker))
+
+    def recent(path: Path, days: int) -> int:
+        if not path.exists():
+            return 0
+        try:
+            since = (dt.datetime.now() - dt.timedelta(days=days)).strftime("%Y-%m-%d")
+            r = subprocess.run(
+                ["git", "log", f"--since={since}", "--numstat", "--pretty=tformat:", "--", str(path.name)],
+                capture_output=True, text=True, cwd=str(path.parent), timeout=10,
+            )
+            total = 0
+            for line in r.stdout.strip().splitlines():
+                parts = line.split("\t")
+                if parts and parts[0].isdigit():
+                    total += int(parts[0])
+            return total
+        except Exception:
+            return 0
+
+    return {
+        "lessons_total": count(lessons, "## "),
+        "patterns_total": count(patterns, "## Pattern"),
+        "lessons_added_lines_30d": recent(lessons, 30),
+        "patterns_added_lines_30d": recent(patterns, 30),
+    }
+
+
+def compute_project_snapshot(project_path: Path) -> dict:
+    """Single-project metrics view (used when invoked from a downstream project)."""
     framework_version = read_version()
+    if not project_path.exists():
+        return {"error": f"project path not found: {project_path}"}
+
+    cfg = project_path / "project.config.yaml"
+    project_name = "unknown"
+    if cfg.exists():
+        m = re.search(r'name:\s*"([^"]+)"', cfg.read_text())
+        if m:
+            project_name = m.group(1)
+
+    ver_file = project_path / ".agent-system-version"
+    project_version = ver_file.read_text().strip() if ver_file.exists() else "unknown"
+    drift = semver_distance(project_version, framework_version) if project_version != "unknown" else None
+
+    prd = project_path / "docs" / "PRD.md"
+    maturity = "no_prd"
+    prd_words = 0
+    if prd.exists():
+        prd_words = len(prd.read_text().split())
+        maturity = "stub" if prd_words < THRESHOLDS["stub_doc_min_words"] else "filled"
+
+    # Workflow telemetry filtered to this project
+    workflow = compute_workflow_telemetry(project_filter=project_path.name)
+
     return {
         "ts": utc_now_iso(),
+        "scope": "project",
+        "project_name": project_name,
+        "project_path": str(project_path),
+        "framework_version": framework_version,
+        "project_version": project_version,
+        "drift": drift,
+        "maturity": maturity,
+        "prd_words": prd_words,
+        "knowledge": compute_project_knowledge(project_path),
+        "workflow_telemetry": workflow,
+    }
+
+
+def collect_snapshot() -> dict:
+    framework_version = read_version()
+    workflow = compute_workflow_telemetry()
+    return {
+        "ts": utc_now_iso(),
+        "scope": "framework",
         "framework_version": framework_version,
         "portfolio": compute_portfolio(framework_version),
         "knowledge": compute_knowledge(),
         "velocity": compute_framework_velocity(),
         "evolution_log": compute_evolution_log_stats(),
+        "workflow_telemetry": workflow,
         "health": run_audit_summary(),
-        "phase2_pending": [
-            "workflow_completion_rate",
-            "avg_quality_loop_iterations",
-            "avg_builder_cycles",
-            "token_cost_per_workflow",
-        ],
     }
+
+
+def _render_workflow_section(wt: dict) -> str:
+    """Render workflow telemetry section for either framework or project scope."""
+    if not wt or wt.get("error"):
+        return f"_Telemetry unavailable: {wt.get('error', 'unknown error') if wt else 'not computed'}_"
+
+    wf = wt.get("workflows", {})
+    c7 = wt.get("cost_7d", {})
+    c30 = wt.get("cost_30d", {})
+
+    lines = [
+        f"| Metric | Value |",
+        f"|---|---|",
+        f"| Sessions scanned | {wt.get('sessions_scanned', 0)} |",
+        f"| Projects with activity | {len(wt.get('projects_with_activity', []))} |",
+        f"| Workflows tracked (with task_id) | {wf.get('workflow_count', 0)} |",
+    ]
+
+    if wf.get("workflow_count", 0) > 0:
+        cr = wf.get("completion_rate")
+        lines.extend([
+            f"| Completion rate | {f'{cr:.0%}' if cr is not None else 'N/A'} |",
+            f"| Avg quality loop iterations | {wf.get('avg_quality_loop_iterations', 'N/A')} |",
+            f"| Avg builder cycles per task | {wf.get('avg_builder_cycles', 'N/A')} |",
+        ])
+    else:
+        lines.append(f"| Workflow tracking | _no handoff blocks yet — agents haven't emitted them in recorded sessions_ |")
+
+    lines.extend([
+        f"| Cost (last 7 days) | ${c7.get('total_cost_usd', 0):.2f} |",
+        f"| Cost (last 30 days) | ${c30.get('total_cost_usd', 0):.2f} |",
+    ])
+
+    if c30.get("by_project"):
+        top = sorted(c30["by_project"].items(), key=lambda x: -x[1]["cost_usd"])[:5]
+        lines.append("\n**Cost breakdown (30d, top 5 projects):**\n")
+        lines.append("| Project | Input tok | Output tok | Cache read | Cost USD |")
+        lines.append("|---|---|---|---|---|")
+        for proj, info in top:
+            t = info["tokens"]
+            lines.append(
+                f"| {proj} | {t['input']:,} | {t['output']:,} | {t['cache_read']:,} | ${info['cost_usd']:.2f} |"
+            )
+
+    return "\n".join(lines)
+
+
+def render_project_markdown(s: dict) -> str:
+    """Render single-project metrics as Markdown."""
+    kn = s.get("knowledge", {})
+    wt = s.get("workflow_telemetry", {})
+
+    def drift_badge(d: int | None) -> str:
+        if d is None:
+            return "?"
+        if d == 0:
+            return "✓ current"
+        if d <= THRESHOLDS["version_drift_minor"]:
+            return f"↓{d} (minor)"
+        if d < THRESHOLDS["version_drift_major"]:
+            return f"⚠ ↓{d} (warning)"
+        return f"🚨 ↓{d} (major)"
+
+    return f"""# Project Metrics — {s['project_name']}
+
+**Snapshot:** {s['ts']}
+**Path:** `{s['project_path']}`
+**Framework version:** {s['framework_version']}
+
+---
+
+## Status
+
+| Metric | Value |
+|---|---|
+| Framework drift | {drift_badge(s.get('drift'))} ({s.get('project_version', '?')} → {s['framework_version']}) |
+| PRD maturity | {s.get('maturity', '?')} ({s.get('prd_words', 0)} words) |
+
+---
+
+## Knowledge
+
+| Metric | Value |
+|---|---|
+| LESSONS_LEARNED entries | {kn.get('lessons_total', 0)} |
+| KNOWN_PATTERNS entries | {kn.get('patterns_total', 0)} |
+| Lines added to LESSONS_LEARNED (30d) | {kn.get('lessons_added_lines_30d', 0)} |
+| Lines added to KNOWN_PATTERNS (30d) | {kn.get('patterns_added_lines_30d', 0)} |
+
+---
+
+## Workflow telemetry (this project)
+
+{_render_workflow_section(wt)}
+
+---
+
+## Schema
+
+- Drift: semver distance from framework `VERSION` to this project's `.agent-system-version`
+- PRD maturity: `filled` if ≥{THRESHOLDS['stub_doc_min_words']} words, else `stub`
+- Knowledge: entries + recent line additions from `git log --numstat`
+- Workflow telemetry: parsed from `~/.claude/projects/<encoded-path>/*.jsonl` — handoff JSON blocks + message usage metadata
+
+Run from framework root (`cd {{{{AGENT_SYSTEM_ROOT}}}}`) to see portfolio view instead.
+"""
 
 
 def render_markdown(s: dict) -> str:
@@ -367,11 +559,9 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 
 ---
 
-## Pending (Phase 2 — needs IM instrumentation)
+## Tier 1 — Workflow telemetry (from Claude Code transcripts)
 
-These metrics require Iteration Manager to log per-workflow telemetry. Not available yet:
-
-{chr(10).join(f"- `{m}`" for m in s['phase2_pending'])}
+{_render_workflow_section(s.get('workflow_telemetry', {}))}
 
 ---
 
@@ -413,32 +603,72 @@ def show_history(n: int) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Framework metrics snapshot + history")
+    ap = argparse.ArgumentParser(description="Framework + project metrics snapshot + history")
     ap.add_argument("--json", action="store_true", help="Output snapshot as JSON to stdout")
     ap.add_argument("--append", action="store_true", help="Append snapshot to docs/METRICS_HISTORY.jsonl")
-    ap.add_argument("--history", type=int, metavar="N", help="Show last N history entries instead of taking snapshot")
+    ap.add_argument("--history", type=int, metavar="N", help="Show last N history entries (framework scope only)")
+    ap.add_argument("--project", metavar="PATH", help="Project scope: produce snapshot for given downstream project path")
     args = ap.parse_args()
 
     if args.history is not None:
         show_history(args.history)
         return 0
 
+    # Decide scope
+    if args.project:
+        project_path = Path(args.project).resolve()
+        snapshot = compute_project_snapshot(project_path)
+        if "error" in snapshot:
+            print(f"Error: {snapshot['error']}", file=sys.stderr)
+            return 1
+        out_md = project_path / "docs" / "METRICS.md"
+        out_md.parent.mkdir(parents=True, exist_ok=True)
+        out_md.write_text(render_project_markdown(snapshot))
+
+        if args.json:
+            print(json.dumps(snapshot, indent=2, default=str))
+        else:
+            wt = snapshot.get("workflow_telemetry", {})
+            wf = wt.get("workflows", {})
+            c30 = wt.get("cost_30d", {})
+            print(f"=== Project Metrics — {snapshot['project_name']} ({snapshot['ts']}) ===")
+            print(f"  Framework drift:  {snapshot.get('drift', '?')} ({snapshot.get('project_version', '?')} → {snapshot['framework_version']})")
+            print(f"  PRD maturity:     {snapshot.get('maturity', '?')} ({snapshot.get('prd_words', 0)} words)")
+            kn = snapshot.get("knowledge", {})
+            print(f"  Knowledge:        {kn.get('lessons_total', 0)} lessons, {kn.get('patterns_total', 0)} patterns")
+            print(f"  Workflows:        {wf.get('workflow_count', 0)} tracked")
+            print(f"  Cost (30d):       ${c30.get('total_cost_usd', 0):.2f}")
+            print(f"  Snapshot:         {out_md}")
+        return 0
+
+    # Framework scope (default)
     snapshot = collect_snapshot()
 
-    # Always write the markdown snapshot
     METRICS_MD.parent.mkdir(parents=True, exist_ok=True)
     METRICS_MD.write_text(render_markdown(snapshot))
 
     if args.append:
-        append_history(snapshot)
+        # Strip the verbose workflow telemetry from history (already huge)
+        history_snapshot = {k: v for k, v in snapshot.items() if k != "workflow_telemetry"}
+        wt = snapshot.get("workflow_telemetry", {})
+        history_snapshot["workflow_summary"] = {
+            "sessions_scanned": wt.get("sessions_scanned"),
+            "workflows": wt.get("workflows", {}).get("workflow_count"),
+            "completion_rate": wt.get("workflows", {}).get("completion_rate"),
+            "avg_ql_iter": wt.get("workflows", {}).get("avg_quality_loop_iterations"),
+            "avg_builder_cycles": wt.get("workflows", {}).get("avg_builder_cycles"),
+            "cost_7d_usd": wt.get("cost_7d", {}).get("total_cost_usd"),
+            "cost_30d_usd": wt.get("cost_30d", {}).get("total_cost_usd"),
+        }
+        append_history(history_snapshot)
 
     if args.json:
         print(json.dumps(snapshot, indent=2, default=str))
     else:
-        # Brief human summary
         pf = snapshot["portfolio"]
         kn = snapshot["knowledge"]
         vel = snapshot["velocity"]
+        wt = snapshot.get("workflow_telemetry", {})
         print(f"=== Framework Metrics — {snapshot['ts']} ===")
         print(f"  Framework: v{snapshot['framework_version']}")
         print(f"  Portfolio: {pf['active_count']} active / {pf['registered_count']} registered "
@@ -451,6 +681,12 @@ def main() -> int:
               f"(+{kn['lessons_added_lines_7d']}/{kn['patterns_added_lines_7d']} lines past 7d)")
         print(f"  Velocity:  {vel.get('commits_7d', '?')} commits / 7d, "
               f"{vel.get('version_bumps_30d', '?')} version bumps / 30d")
+        wf = wt.get("workflows", {})
+        c30 = wt.get("cost_30d", {})
+        cr = wf.get("completion_rate")
+        cr_str = f"{cr:.0%}" if cr is not None else "N/A"
+        print(f"  Workflows: {wf.get('workflow_count', 0)} tracked, completion rate: {cr_str}")
+        print(f"  Cost (30d): ${c30.get('total_cost_usd', 0):.2f}")
         print(f"  Snapshot:  {METRICS_MD.relative_to(ROOT)}")
         if args.append:
             print(f"  Appended:  {HISTORY_JSONL.relative_to(ROOT)}")
