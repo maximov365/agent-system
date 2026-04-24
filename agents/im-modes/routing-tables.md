@@ -44,6 +44,7 @@ Classify every incoming request before selecting an agent.
 | Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
 | User research needed; planning interviews, usability tests, or surveys | `Discovery` (user-research mode) |
 | Existing research data needs synthesis into themes and recommendations | `Discovery` (research-synthesis mode) |
+| Weekly or on-demand AI landscape review for framework evolution | `Discovery` (ai-landscape mode) |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
 | Design approved; feature has 3+ screens / 5+ custom components / complex responsive or motion specs / user requested structured handoff | `Designer` (handoff-spec mode, before UI Builder) |

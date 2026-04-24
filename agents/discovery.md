@@ -22,6 +22,7 @@ Discovery operates in specialized modes. Select the mode based on the request, t
 | Regulatory compliance, data protection, legal risks | legal | `agents/discovery-modes/legal.md` |
 | Plan or design user research (interviews, usability, surveys) | user-research | `agents/discovery-modes/user-research.md` |
 | Synthesize existing research data into themes and recommendations | research-synthesis | `agents/discovery-modes/research-synthesis.md` |
+| Periodic AI landscape review (papers, frameworks, benchmarks) for framework evolution | ai-landscape | `agents/discovery-modes/ai-landscape.md` |
 
 **Rules:**
 
