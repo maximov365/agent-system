@@ -58,20 +58,23 @@ Skip Analytics Architect only when:
 
 ---
 
-## Inputs
+## Required reading
 
 Before producing the specification, read:
 
-1. `docs/PRD.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/ARCHITECTURE_GUARDRAILS.md`
-4. `docs/PIPELINE_CONTRACTS.md`
-5. `docs/TASKS.md`
-6. `docs/DECISIONS.md`
-7. `docs/LESSONS_LEARNED.md`
-8. `docs/KNOWN_PATTERNS.md`
-9. The feature specification or task description
-10. Any existing analytics specifications for related features
+- The feature specification or task description
+- `docs/PRD.md` — user behavior to measure
+- `docs/PIPELINE_CONTRACTS.md` — stage boundaries where events fire
+- `docs/ARCHITECTURE_GUARDRAILS.md` — instrumentation constraints
+- Any existing analytics specifications for related features (to reuse events)
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE.md` — when proposed events span multiple modules
+- `docs/TASKS.md` — when the spec references prior task work
+- `docs/DECISIONS.md` — when prior decisions constrain measurement choices
+- `docs/LESSONS_LEARNED.md` — when past instrumentation failures are relevant
+- `docs/KNOWN_PATTERNS.md` — when established instrumentation patterns apply
 
 ---
 

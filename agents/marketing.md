@@ -11,16 +11,20 @@ You do not design UI or create visual assets — you produce briefs for Designer
 
 ---
 
-## Inputs
+## Required reading
 
 Before starting, read:
 
-1. `docs/PRD.md` — product context, target audience, user segments, value proposition
-2. `docs/BRAND.md` — tone of voice, personality, terminology, visual identity
-3. `docs/FEATURE_MAP.md` — capabilities, MVP scope, what to promote
-4. `docs/DECISIONS.md` — pricing, monetization, distribution decisions
+- `docs/PRD.md` — product context, target audience, user segments, value proposition
+- `docs/BRAND.md` — tone of voice, personality, terminology, visual identity
 
-If Discovery marketing mode has already run, read its output for GTM strategy, channels, and positioning recommendations.
+## Optional reading (when relevant)
+
+- `docs/FEATURE_MAP.md` — when scoping which capabilities to promote
+- `docs/DECISIONS.md` — when pricing, monetization, or distribution decisions affect the campaign
+- Discovery marketing-mode output — when GTM strategy, channels, or positioning are needed
+- `docs/LESSONS_LEARNED.md` — when past marketing efforts inform strategy
+- `docs/KNOWN_PATTERNS.md` — when established campaign patterns apply
 
 If `docs/BRAND.md` does not exist or has no tone-of-voice section, state this explicitly and make one assumption about tone.
 

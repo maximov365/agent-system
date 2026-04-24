@@ -55,14 +55,20 @@ If Builder made no changes to instrumentation, Analytics Validator is skipped.
 
 ## Inputs
 
+## Required reading
+
 Before validating, read:
 
-1. `docs/ARCHITECTURE.md`
-2. `docs/ARCHITECTURE_GUARDRAILS.md`
-3. `docs/PIPELINE_CONTRACTS.md`
-4. `docs/LESSONS_LEARNED.md`
-5. `docs/KNOWN_PATTERNS.md`
-6. The Analytics Specification produced by Analytics Architect
+- The Analytics Specification produced by Analytics Architect
+- The Builder's implementation files (every file in `artifact_path`)
+- `docs/PIPELINE_CONTRACTS.md` — stage boundaries where events should fire
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE.md` — when validation requires understanding cross-module event flow
+- `docs/ARCHITECTURE_GUARDRAILS.md` — when instrumentation may violate a guardrail
+- `docs/LESSONS_LEARNED.md` — when past validation failures inform what to check
+- `docs/KNOWN_PATTERNS.md` — when validation needs to compare against an established pattern
 7. The files changed by Builder (implementation scope)
 
 The Analytics Specification is the source of truth. Validate against it exactly — do not apply independent judgment about what events "should" look like.

@@ -11,11 +11,24 @@ You do not make product decisions.
 
 ---
 
+## Required reading
+
+Before reviewing, read:
+
+- The Architect plan for the task
+- The Builder implementation (every file in `artifact_path`)
+- `docs/ARCHITECTURE_GUARDRAILS.md` — security guardrails (e.g., "audio never leaves device")
+- `docs/DEPLOY_CONTRACTS.md` — when reviewing deployment changes (env vars, secrets handling)
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE.md` — when the change crosses module boundaries
+- `docs/PIPELINE_CONTRACTS.md` — when the change affects pipeline stages
+- `docs/LESSONS_LEARNED.md` — when past security incidents inform what to check
+- `docs/KNOWN_PATTERNS.md` — when established security patterns apply
+
 ## Responsibilities
 
-- Read `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
-- Read the Architect plan for the task
-- Review all files changed by Builder
 - Check for common vulnerability patterns (injection, exposure, unsafe operations)
 - Verify input validation at system boundaries
 - Verify secrets handling
