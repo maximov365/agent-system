@@ -40,6 +40,7 @@ FRAMEWORK_GLOBS = [
     "docs/TASK_TEMPLATE.md",
     "docs/ONBOARDING.md",
     "docs/MCP_TOOLS.md",
+    "docs/CLAUDE_SKILLS.md",
     "setup.py",
     "requirements-framework.txt",
 ]

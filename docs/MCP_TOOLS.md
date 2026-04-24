@@ -4,6 +4,8 @@ This document describes external MCP (Model Context Protocol) tools used by tool
 
 MCP tools extend agent capabilities beyond text generation — enabling image generation, code execution, browser automation, and other external model integrations.
 
+For optional methodological augmentation via Claude skills (prompt templates, not external services), see `docs/CLAUDE_SKILLS.md`.
+
 ---
 
 ## Image Generation (Illustrator agent)
