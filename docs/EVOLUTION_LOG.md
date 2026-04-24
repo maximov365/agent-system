@@ -328,4 +328,55 @@ Decisions executed within hours:
 
 ---
 
+## Methodology Discovery — 2026-04-24 (meta: source list expansion)
+
+**Type:** Methodology update, not a finding-driven review.
+**Trigger:** User asked "what other sources should we monitor?" — discovered we had a critical Anthropic-blind spot and gaps in autonomous-agents/swarms coverage.
+
+### Gaps identified (with evidence)
+
+1. **Anthropic-blind spot** — 8 of 9 prior-version tiers were vendor-agnostic but Tier 1 was Anthropic-only. We missed: OpenAI GPT-5.4 family, Computer Use API, Tool Search, 1M context, MCP support in Responses API, Assistants → Responses migration; Google Gemini 3.1 Pro, Deep Research / Deep Research Max (93.3% on DeepSearchQA), agentic vision; Stanford AI Index 2026 findings (SWE-bench 60→100% in a year, China-US lead at 2.7%, 57% orgs have agents in production).
+2. **Standards & governance not tracked** — MCP donated to Linux Foundation Agentic AI Foundation (Dec 2025), A2A protocol at v1.2 with 150+ orgs in production (June 2025), MCP v2.0 milestone Q1 2026 (Streamable HTTP + OAuth 2.1). Without monitoring we'd miss breaking-protocol changes.
+3. **Autonomous agents & swarms not surfaced** — Devin (Cognition), OpenHands, SWE-Agent, Cursor agent mode, Sourcegraph Amp, Anthropic Computer Use; OpenAI Agents SDK, AG2/AutoGen, LangGraph deepagents, Hermes Agent (100k+ stars). These compare directly to our Builder workflow and inform whether to add autonomous capability to specific agents.
+4. **Reddit underweighted** — r/AI_Agents has production-failure threads 2-4 weeks ahead of blog posts. r/ClaudeAI tracks Claude Code workflows specifically. r/LocalLLaMA (266k+ members) for open-source / local patterns.
+5. **No cadence rules** — every tier was treated as weekly. Stanford Index is annual; ToT research is months-long signal; Claude Code changelog is daily-velocity. Same scan rhythm wastes queries on slow-signal tiers and under-checks fast-signal ones.
+
+### Methodology changes applied to `agents/discovery-modes/ai-landscape.md`
+
+**Three new tiers:**
+- **Tier 10 — Competing AI ecosystems** (OpenAI, Google/DeepMind, open-source via HF, cross-vendor leaderboards). Closes the Anthropic-blind spot. Required weekly.
+- **Tier 11 — Standards & governance** (MCP roadmap, A2A protocol, Linux Foundation AAIF, EU AI Act, ISO). Required monthly. Tracks breaking-protocol risk.
+- **Tier 12 — Autonomous agentic development & agent swarms** (Devin, OpenHands, SWE-Agent, Cursor agent, OpenAI Agents SDK, AG2, LangGraph deepagents, multi-agent collaboration patterns). Bi-weekly. Compares directly to our Builder workflow and surfaces emergent collaboration patterns.
+
+**Expansions to existing tiers:**
+- Tier 1: added Anthropic Research blog, Anthropic Skills repo, EconomicIndex dataset, HF Daily Papers
+- Tier 5: explicit list of 6 newsletters (AlphaSignal, TLDR AI, Latent Space, Import AI, Ahead of AI, LLMs for Engineers) and 5 Reddit subs (ClaudeAI, AI_Agents, LocalLLaMA, LangChain, MachineLearning); curated Twitter/X handles
+- Tier 7: VoltAgent collections (awesome-agent-skills 1000+, awesome-agent-papers), awesome-ai-agents-2026 (300+, 20 categories)
+- Tier 8: Latent Space podcast as primary practitioner source; explicit MAST taxonomy reference; r/AI_Agents horror stories
+- Tier 9: Anthropic "Building Effective Agents" 7-pattern foundation; Self-Discover, Voyager, A-Mem additions
+
+**New cadence section:**
+- Weekly: Tier 1, 5, 6, 10
+- Bi-weekly: Tier 2, 7, 8, 12
+- Monthly: Tier 3, 4, 9, 11
+- Quarterly: industry reports (Stanford Index, State of AI, McKinsey)
+
+**Updated query quota rules:**
+- Required every weekly review: ≥1 Tier 1 + ≥1 Tier 10 + ≥2 agent-specific (Tier 2/7/8/9/12) + ≥1 Tier 4
+- Monthly bonus: +1 Tier 11
+- Quarterly bonus: +1 industry reports
+- Effect: each review now spans both vendors AND agent substance, instead of drifting to all-tooling or all-Anthropic.
+
+### Trade-offs accepted
+
+- Each review will use 2-3 more queries than before → ~$1 extra cost per review (from ~$2 to ~$3)
+- Methodology file grew from 222 lines to 365 lines (+143)
+- More cognitive load on the reviewing agent — Cadence + quota matrix takes attention to follow
+
+### Adoption note
+
+This methodology change takes effect on the next `/ai-landscape-review` invocation (next Monday 10:08 launchd notification → manual run, or on-demand any time). The methodology applies to both framework-scope and project-scope reviews.
+
+---
+
 
