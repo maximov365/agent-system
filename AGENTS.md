@@ -68,7 +68,7 @@ The project prioritizes:
 
 **Sequencing notes:**
 
-- **Designer** is optional — runs after Product spec is accepted and before Animator/UX Writer or Architect, only when the feature has user-facing UI.
+- **Designer** is optional — runs after Product spec is accepted and before Animator/UX Writer or Architect, only when the feature has user-facing UI. Designer can be re-invoked in **handoff-spec mode** after design approval, when the feature is complex (3+ screens, 5+ custom components, non-trivial responsive/motion).
 - **Animator** is optional — runs after Designer when the feature has motion, animations, or transitions. Skipped for static designs.
 - **Illustrator** is a tool-agent — runs when Designer or Marketing produces visual briefs requiring image generation. Returns images to the requesting agent for review. Requires MCP image generation tool (see `docs/MCP_TOOLS.md`).
 - **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
@@ -125,7 +125,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → [Designer] → [Animator] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [Designer handoff-spec] → [Animator] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 

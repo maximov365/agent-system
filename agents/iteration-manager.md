@@ -154,6 +154,7 @@ Classify every incoming request before selecting an agent.
 | Existing research data needs synthesis into themes and recommendations | `Discovery` (research-synthesis mode) |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
+| Design approved; feature has 3+ screens / 5+ custom components / complex responsive or motion specs / user requested structured handoff | `Designer` (handoff-spec mode, before UI Builder) |
 | Design approved; feature has motion, animation, or transitions | `Animator` |
 | Designer or Marketing produced visual briefs needing image generation | `Illustrator` |
 | Design/animation approved (or no Designer); feature has user-facing text | `UX Writer` |

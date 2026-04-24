@@ -78,19 +78,14 @@ The following skills are referenced by framework agents. Each entry lists: which
 | Built-in fallback | Built-in synthesis methodology in `agents/discovery-modes/research-synthesis.md` |
 | Source plugin | `frontend-design` / Cowork design plugin |
 
----
-
-## Planned integrations
-
-The following skills are evaluated for future integration but not yet wired into any agent. Listed here so authors know they're available and the framework has already assessed the fit.
-
 ### `design:design-handoff`
 
 | Field | Value |
 |---|---|
-| Candidate user | Designer (optional handoff-spec output mode) |
-| Would provide | Structured developer handoff: design tokens table, components/props/states tables, responsive behavior, edge cases, animation specs |
-| Status | Planned (P2) — fits projects with complex UI; overkill for simple ones |
+| Used by | Designer (in `handoff-spec` mode — opt-in for complex UI) |
+| Provides | Structured developer handoff: design tokens table, components/props/states tables, responsive behavior, edge cases, animation specs |
+| Built-in fallback | Built-in handoff-spec output format in `agents/designer.md` (Handoff-spec mode section) |
+| Source plugin | `frontend-design` / Cowork design plugin |
 
 ---
 

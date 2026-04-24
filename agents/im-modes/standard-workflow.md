@@ -37,9 +37,13 @@ After each agent completes, determine the next step based on the agent's output 
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; feature has measurable outcomes | → `Analytics Architect` |
 | `Product` → Quality loop | Gatekeeper `accept`; no UI; no user-facing text; no analytics needed | → `Architect` |
 | `Designer` | Design output includes visual briefs for illustration | → `Illustrator` (generate images; return to Designer for review) |
+| `Designer` | Design approved by user; feature is complex (3+ screens / 5+ custom components / non-trivial responsive or motion) | → `Designer` (handoff-spec mode) |
 | `Designer` | Design approved by user; feature has motion/animation | → `Animator` |
 | `Designer` | Design approved by user; no animation; feature has user-facing text | → `UX Writer` (copy creation) |
 | `Designer` | Design approved by user; no animation; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Designer` (handoff-spec mode) | Handoff spec produced; feature has motion/animation | → `Animator` |
+| `Designer` (handoff-spec mode) | Handoff spec produced; no animation; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Designer` (handoff-spec mode) | Handoff spec produced; no animation; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
 | `Animator` | Animation spec approved by user; feature has user-facing text | → `UX Writer` (copy creation) |
 | `Animator` | Animation spec approved by user; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
 | `Illustrator` | Images generated successfully | → Return to requesting agent (`Designer` or `Marketing`) for review |
