@@ -379,4 +379,132 @@ This methodology change takes effect on the next `/ai-landscape-review` invocati
 
 ---
 
+## AI Landscape Review — 2026-04-24 (#4: methodology validation run)
+
+**Reviewer:** Discovery (ai-landscape mode)
+**Scope:** framework
+**Sources scanned:** Tier 1, 4, 5, 7, 10, 11, 12 (validated new query-quota rules in action)
+**Time period:** anything missed by prior 3 reviews today
+**Trigger:** User asked to re-run after methodology expansion to validate new tiers actually surface findings the old methodology missed.
+
+### Methodology validation result
+
+**Query quota satisfied:**
+- ✓ Tier 1 Anthropic — 1 query (caught Mythos Preview restriction, Opus 4.7 release, Claude Design launch, Claude Managed Agents beta)
+- ✓ Tier 10 Competing — 2 queries (OpenAI Agents SDK April update, Google A2A v1.2 + Cloud Next 2026)
+- ✓ Tier 12 Autonomous & swarms — 2 queries (Devin/OpenHands/Cursor releases, Anthropic Computer Use)
+- ✓ Tier 11 Standards (monthly bonus) — 1 query (MCP v2.0 status confirmed shipped)
+- ✓ Tier 7 Agent roles — 1 query (Vercel Open Agents, top skill installs)
+- ✓ Tier 4 Benchmarks — 1 query (SWE-bench Pro becoming new standard)
+
+**New findings the old methodology would have missed:** 7 of 10 below come from Tier 10/11/12 queries that didn't exist before this morning.
+
+### Findings — High Priority
+
+#### F26: Claude Mythos Preview confirmed restricted (Project Glasswing only) — NOT a public model
+
+- **Source:** [NBC News on Mythos limited release](https://www.nbcnews.com/tech/security/anthropic-project-glasswing-mythos-preview-claude-gets-limited-release-rcna267234), [InfoQ Mythos analysis](https://www.infoq.com/news/2026/04/anthropic-claude-mythos/)
+- **What it is:** Mythos Preview rolled out April 8, 2026 only to Project Glasswing partners (Amazon, Microsoft, Nvidia, Apple). Cybersecurity-focused. SWE-bench 93.9%, USAMO 97.6%. Autonomously found zero-days in every major OS and browser during testing.
+- **Impact on us:** **F4 from earlier review is now resolved as DEAD-END.** Mythos won't be available to us; stop monitoring for GA.
+- **Decision needed:** Yes — remove F4 from "monitor" list and update it as "blocked: enterprise-only, won't reach public framework."
+
+#### F30: Anthropic Agent-Based Code Review for Claude Code (April 2026)
+
+- **Source:** [InfoQ: Anthropic Introduces Agent-Based Code Review for Claude Code](https://www.infoq.com/news/2026/04/claude-code-review/)
+- **What it is:** New native code review feature in Claude Code, agent-driven.
+- **Impact on us:** HIGH — directly overlaps with our Reviewer + Spec Reviewer agents. If Anthropic's native solution is high quality, we may want to integrate it as optional Skill (per CLAUDE_SKILLS.md pattern) or evaluate if it replaces our Reviewer entirely.
+- **Effort:** SMALL — read InfoQ article + test on a real PR.
+- **Decision needed:** Yes — investigate Anthropic Agent-Based Code Review and compare to our Reviewer/Spec Reviewer?
+
+#### F27: Multi-agent parallel execution became "table stakes" (Feb 2026 wave)
+
+- **Source:** [Morph LLM AI Coding Agent comparison](https://www.morphllm.com/ai-coding-agent), [MightyBot rankings](https://mightybot.ai/blog/coding-ai-agents-for-accelerating-engineering-workflows/)
+- **What it is:** In a single 2-week February 2026 window: Cursor 3.0 (8 parallel agents), Windsurf (5 parallel), Grok Build (8), Claude Code Agent Teams, Codex CLI (Agents SDK), Devin parallel sessions. Industry consensus: running multiple agents simultaneously on different parts of a codebase is now table stakes.
+- **Impact on us:** HIGH (architectural) — our framework is strictly sequential workflow. We're behind the industry on parallel execution. But: parallel adds coordination cost + state-conflict risk that our quality loop hasn't been designed for.
+- **Effort:** LARGE — would require rethinking workflow_state, handoff contract, IM routing for parallel branches.
+- **Proposal:** **Investigate Claude Code Agent Teams specifically** — it's Anthropic-native multi-agent in Claude Code. If it slots into our existing IM as a "parallel execution" mode for independent subtasks (e.g., Builder + Test Strategist + Documentation in parallel), it might give us parallelism without architectural rework.
+- **Decision needed:** Yes — investigate Claude Code Agent Teams as parallel execution path?
+
+#### F33: SWE-bench Verified deprecated by OpenAI in favor of Pro (gold patch leakage)
+
+- **Source:** [CodeAnt SWE-bench scores 2026](https://www.codeant.ai/blogs/swe-bench-scores), [Morph SWE-Bench Pro](https://www.morphllm.com/swe-bench-pro)
+- **What it is:** OpenAI stopped reporting Verified scores in early 2026. Audit found that every frontier model could reproduce verbatim gold patches or problem statement specifics for certain Verified tasks. 59.4% of the hardest unsolved problems had flawed test cases. SWE-Bench Pro is the new reliable benchmark (top: Claude Mythos 77.8%, Opus 4.7 64.3%, Kimi 2.6 58.6%).
+- **Impact on us:** MEDIUM — our prior reviews and EVOLUTION_LOG references Verified as "the" benchmark. Should switch all benchmark references to Pro.
+- **Effort:** SMALL — text-only update in `agents/discovery-modes/ai-landscape.md` and EVOLUTION_LOG entries that reference Verified.
+- **Decision needed:** Yes — update SWE-bench reference to SWE-Bench Pro in framework docs?
+
+#### F29: Anthropic Claude Managed Agents (public beta, April 2026)
+
+- **Source:** [Apify MCP handbook April 2026 edition](https://use-apify.com/blog/mcp-server-handbook-2026)
+- **What it is:** Hosted Claude Platform service for long-horizon agent work. Handles sessions, harnesses, sandboxing, state management, tool execution, error recovery. For autonomous AI agents that need durable state and safer tool access.
+- **Impact on us:** MEDIUM-HIGH (future) — our framework runs interactive agents tied to a Claude Code session. Managed Agents would be the path if a downstream project needs autonomous long-running agents (e.g., monitoring, ongoing data ingestion, scheduled background work).
+- **Effort:** LARGE — would require new agent type + handoff contract extension for "agent runs in remote managed runtime."
+- **Decision needed:** No active decision. Note as future option for downstream projects with that need (none today).
+
+### Findings — Medium Priority
+
+#### F31: Claude Design product launched (April 17, 2026, experimental)
+
+- **Source:** [Releasebot Claude release notes](https://releasebot.io/updates/anthropic/claude)
+- **What it is:** Anthropic Labs experimental product for creating prototypes, slides, one-pagers. Available to Pro, Max, Team, Enterprise users.
+- **Impact on us:** MEDIUM — our Designer agent already produces visual mockups. Claude Design overlaps but is a distinct product surface (likely with its own UI). Should check if it produces deliverables our Designer doesn't, or if its workflow informs Designer evolution.
+- **Decision needed:** Maybe — check Claude Design output formats vs our Designer's output format?
+
+#### F32: A2A protocol v1.2 with Signed Agent Cards (cryptographic identity)
+
+- **Source:** [Google Cloud A2A blog](https://cloud.google.com/blog/products/ai-machine-learning/agent2agent-protocol-is-getting-an-upgrade), [The Next Web Cloud Next 2026](https://thenextweb.com/news/google-cloud-next-ai-agents-agentic-era)
+- **What it is:** A2A protocol v1.2 with cryptographically signed Agent Cards (verifiable identity). Native A2A support now built into Google ADK, LangGraph, CrewAI, LlamaIndex, Semantic Kernel, AutoGen. 150+ orgs in production.
+- **Impact on us:** LOW today (we don't do cross-org agent collaboration), MEDIUM future. Signal that decentralized multi-agent is reaching production maturity.
+- **Decision needed:** No — defer until cross-org need arises.
+
+#### F35: Vercel Open Agents — open-source autonomous coding platform
+
+- **Source:** [Vercel Open Agents announcement](https://newclawtimes.com/articles/vercel-open-agents-open-source-coding-agent-platform-github/)
+- **What it is:** Forkable open-source platform — web UI + durable agent runtime + sandboxed execution + GitHub integration. From prompt to PR without local machine.
+- **Impact on us:** MEDIUM — alternative reference architecture for downstream projects that want their own self-hosted agent infrastructure (vs Cursor/Claude Code lock-in).
+- **Decision needed:** No — keep on watch as reference design for self-hosted scenarios.
+
+### Findings — Monitor
+
+- **F28:** [Claude Code Agent Teams](https://www.morphllm.com/ai-coding-agent) — Anthropic-native multi-agent feature in Claude Code (Feb 2026). Investigation needed (covered under F27 proposal).
+- **F34:** OpenAI Agents SDK April update: sandboxing + long-horizon harness (Python first). Catching up to Claude Managed Agents. Direct OpenAI competitor to Anthropic's hosted runtime.
+- **F36:** OpenHands v1.6.0 (March 30, 2026) — Kubernetes support + Planning Mode beta. For self-hosted teams.
+- **F37:** Vercel skills `find-skills` (579k installs), `vercel-react-best-practices` (216k), `web-design-guidelines` (171k). Signal for what skills the wider community values.
+- **F38:** [Anthropic 2026 Agentic Coding Trends report](https://resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf) — official PDF, deserves a deep read at quarterly cadence.
+
+### Decisions Required from User
+
+| # | Question | Recommended default |
+|---|---|---|
+| 18 | F26: Mark F4 (Mythos Preview GA) as "blocked: enterprise-only"? | yes (closes a tracked item) |
+| 19 | F30: Investigate Anthropic Agent-Based Code Review (compare to our Reviewer)? | yes (high overlap, low cost to investigate) |
+| 20 | F27/F28: Investigate Claude Code Agent Teams as parallel execution path? | yes (architectural research, not adoption) |
+| 21 | F33: Update framework docs to use SWE-Bench Pro as reference (not Verified)? | yes (mechanical doc update) |
+| 22 | F29: Note Claude Managed Agents as future option for autonomous downstream needs? | yes (one-line addition to KNOWN_PATTERNS or DECISIONS) |
+| 23 | F31: Compare Claude Design output formats to our Designer? | maybe (only if we have a UI-heavy project that would benefit) |
+| 24 | F35: Add Vercel Open Agents to reference designs in MCP_TOOLS or similar? | maybe (defer until self-hosted need) |
+
+### Comparison to prior reviews
+
+- **F1 (lazy loading):** still validated ✓
+- **F2 (cache hit ratio):** still 98% efficient ✓
+- **F4 (Mythos Preview GA):** **RESOLVED via F26 — confirmed enterprise-only, won't be public. Remove from monitor list.**
+- **F8 (MCPWatch):** still no package availability — defer indefinitely until package surfaces
+- **F11/F13 CoVe:** adopted in Spec Reviewer, awaiting `cove_applied` data
+- **F19 prompt injection defense:** adopted in IM
+- **F16 Claude Code Security:** still candidate for evaluation; F30 (Agent-Based Code Review) might be the same product or superset
+
+### Notes
+
+**Methodology validation succeeded.** New tiers (10, 11, 12) and query-quota rules surfaced findings the old 9-tier methodology would have missed entirely:
+- Without Tier 10: would not have caught OpenAI Agents SDK update, Google A2A v1.2 with signed cards, full Gemini Cloud Next picture
+- Without Tier 11: would not have known MCP v2.0 features actually shipped (vs my prior assumption of Q1 milestone still pending)
+- Without Tier 12: would not have caught Anthropic Computer Use, Devin/OpenHands/Cursor 3.0 evolution, multi-agent parallel execution becoming table stakes
+
+**Biggest signal of this review:** Industry has moved to **parallel multi-agent** (F27). Our framework is sequential. This is the most significant architectural delta to consider, but adopting parallelism is a large investment that requires our quality loop and handoff contract to be redesigned. Worth a separate dedicated discovery before implementation.
+
+**Closed items:** F4 (Mythos public release will not happen).
+
+---
+
 
