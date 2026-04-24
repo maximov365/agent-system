@@ -169,7 +169,7 @@ Structure your review as:
 ### Verdict: <APPROVED | APPROVED WITH MINOR NOTES | CHANGES REQUIRED>
 ```
 
-End every output with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 **Mapping from verdict to handoff status:**
 

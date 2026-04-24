@@ -177,7 +177,7 @@ Respond with three parts in this order:
 
 1. The revised artifact (complete, in its native format)
 2. A structured revision summary
-3. A handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`
+3. A handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`
 
 Do not include commentary outside these three sections.
 
@@ -219,4 +219,4 @@ Do not include commentary outside these three sections.
 
 Your role is strictly revision for correctness and completeness.
 
-After producing the revision summary, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

@@ -143,7 +143,7 @@ If a generation fails or produces unusable results, state the issue and suggest 
 
 ## Handoff
 
-After producing output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "illustration"`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "illustration"`.
 
 - Generation successful: `status: "produced"`
 - Revision successful: `status: "produced"`

@@ -162,4 +162,4 @@ Rules for specific fields:
 - **Do not invent new blocking issues.** Only raise issues that are explicit policy violations not already captured in the Spec Reviewer output.
 - **Be conservative with iterate.** Each iteration has a cost. Require evidence that the next iteration will improve the artifact before sending it back.
 
-After producing the JSON output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+After the JSON output, append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

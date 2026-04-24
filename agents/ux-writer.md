@@ -159,7 +159,7 @@ all_clear | changes_suggested
 
 ## Handoff
 
-After producing output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "ux_copy"`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "ux_copy"`.
 
 For copy creation: `status: "produced"`.
 For copy review with no issues: `status: "approved"`.

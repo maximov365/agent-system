@@ -257,4 +257,4 @@ Rules for specific fields:
 - Prefer precise issue descriptions. "Missing field" is not sufficient — name the field, the event, and why it matters.
 - Escalate conflicts, do not resolve them. If spec and architecture conflict, that is not a validation problem.
 
-After producing the JSON output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+After the JSON output, append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

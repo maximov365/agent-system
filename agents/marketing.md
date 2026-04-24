@@ -260,7 +260,7 @@ all_clear | changes_suggested
 
 ## Handoff
 
-After producing output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "marketing_campaign"`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "marketing_campaign"`.
 
 For strategy: `status: "produced"`.
 For campaign/launch kit: `status: "produced"`.

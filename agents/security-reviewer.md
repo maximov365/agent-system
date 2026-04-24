@@ -220,4 +220,4 @@ Rules for specific fields:
 - Do not duplicate Reviewer's responsibilities (scope, architecture, code quality).
 - Escalate when the fix requires architectural change. Do not propose architectural changes.
 
-After producing the JSON output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+After the JSON output, append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

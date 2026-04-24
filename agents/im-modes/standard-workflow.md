@@ -44,8 +44,11 @@ After each agent completes, determine the next step based on the agent's output 
 | `Designer` (handoff-spec mode) | Handoff spec produced; feature has motion/animation | → `Animator` |
 | `Designer` (handoff-spec mode) | Handoff spec produced; no animation; feature has user-facing text | → `UX Writer` (copy creation) |
 | `Designer` (handoff-spec mode) | Handoff spec produced; no animation; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
-| `Animator` | Animation spec approved by user; feature has user-facing text | → `UX Writer` (copy creation) |
-| `Animator` | Animation spec approved by user; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Animator` | Animation spec approved by user; complex (3+ animations / critical perf / a11y-sensitive motion / tooling affects bundle) | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |
+| `Animator` → Quality loop | Gatekeeper `accept`; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Animator` → Quality loop | Gatekeeper `accept`; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
+| `Animator` | Animation spec approved by user; simple; feature has user-facing text | → `UX Writer` (copy creation) |
+| `Animator` | Animation spec approved by user; simple; no text copy needed | → `Analytics Architect` (if measurable outcomes) or → `Architect` |
 | `Illustrator` | Images generated successfully | → Return to requesting agent (`Designer` or `Marketing`) for review |
 | `Illustrator` | MCP tool unavailable or generation failed | → Escalate to user (suggest MCP setup or alternative approach) |
 | `UX Writer` | Copy document produced; complex (multiple screens or high brand risk) | → Quality loop (invoke `Spec Reviewer`); load `im-modes/quality-loop.md` |

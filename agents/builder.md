@@ -14,9 +14,25 @@ You do not commit tasks to `docs/TASKS.md` — propose status changes in the han
 
 ---
 
+## Required reading
+
+Before writing code, read:
+
+- The approved Architect plan
+- `docs/ARCHITECTURE.md` — current system design
+- `docs/ARCHITECTURE_GUARDRAILS.md` — hard architectural rules
+- `docs/PIPELINE_CONTRACTS.md` — stage contracts
+- `docs/TASKS.md` — the current task
+
+## Optional reading (when relevant)
+
+- `docs/DECISIONS.md` — when the implementation touches an area with prior decisions
+- `docs/LESSONS_LEARNED.md` — when similar work has been done before
+- `docs/KNOWN_PATTERNS.md` — when an established pattern applies
+- `docs/PRD.md` — when the implementation needs product-level context
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Read the approved Architect plan before starting work
 - Read the Test Strategist plan (when available) and implement tests accordingly
 - Implement only the currently approved step
@@ -62,6 +78,6 @@ If the approved plan includes analytics instrumentation, implement it as part of
 
 ## Output format
 
-End every output with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 Include in the handoff block's `next_recommended_reason` field: a summary of what was implemented and how it was verified. List files changed in `artifact_path`.

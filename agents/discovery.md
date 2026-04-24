@@ -149,4 +149,4 @@ Produce a **Discovery Brief**:
 
 ## Handoff
 
-After producing output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "design_note"` and `status: "produced"`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "design_note"` and `status: "produced"`.

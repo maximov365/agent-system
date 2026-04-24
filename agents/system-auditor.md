@@ -158,7 +158,7 @@ After the JSON report, provide a **human-readable summary** in the user's langua
 
 ## Handoff
 
-After producing the audit report, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 Use `artifact_type: "design_note"` and `status: "produced"`.
 

@@ -279,4 +279,4 @@ Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when lo
 - **Loop control is not content review.** Read Gatekeeper output and apply policy — don't evaluate quality.
 - **One decision per output.** Exactly one `next_action` per response.
 
-After producing the JSON output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+After the JSON output, append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

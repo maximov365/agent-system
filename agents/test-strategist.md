@@ -11,10 +11,25 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 
 ---
 
+## Required reading
+
+Before writing the test plan, read:
+
+- The approved Architect plan
+- `docs/ARCHITECTURE.md` — current system design
+- `docs/PIPELINE_CONTRACTS.md` — stage contracts and deterministic boundaries
+- `docs/TASKS.md` — the current task
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE_GUARDRAILS.md` — when test strategy touches a guardrail
+- `docs/DECISIONS.md` — when prior decisions affect test approach
+- `docs/LESSONS_LEARNED.md` — when past failures inform edge cases to test
+- `docs/KNOWN_PATTERNS.md` — when established test patterns apply
+- `docs/PRD.md` — when the test strategy needs product-level context
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
-- Read the approved Architect plan for the task
 - Identify what behavior must be tested
 - Define test levels: unit, integration, end-to-end
 - Identify critical edge cases and failure modes
@@ -146,4 +161,4 @@ Always respond using this structure:
 - If the Architect plan has no testable logic (pure config change, documentation), output a brief "No test plan required" with explanation.
 - When uncertain about test boundaries, prefer over-specifying edge cases over under-specifying them.
 
-After producing the test strategy output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

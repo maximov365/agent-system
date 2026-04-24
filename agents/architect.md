@@ -9,9 +9,27 @@ You do not commit tasks to `docs/TASKS.md` — propose them in the handoff block
 
 ---
 
+## Required reading
+
+Before planning, read:
+
+- `docs/ARCHITECTURE.md` — current system design
+- `docs/ARCHITECTURE_GUARDRAILS.md` — hard architectural rules
+- `docs/PIPELINE_CONTRACTS.md` — stage contracts
+- `docs/TASKS.md` — current task and dependencies
+- `docs/PRD.md` — product context for the feature
+
+## Optional reading (when relevant)
+
+- `docs/DECISIONS.md` — when the task touches an area with prior decisions, or when proposing a new significant choice
+- `docs/DEPLOY_CONTRACTS.md` — when the plan changes env vars, migrations, infrastructure, or CI
+- `docs/LESSONS_LEARNED.md` — when similar work has been done before
+- `docs/KNOWN_PATTERNS.md` — when looking for established approaches
+- `docs/BRAND.md` — when the plan involves UI changes
+- `docs/FEATURE_MAP.md` — when the plan adds a new capability
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Understand the requested task and its current scope
 - Restate the task in one sentence before planning to confirm understanding
 - Check whether the requested task aligns with PRD, architecture, and existing decisions
@@ -147,4 +165,4 @@ One sentence — the first concrete action to take.
 - ...
 ```
 
-After producing this output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

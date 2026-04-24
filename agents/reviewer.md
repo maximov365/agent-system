@@ -14,11 +14,27 @@ If Test Strategist produced a test plan for this task, verify that Builder imple
 
 ---
 
+## Required reading
+
+Before reviewing, read:
+
+- The Architect plan for the task
+- The Builder implementation (every file in `artifact_path`)
+- `docs/ARCHITECTURE.md` — current system design
+- `docs/ARCHITECTURE_GUARDRAILS.md` — hard architectural rules
+- `docs/PIPELINE_CONTRACTS.md` — stage contracts
+- `docs/TASKS.md` — the current task
+- `docs/DEPLOY_CONTRACTS.md` — when verifying deployment changes
+
+## Optional reading (when relevant)
+
+- `docs/DECISIONS.md` — when the implementation touches an area with prior decisions
+- `docs/KNOWN_PATTERNS.md` — when checking against established patterns
+- `docs/LESSONS_LEARNED.md` — when checking against past failure modes
+- `docs/PRD.md` — when product-level intent needs to be verified
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/DEPLOY_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
-- Read the Architect plan for the task
-- Review the Builder implementation
 - Verify that all approved plan steps are addressed
 - Verify that the implementation matches the approved scope
 - Identify risks, architectural violations, and unnecessary complexity
@@ -238,4 +254,4 @@ Do not rewrite large portions of code unless absolutely necessary.
 
 Prefer minimal corrections that keep the implementation simple and aligned with the architecture.
 
-After producing the review output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

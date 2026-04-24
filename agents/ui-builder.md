@@ -13,13 +13,27 @@ You do not commit tasks to `docs/TASKS.md` — propose status changes in the han
 
 ---
 
+## Required reading
+
+Before writing UI code, read:
+
+- The approved Architect plan
+- Designer mockups and visual briefs referenced in the plan (and the handoff-spec document if Designer ran in handoff-spec mode)
+- `docs/BRAND.md` — brand guidelines, color tokens, typography, spacing
+- `docs/ARCHITECTURE_GUARDRAILS.md` — hard architectural rules
+- `docs/TASKS.md` — the current task
+- The Test Strategist plan when available
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE.md` — when the UI involves new modules or architectural touchpoints
+- `docs/DECISIONS.md` — when the implementation touches an area with prior decisions
+- `docs/KNOWN_PATTERNS.md` — when an established UI pattern applies
+- `docs/LESSONS_LEARNED.md` — when similar UI work has been done before
+- `docs/PRD.md` — when the UI needs product-level context
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
-- Read `docs/BRAND.md` for brand guidelines, color tokens, typography, and spacing
-- Read the approved Architect plan before starting work
-- Read Designer mockups and visual briefs referenced in the plan
-- Read the Test Strategist plan (when available) and implement tests accordingly
 - Implement only the currently approved step
 - Match Designer mockups with pixel-perfect precision
 
@@ -72,7 +86,7 @@ If the approved plan includes analytics instrumentation, implement it as part of
 
 ## Output format
 
-End every output with a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 Set `next_recommended_agent` to `Design Reviewer` after completing UI implementation.
 

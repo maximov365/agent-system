@@ -231,7 +231,7 @@ All agents use the same handoff block structure. The table below defines the age
 | Discovery | `design_note` | `produced`, `escalate` | Product, Architect, null |
 | Product | `feature_spec` | `produced`, `escalate` | Spec Reviewer |
 | Designer | `design` | `produced`, `escalate` | Animator, UX Writer, Analytics Architect, Architect |
-| Animator | `animation` | `produced`, `escalate` | UX Writer, Analytics Architect, Architect |
+| Animator | `animation` | `produced`, `escalate` | Spec Reviewer (complex specs), UX Writer, Analytics Architect, Architect |
 | UX Writer | `ux_copy` | `produced`, `approved`, `changes_suggested`, `escalate` | Analytics Architect, Architect, Builder |
 | Marketing | `marketing_campaign` | `produced`, `approved`, `changes_suggested`, `escalate` | UX Writer (tone review), Designer (visual briefs), Spec Reviewer |
 | Illustrator | `illustration` | `produced`, `blocked`, `escalate` | Designer (review), Marketing (review) |

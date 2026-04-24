@@ -446,4 +446,4 @@ Continue iterating until the user explicitly approves. Then produce the final de
 - When uncertain about a design choice, present 2 options with trade-offs rather than picking one silently.
 - Respect the user's time. Present the most important screens first. Add detail only when asked.
 
-After producing the final approved design, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.

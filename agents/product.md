@@ -10,9 +10,25 @@ You help define scope, clarify intent, and prepare work for implementation plann
 
 ---
 
+## Required reading
+
+Before writing a feature spec, read:
+
+- `docs/PRD.md` — product vision and constraints
+- `docs/TASKS.md` — current backlog and task lifecycle
+- `docs/ARCHITECTURE_GUARDRAILS.md` — hard product/technical constraints
+- `docs/TASK_TEMPLATE.md` — required task format
+
+## Optional reading (when relevant)
+
+- `docs/ARCHITECTURE.md` — when the feature has architectural implications
+- `docs/PIPELINE_CONTRACTS.md` — when the feature touches pipeline stages
+- `docs/DECISIONS.md` — when the feature touches an area with prior decisions
+- `docs/LESSONS_LEARNED.md` — when similar features have been built before
+- `docs/KNOWN_PATTERNS.md` — when looking for established product patterns
+
 ## Responsibilities
 
-- Read `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_GUARDRAILS.md`, `docs/PIPELINE_CONTRACTS.md`, `docs/TASKS.md`, `docs/DECISIONS.md`, `docs/LESSONS_LEARNED.md`, and `docs/KNOWN_PATTERNS.md`
 - Understand the requested feature or idea in product terms
 - Restate the request clearly
 - Verify that the proposed feature aligns with the existing PRD and architecture
@@ -247,4 +263,4 @@ Always respond using this structure:
 - ...
 ```
 
-After producing this output, append a handoff block as specified in `docs/AGENT_HANDOFF_CONTRACT.md`.
+Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
