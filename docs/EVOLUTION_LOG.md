@@ -306,4 +306,26 @@ Strongest finding is **empirical validation from MAST taxonomy (UC Berkeley, 1,6
 
 ---
 
+## Adoption Notes — 2026-04-24 (supplementary review, same-day execution)
+
+Decisions executed within hours:
+
+- **F11/F13 ✅ adopted** — Added "Optional Chain-of-Verification (CoVe) frame" section to `agents/spec-reviewer.md`. 4-step process (draft → verify questions → answer independently → refine), gated on high-stakes triggers (artifact >500 words, ≥3 components, prior disputed iteration, sensitive domain, ql_iteration ≥ 2). Added `cove_applied: true|false` field to output JSON for downstream measurement. Ground for measuring whether CoVe actually reduces revision rate in our workflow.
+- **F19 ✅ adopted** — Added "Trust boundary check (input sanitization)" section to `agents/iteration-manager.md` as the single chokepoint for user-supplied content. Added shorter pointer in `agents/discovery-modes/research-synthesis.md` (the only other agent that reads user content from a different surface — pasted research data). Explicit trust contract: USER → IM (checked) → all downstream agents (trusted).
+- **F10 ⏸ deferred** — MAST 14-mode mapping audit needs deeper research (top-level 3 categories known; the 14 specific modes need a fresh source dive). Will run in next scheduled review.
+- **F16 ⏸ deferred** — Claude Code Security agent evaluation requires actual side-by-side test on a real code task; will pair with the next real Builder workflow.
+- **F18 ⏸ deferred** — VoltAgent skills catalog browse is a 30-min human task, not auto-executable.
+
+**New patterns documented in `docs/KNOWN_PATTERNS.md`:**
+- "Trust boundary at single chokepoint" — formalizes the IM-as-sanitizer architecture so future agents know the contract
+- "Optional Chain-of-Verification (CoVe) for review-class agents" — generalized so other reviewers (Reviewer, Design Reviewer, Security Reviewer, Analytics Validator) can adopt the pattern when justified
+
+**Quality risk assessment:**
+- F11/F13 CoVe — OPTIONAL frame, gated on high-stakes triggers. Default behavior (rubric scoring) unchanged. Can only improve verdicts, never degrade them. Token cost increase ~30-50% on triggered reviews only.
+- F19 prompt injection defense — pure addition of input sanitization at IM. False positives recoverable (user confirms). False negatives are baseline behavior pre-adoption (i.e., zero regression). Defense in depth.
+
+**Net effect:** 1 agent extended with CoVe (Spec Reviewer), 1 chokepoint hardened (IM), 1 mode patched (research-synthesis), 2 new patterns documented. Zero quality regression. Forward path: when CoVe adoption produces enough `cove_applied: true` data points, measure whether revision rate drops; if yes, generalize CoVe to other Reviewer-class agents.
+
+---
+
 

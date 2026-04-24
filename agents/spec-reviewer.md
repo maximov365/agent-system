@@ -154,6 +154,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
   "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | test_plan",
   "artifact_path": "<path or title of the artifact being reviewed>",
   "iteration": "<current iteration number, e.g. 1>",
+  "cove_applied": true,
   "dimension_scores": {
     "problem_clarity": 0.0,
     "goal_clarity": 0.0,
@@ -200,6 +201,42 @@ For Spec Reviewer evaluations, Anthropic's Opus 4.7 with `xhigh` effort level (b
 For trivial artifacts (single-screen designs, single-step plans, copy-only changes), default `high` is sufficient.
 
 This is a recommendation, not enforced. Falls back gracefully on lower effort if not set.
+
+---
+
+## Optional Chain-of-Verification (CoVe) frame
+
+For high-stakes reviews, apply an optional Chain-of-Verification pattern before producing the final JSON. CoVe reduces missed issues by structurally challenging the draft verdict — reported ~23% F1 improvement on factual reasoning tasks (source: `docs/EVOLUTION_LOG.md` F13, 2026-04-24).
+
+### When to apply CoVe
+
+Use CoVe when **any** of these is true:
+
+- Artifact is >500 words or covers ≥3 screens/components
+- Prior iteration produced `must_fix` items the user disputed
+- Artifact touches a sensitive area (security, data flow, pricing, deletion semantics)
+- Quality loop iteration ≥ 2 (subsequent passes need extra rigor)
+- User explicitly requests deeper review
+
+Skip CoVe for trivial artifacts (single-paragraph plans, copy-only reviews, decision notes <200 words). The added reasoning cost isn't justified.
+
+### CoVe process (run BEFORE producing JSON output)
+
+1. **Draft baseline verdict** — internal scratch only. Score each dimension as you would normally.
+
+2. **Generate 3–5 verification questions** — questions whose "no" answer would invalidate your draft verdict. Examples:
+   - "Does the artifact actually conflict with `docs/DECISIONS.md` decision X, or did I misread?"
+   - "Are the acceptance criteria genuinely untestable, or could a simple test plan verify them?"
+   - "Is the missing field critical for downstream agents, or just nice-to-have?"
+   - "Does my `prd_alignment` score reflect the actual PRD content I just re-read, or my prior expectation?"
+
+3. **Answer each independently** — re-read the source documents specifically to answer each question. Do NOT default to your draft answer. Treat each verification question as a hostile test of your conclusion.
+
+4. **Refine** — if any verification answer contradicts your draft, update scores, `must_fix`, and `should_fix` lists accordingly. Then produce the final JSON.
+
+Track CoVe usage in the JSON output by adding `"cove_applied": true|false` at the top level (between `iteration` and `dimension_scores`). This lets downstream metrics measure CoVe's actual impact on revision rates.
+
+This is optional methodology — built-in 10-dimension scoring still works without it. CoVe is not a replacement for the rubric, only a self-check on top.
 
 ---
 
