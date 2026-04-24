@@ -20,6 +20,7 @@ VERSION_FILE = ROOT / "VERSION"
 FRAMEWORK_GLOBS = [
     "agents/*.md",
     "agents/discovery-modes/*.md",
+    "agents/designer-modes/*.md",
     "agents/im-modes/*.md",
     "AGENTS.md",
     "CLAUDE.md",

@@ -46,7 +46,7 @@ The project prioritizes:
 |---|---|---|---|
 | **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing, legal, user-research, research-synthesis | Write production code |
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
-| **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
+| **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes via specialized modes (`agents/designer-modes/`): default (built-in), onboarding-intake, handoff-spec | Write code; define product scope |
 | **Animator** | `agents/animator.md` | Define motion design, animations, and transitions for approved UI designs | Write code; change visual design; make product decisions |
 | **Illustrator** | `agents/illustrator.md` | Generate images via MCP tools (Nano Banana, etc.) from visual briefs | Make design decisions; write code; choose what to create |
 | **UX Writer** | `agents/ux-writer.md` | Write and review all user-facing text; ensure consistent tone of voice | Write code; change scope; make design decisions |

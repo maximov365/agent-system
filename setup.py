@@ -34,6 +34,7 @@ JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}|\{%.+?%\}")
 
 TEMPLATE_GLOBS = [
     "agents/*.md",
+    "agents/designer-modes/*.md",
     "CLAUDE.md",
     "AGENTS.md",
     ".cursor/rules.md",
