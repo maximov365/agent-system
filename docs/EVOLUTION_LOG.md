@@ -175,3 +175,135 @@ Decisions executed within hours of the review:
 
 ---
 
+## AI Landscape Review — 2026-04-24 (supplementary, agent-focused)
+
+**Reviewer:** Discovery (ai-landscape mode)
+**Scope:** framework
+**Sources scanned:** Tier 7 (agent role inventory), Tier 8 (production patterns / failure modes), Tier 9 (cognitive architectures / prompting), with spot checks in Tier 1, 4, 6
+**Time period:** all-time (first agent-focused review after extending methodology with Tier 7-9)
+**Motivation:** The earlier same-day review (F1–F9) weighted heavily toward tooling/cost. User flagged the gap. We extended the mode to add Tier 7 (agent roles), 8 (production patterns), 9 (cognitive architectures), plus a query-quota rule requiring ≥2 agent-specific queries per review. This is the first review applying the new methodology.
+
+### Summary
+
+Strongest finding is **empirical validation from MAST taxonomy (UC Berkeley, 1,600 traces across 7 multi-agent frameworks)**: 42% of multi-agent failures come from **specification clarity** — exactly what our Product → Spec Reviewer → Gatekeeper quality loop addresses. Second tier: 37% coordination breakdowns (our handoff contract), 21% weak verification (our Reviewer class). Our core architecture maps well to the biggest failure modes. Most actionable new improvement: **Chain-of-Verification (CoVe)** — a 4-step self-check pattern reported to improve F1 by 23% on factual tasks; could be added as an optional thinking frame for our Reviewer-class agents. Also actionable: **prompt-injection defense** for agents that read user-supplied content (CVE-2025-53773 showed 9.6 CVSS exploit via PR descriptions), and **Claude Code Security agent** from Anthropic (Feb 2026) for evaluation alongside our Security Reviewer.
+
+### Findings — High Priority
+
+#### F10: MAST taxonomy validates our core architecture (42/37/21 failure split)
+
+- **Source:** [Why Multi-Agent LLM Systems Fail](https://redis.io/blog/why-multi-agent-llm-systems-fail/), [Augment Code 2026 guide](https://www.augmentcode.com/guides/why-multi-agent-llm-systems-fail-and-how-to-fix-them)
+- **What it is:** UC Berkeley researchers analyzed 1,600+ traces across 7 popular multi-agent frameworks. Failures categorized 42% bad specifications, 37% coordination breakdowns, 21% weak verification.
+- **Impact on us:** HIGH (validation, not action) — our framework's three pillars are exactly aligned: Spec Reviewer + Gatekeeper for specifications (42%), handoff contract for coordination (37%), Spec/Design/Security/Analytics Reviewers for verification (21%). Good news: we're addressing the biggest failure modes.
+- **Adoption confidence:** HIGH — peer-reviewed empirical study.
+- **Effort:** SMALL — audit our 14 specific MAST failure modes and check each has a guardrail.
+- **Proposal:** Run a mapping: MAST's 14 specific failure modes vs our framework guardrails. Where we lack coverage, add a note to the relevant agent or to SYSTEM_AUDITOR's checks.
+- **Decision needed:** Yes — run the MAST mapping audit?
+
+#### F13: Chain-of-Verification (CoVe) — +23% F1 on reasoning tasks
+
+- **Source:** [CoVe learning prompt](https://learnprompting.org/docs/advanced/self_criticism/chain_of_verification), [Chain-of-Verification research](https://www.researchgate.net/publication/384218319_Chain-of-Verification_Reduces_Hallucination_in_Large_Language_Models)
+- **What it is:** 4-step prompting pattern: (1) baseline response → (2) plan verification questions → (3) answer verification questions independently → (4) refine final output. Reported 23% F1 improvement (0.39 → 0.48), outperforms zero-shot, few-shot, and plain CoT.
+- **Impact on us:** HIGH — could add optional CoVe-style structure to Reviewer-class agents (Spec Reviewer, Security Reviewer, Analytics Validator, Reviewer). These agents already produce verdicts, so adding explicit verification questions as an intermediate step would likely improve catch rate on subtle issues.
+- **Adoption confidence:** MEDIUM-HIGH — peer-reviewed, widely adopted in production.
+- **Effort:** MEDIUM — prompt engineering on 4 agents. Need to test whether it actually improves our reviewers (pairs with Skill-Creator from F6).
+- **Proposal:** Add an optional "Verification frame" section to Spec Reviewer first (highest impact). Structure: (1) draft verdict + scores, (2) list 3-5 verification questions that would falsify this verdict, (3) check each, (4) revise if any verification fails.
+- **Risk & rollback:** Increased token cost per review (~30-50% more reasoning). Easy to remove — just delete the Verification frame section.
+- **Decision needed:** Yes — pilot CoVe on Spec Reviewer?
+
+#### F16: Claude Code Security — Anthropic's dedicated security agent (Feb 2026, Opus 4.6)
+
+- **Source:** [Dark Reading: AI agent runtime security 2026](https://venturebeat.com/security/ai-agent-runtime-security-system-card-audit-comment-and-control-2026), [AI Code Security Tools 2026](https://www.truefoundry.com/blog/best-ai-code-security)
+- **What it is:** Anthropic's Claude Code Security agent (launched Feb 2026 with Opus 4.6) found 500+ vulnerabilities in production open-source codebases, including 14 high-severity in Firefox alone.
+- **Impact on us:** HIGH — this is a dedicated Anthropic-built security reviewer that's demonstrably effective. Could replace or augment our generic Security Reviewer with a specialist.
+- **Adoption confidence:** HIGH — direct Anthropic product, proven in production.
+- **Effort:** SMALL-MEDIUM — evaluate side-by-side with our Security Reviewer on a real code task; decide whether to replace, delegate-to, or keep both.
+- **Proposal:** Add Claude Code Security as an optional MCP/skill integration in `agents/security-reviewer.md`, with the same pattern as our Claude Skills — use it if available, fall back to built-in checks otherwise.
+- **Risk & rollback:** External tool dependency; fallback preserves our existing security review.
+- **Decision needed:** Yes — evaluate Claude Code Security alongside our Security Reviewer?
+
+#### F19: Prompt injection defense — adversarial content in user-supplied text (CVE-2025-53773)
+
+- **Source:** [Coders Adopt AI Agents, Security Pitfalls 2026](https://www.darkreading.com/application-security/coders-adopt-ai-agents-security-pitfalls-lurk-2026), CVE-2025-53773 (CVSS 9.6)
+- **What it is:** Hidden prompt injection in PR descriptions enabled remote code execution via GitHub Copilot. Pattern: agents read user-supplied content (PRD, TASKS, PR descriptions, issue comments) which may contain adversarial instructions.
+- **Impact on us:** HIGH — our agents routinely read `docs/PRD.md`, `docs/TASKS.md`, and task descriptions. If any of these come from untrusted sources (team members with varying trust levels, external contributors, copy-paste from web), prompt injection is a real risk. Not a current problem at 1-user scale, but becomes critical if the framework scales to teams.
+- **Adoption confidence:** HIGH — well-documented threat.
+- **Effort:** MEDIUM — add a "Trust boundary check" section to agents that read user-supplied docs: scan for instruction-like phrases that contradict the agent's role, flag for user review if found.
+- **Proposal:** Add a note to Iteration Manager's routing logic: when task description comes from an untrusted source (open PR, shared link, forwarded message), route to a "Trust Sanitizer" check first — or have each agent that reads `docs/TASKS.md` pattern-match for instruction injection.
+- **Risk & rollback:** False positives on legitimate imperative content. Tune pattern list carefully.
+- **Decision needed:** Yes — add prompt-injection defense guardrails?
+
+### Findings — Medium Priority
+
+#### F15: Specialist reviewer split (bug-hunter, security-auditor, test-coverage, style)
+
+- **Source:** [Maestro Orchestrate](https://github.com/caramaschiHG/awesome-ai-agents-2026), industry pattern
+- **What it is:** Production code-review systems split reviewer role into specialists: bug-hunter, security-auditor, code-quality-reviewer, contracts-reviewer, historical-context-reviewer, test-coverage-reviewer.
+- **Impact on us:** MEDIUM — our Reviewer is currently single-agent doing all categories. Specialization could improve catch rate but adds workflow steps and orchestration overhead.
+- **Proposal:** **Wait for evidence.** Track Reviewer outputs (via `builder_cycle_count` in handoff blocks) — if certain categories consistently get missed, that's the signal to split. Premature split adds cost without proven benefit.
+- **Decision needed:** No — defer until data shows specific weakness.
+
+#### F18: VoltAgent awesome-agent-skills (1000+ cross-platform skills)
+
+- **Source:** [awesome-agent-skills GitHub](https://github.com/VoltAgent/awesome-agent-skills)
+- **What it is:** Curated collection of 1000+ agent skills compatible with Claude Code, Codex, Gemini CLI, Cursor. Could contain specializations we lack (e.g., Docker audit, Terraform review, SQL query optimization).
+- **Impact on us:** MEDIUM — opportunity cost of NOT browsing.
+- **Proposal:** Spend 30 min browsing the collection for 2-3 skills that fill gaps in our 21-agent coverage. Evaluate each via the optional-skill-augmentation pattern from CLAUDE_SKILLS.md.
+- **Decision needed:** Yes — browse and identify 2-3 candidates?
+
+#### F20: Simon Willison's Agentic Engineering Patterns (ongoing series, Feb 2026+)
+
+- **Source:** [Simon Willison newsletter](https://simonwillison.net/2026/Feb/23/agentic-engineering-patterns/), [Pragmatic Summit talk](https://www.youtube.com/watch?v=owmJyKVu5f8)
+- **What it is:** Ongoing guide documenting practical patterns from Simon Willison (prominent AI engineer) — red/green TDD for agents, "code is now inexpensive" shift, 1-2 chapters/week.
+- **Impact on us:** MEDIUM — reference material for our KNOWN_PATTERNS.md and future reviews.
+- **Proposal:** Add to Tier 8 sources in `ai-landscape.md` (already there). Track the newsletter; extract any patterns that specifically improve our Architect/Builder workflows.
+- **Decision needed:** No action — it's in our standing watchlist now.
+
+#### F21: Process Reward Models (PRM) — score each reasoning step, not just final output
+
+- **Source:** [AI Trends 2026: Test-Time Reasoning](https://huggingface.co/blog/aufklarer/ai-trends-2026-test-time-reasoning-reflective-agen)
+- **What it is:** Instead of evaluating only final outputs, PRMs score each intermediate reasoning step. Accelerated in 2025-2026.
+- **Impact on us:** LOW-MEDIUM — our Spec Reviewer already scores 10 dimensions which is similar in spirit. PRMs are more granular (per-step) but require training/fine-tuning infrastructure.
+- **Proposal:** Monitor. Our rubric-based scoring is already strong; PRMs are an enterprise-scale investment.
+- **Decision needed:** No — defer.
+
+### Findings — Monitor
+
+- **F14:** General reflective/critique loops report **25-50% higher success rates on multi-step tasks** (Medium article, Zylos Research, 2026). **Our quality loop is exactly this pattern** — built-in reflection via Reviewer agents + Gatekeeper. Validation that our architecture is sound. When IM telemetry (Phase 2 metrics) fills with real data, we'll be able to measure our own loop's effectiveness.
+- **F17: Memory architectures (MemGPT, A-Mem, 85-93% token reduction)** — compelling but our workflow is task-bounded (no persistent long-lived memory). Monitor for cases where Discovery agent does multi-session research that benefits from memory.
+- **F22: Test-time reasoning** — already covered by F3 (`xhigh` effort) from earlier review.
+- **F23: Self-Consistency sampling** — expensive (multiple sampling paths), domain gains reported on math/reasoning benchmarks. Our domain is less sampling-suitable.
+- **F24: Tree-of-Thoughts** — 2026 research raised concerns about redundant exploration of low-value paths. Skip.
+- **F25: Kubernetes-for-AI-agents (Maestro)** — enterprise scale, overkill at 6 projects.
+
+### Decisions Required from User
+
+| # | Question | Recommended default |
+|---|---|---|
+| 10 | F10: Run MAST mapping audit (our framework vs 14 specific failure modes)? | yes (cheap validation) |
+| 11 | F13: Pilot Chain-of-Verification on Spec Reviewer? | yes (low-risk, high-upside prompt change) |
+| 12 | F15: Split Reviewer into specialists? | defer (need weakness signal first) |
+| 13 | F16: Evaluate Claude Code Security alongside our Security Reviewer? | yes (likely material improvement) |
+| 14 | F18: Browse VoltAgent skills catalog for 2-3 gap fills? | yes (30 min investment) |
+| 15 | F19: Add prompt-injection defense guardrails? | yes (defensive hygiene) |
+| 16 | F21: Adopt Process Reward Models? | defer (enterprise infrastructure) |
+| 17 | F17: Adopt MemGPT/A-Mem memory architecture? | defer (our scope doesn't need it) |
+
+### Comparison to prior reviews
+
+- **F1 (lazy loading):** adopted, documented. No change.
+- **F2 (cache hit ratio):** debunked by data — hit ratio 98%. F2 stays closed.
+- **F3 (`xhigh` effort):** adopted in 3 agents. F14 (reflection loops) and F22 (test-time reasoning) in this review reinforce the F3 bet — reasoning quality is where returns are.
+- **F4 (Mythos Preview):** still monitoring, GA not yet.
+- **F8 (MCPWatch):** still blocked on tooling. **F16 (Claude Code Security) partially compensates** — Anthropic's own security agent has same goal.
+
+### Notes
+
+**Biggest surprise:** MAST taxonomy validates our architecture very cleanly. The top 3 failure modes in industry (bad specs / coordination / verification) map directly onto our top 3 framework pillars (Product+Spec Reviewer / handoff contract / Reviewer-class agents). Suggests our design is structurally correct — most improvements will be refinements, not restructuring.
+
+**New pattern for future reviews:** The query-quota rule works. Six of eight queries this round were agent-specific (Tier 7-9), and findings are concrete and actionable (CoVe, prompt injection, Claude Code Security) — not just tooling news.
+
+**Framework health indicator:** When an industry-wide failure taxonomy (MAST) lands on 42/37/21 split, and our framework addresses all three at the structural level, that's an external validation signal. Worth noting in `docs/DECISIONS.md` as architectural justification for the current design.
+
+---
+
+

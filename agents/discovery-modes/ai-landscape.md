@@ -71,6 +71,54 @@ Use WebSearch and WebFetch to investigate the following sources. Spend ~5–10 w
 - LLM observability (Langfuse, Helicone, Phoenix)
 - Eval frameworks (Promptfoo, Inspect)
 
+### Tier 7 — Agent role inventory & domain specializations
+
+Use this tier to discover **specialized agent roles** that our system might lack, or domain-specific agent patterns worth adopting.
+
+- `awesome-llm-agents`, `awesome-ai-agents` GitHub lists
+- CrewAI built-in agent library (their `Agent` presets)
+- Vercel AI SDK agent templates
+- Anthropic enterprise plugin agents (finance, legal, HR, engineering) — hints at valuable specializations
+- Domain-specific AI tools: DevSecOps, FinOps, Performance analysis, License/compliance audit, Data quality, Accessibility, Documentation, Observability/SRE
+
+**Mapping question:** For each interesting specialization found, ask "would this become a new agent in our system, or enhance an existing one?"
+
+### Tier 8 — Production patterns & failure modes
+
+Use this tier to learn from engineers running multi-agent systems with real traffic — what works, what breaks, what they wish they'd known.
+
+- [Latent Space podcast](https://www.latent.space/) — production AI engineering deep dives
+- [Eugene Yan blog](https://eugeneyan.com/) — applied ML/agents, evaluation
+- [Simon Willison's weeknotes](https://simonwillison.net/) — practical LLM engineering
+- "Building agents in production" posts on Substack / LinkedIn
+- Anthropic case studies + customer stories
+- Horror stories / post-mortems of agent failures
+
+**Mapping question:** For each failure mode found, ask "could this happen to us? do our agents have the right guardrail?"
+
+### Tier 9 — Cognitive architectures & prompting techniques
+
+Use this tier to improve how **existing agents think** — planning structure, memory, reasoning chains, structured output.
+
+- Anthropic prompt engineering documentation
+- Awesome-prompt-engineering list
+- Specific research directions: Plan-and-Solve, ReAct, Tree-of-Thoughts, Self-Consistency, Reflexion, Chain-of-Verification, Memory-augmented agents (MemGPT, generative agents)
+- "How I prompt X agent to do Y" posts from experienced prompt engineers
+
+**Mapping question:** For each technique found, ask "which of our 21 agents would benefit, and is the added prompt length / token cost justified?"
+
+---
+
+## Query quota rules
+
+Each review must allocate queries across tiers with these minimums:
+
+- At least 2 queries targeting **agent-specific tiers** (Tier 2, 7, 8, or 9) — ensures we don't drift into only tooling/cost reviews
+- At least 1 query each in Tiers 1 (Anthropic ecosystem) and 4 (benchmarks) — these are foundational
+- Remaining queries distributed by the review's focus area (if `OPTIONAL_FOCUS` is set) or evenly
+
+The review should balance **tooling improvements** (cost, lazy loading, MCP) and **agent/workflow improvements** (new roles, prompting techniques, failure modes). A review where all 10 queries are about caching or observability fails this balance — it means we're over-weighting infrastructure and under-weighting the substance of the agents themselves.
+
 ---
 
 ## Methodology
