@@ -45,7 +45,89 @@ Evaluate each dimension. For each issue found, classify severity.
 | Responsive behavior | Breakpoints and adaptive layout match design specifications |
 | Visual hierarchy | Element ordering, sizing, and emphasis match mockup intent |
 | Animations | Transitions and animations match design specifications (if any) |
-| Accessibility | Contrast ratios, touch targets, semantic markup meet minimum standards |
+| Accessibility | Full WCAG 2.1 AA audit — see Accessibility methodology below |
+
+---
+
+## Accessibility methodology
+
+The Accessibility dimension is audited using a structured WCAG 2.1 AA framework, not a single check. This methodology produces specific, citable findings.
+
+### Built-in WCAG 2.1 AA checklist
+
+#### Perceivable
+- **1.1.1** All non-text content (images, icons) has appropriate alt text or `aria-label`
+- **1.3.1** Information and relationships are conveyed semantically (headings, lists, form labels — not just visually)
+- **1.4.3** Color contrast ratio ≥ 4.5:1 for normal text, ≥ 3:1 for large text (18pt+ or 14pt+ bold)
+- **1.4.11** Non-text contrast ≥ 3:1 for UI components (buttons, form borders, focus indicators) and meaningful graphics
+
+#### Operable
+- **2.1.1** All functionality is available via keyboard (no mouse-only interactions)
+- **2.4.3** Focus order is logical and matches visual reading order
+- **2.4.7** Focus indicator is visible on all interactive elements
+- **2.5.5** Touch targets are at least 44×44 CSS pixels (or have ≥ 24px spacing if smaller)
+
+#### Understandable
+- **3.2.1** Focusing an element does not trigger unexpected context changes
+- **3.3.1** Errors are clearly identified and described in text
+- **3.3.2** All form inputs have labels or instructions
+
+#### Robust
+- **4.1.2** All custom UI components expose name, role, and value programmatically (ARIA where needed)
+
+### Required color contrast verification
+
+For every color pair in the implementation, produce a row:
+
+| Element | Foreground | Background | Ratio | Required | Pass? |
+|---|---|---|---|---|---|
+| <text element> | <hex> | <hex> | <X>:1 | 4.5:1 / 3:1 | ✅ / ❌ |
+
+If any ratio fails, classify as `must_fix` and reference WCAG 1.4.3 or 1.4.11.
+
+### Required keyboard navigation verification
+
+For every interactive element, verify:
+
+| Element | Reachable via Tab | Activates with Enter/Space | Visible focus indicator | Logical tab order |
+|---|---|---|---|---|
+| <element> | ✅ / ❌ | ✅ / ❌ | ✅ / ❌ | ✅ / ❌ |
+
+Any ❌ in the first three columns = `must_fix` (WCAG 2.1.1, 2.4.7).
+
+### Common accessibility issues to flag
+
+1. Insufficient color contrast (most common)
+2. Missing form labels (use `<label>` or `aria-label`, not just placeholders)
+3. Interactive elements not reachable via keyboard
+4. Missing alt text on meaningful images
+5. Focus traps in modals (no way to escape with keyboard)
+6. Missing ARIA landmarks (`<main>`, `<nav>`, `<header>`)
+7. Auto-playing media without controls
+8. Touch targets smaller than 44×44 CSS pixels
+
+### Severity mapping for accessibility issues
+
+| WCAG criterion violation | Default severity |
+|---|---|
+| 1.4.3, 1.4.11 (contrast) | `must_fix` |
+| 2.1.1 (keyboard access) | `must_fix` |
+| 2.4.7 (focus indicator) | `must_fix` |
+| 2.5.5 (touch target size) | `must_fix` for mobile, `should_fix` for desktop |
+| 1.1.1 (alt text on meaningful images) | `must_fix` |
+| 1.1.1 (alt text on decorative images, missing `alt=""`) | `should_fix` |
+| 1.3.1 (semantic structure) | `should_fix` (unless screen reader cannot navigate, then `must_fix`) |
+| 4.1.2 (ARIA name/role/value) | `must_fix` for custom controls, `should_fix` otherwise |
+
+### Optional skill augmentation
+
+If the Claude skill `design:accessibility-review` is available in the current environment, invoke it to supplement the audit with additional WCAG cross-references and screen reader testing patterns. Pass the implementation under review as the argument.
+
+If the skill is not available (Cursor, API, or no plugin installed), use the built-in WCAG checklist above — it covers the same essential ground.
+
+Skill availability is detected via the available-skills list in the conversation context. If unsure, do not invoke the skill — proceed with built-in methodology.
+
+The handoff verdict is based on built-in findings — skill output is supplementary depth, never a verdict dependency.
 
 ---
 

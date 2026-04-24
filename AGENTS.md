@@ -44,7 +44,7 @@ The project prioritizes:
 
 | Agent | Role file | Core responsibility | Does NOT |
 |---|---|---|---|
-| **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing | Write production code |
+| **Discovery** | `agents/discovery.md` | Explore options via specialized modes (`agents/discovery-modes/`): technical, market, references, brand, marketing, legal, user-research, research-synthesis | Write production code |
 | **Product** | `agents/product.md` | Turn ideas into feature specs, task breakdowns, and acceptance criteria | Write production code |
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes; iterate with user feedback | Write code; define product scope |
 | **Animator** | `agents/animator.md` | Define motion design, animations, and transitions for approved UI designs | Write code; change visual design; make product decisions |

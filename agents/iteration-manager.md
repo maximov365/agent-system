@@ -150,6 +150,8 @@ Classify every incoming request before selecting an agent.
 |---|---|
 | Project onboarding; user requests new project setup; project docs are empty stubs | `Discovery` (onboarding intake mode) |
 | Technical uncertainty; multiple approaches; unclear architecture direction; market/competitive research needed | `Discovery` |
+| User research needed; planning interviews, usability tests, or surveys | `Discovery` (user-research mode) |
+| Existing research data needs synthesis into themes and recommendations | `Discovery` (research-synthesis mode) |
 | Feature idea; scope unclear; task not yet in `docs/TASKS.md` | `Product` |
 | Accepted feature specification has user-facing UI and needs design review | `Designer` |
 | Design approved; feature has motion, animation, or transitions | `Animator` |

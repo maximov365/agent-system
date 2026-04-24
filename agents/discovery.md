@@ -20,6 +20,8 @@ Discovery operates in specialized modes. Select the mode based on the request, t
 | Brand positioning, naming, tone of voice, identity | brand | `agents/discovery-modes/brand.md` |
 | Go-to-market, channels, messaging, pricing | marketing | `agents/discovery-modes/marketing.md` |
 | Regulatory compliance, data protection, legal risks | legal | `agents/discovery-modes/legal.md` |
+| Plan or design user research (interviews, usability, surveys) | user-research | `agents/discovery-modes/user-research.md` |
+| Synthesize existing research data into themes and recommendations | research-synthesis | `agents/discovery-modes/research-synthesis.md` |
 
 **Rules:**
 
