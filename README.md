@@ -36,7 +36,7 @@ cd ~/projects/agent-system
 # 2. Install Python deps
 pip install -r requirements-framework.txt
 
-# 3. Install the /init-downstream Claude Code slash command
+# 3. Install Claude Code slash commands (/init-downstream, /metrics, /ai-landscape-review)
 bash install-slash-commands.sh
 
 # 4. (Optional) Enable post-commit auto-sync of downstream projects
@@ -64,6 +64,20 @@ This will:
 2. Register the path in `agent-system/downstream.projects`
 3. Sync framework files and render templates
 4. Offer to start the onboarding workflow (Discovery intake mode)
+
+### Framework health & evolution
+
+```
+/metrics                              # snapshot of portfolio, knowledge, velocity
+/metrics history 10                   # last 10 historical snapshots
+
+/ai-landscape-review                  # weekly scan of AI ecosystem for improvements
+/ai-landscape-review "agent frameworks"  # focused review
+```
+
+`/metrics` writes `docs/METRICS.md` (current snapshot) and appends to `docs/METRICS_HISTORY.jsonl` (timeseries).
+
+`/ai-landscape-review` appends findings to `docs/EVOLUTION_LOG.md`. The review is report-only — the user decides what to adopt.
 
 ### Manual setup (alternative)
 
