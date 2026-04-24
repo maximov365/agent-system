@@ -10,15 +10,19 @@ Claude skills (also called "agent skills") are pre-built prompt templates and me
 
 ## Compatibility matrix
 
+The Agent Skills format became an open standard in December 2025 and was adopted by OpenAI for Codex CLI and ChatGPT (the same `.md` skill files work across vendors).
+
 | Environment | Skills available? | What agents do |
 |---|---|---|
 | Claude Code + plugin installed | Yes | Use skill as primary methodology |
 | Claude Code without plugin | No | Use built-in fallback methodology |
+| OpenAI Codex CLI + skill installed | Yes | Use skill as primary methodology (open standard since Dec 2025) |
+| ChatGPT + skill installed | Yes | Use skill as primary methodology (open standard since Dec 2025) |
 | Cursor (via `.cursor/rules.md`) | No | Use built-in fallback methodology |
 | Anthropic API direct | No | Use built-in fallback methodology |
 | Other Claude clients | No | Use built-in fallback methodology |
 
-The framework is designed to be **environment-agnostic by default**. Skills are an opt-in enhancement, not a dependency.
+The framework is designed to be **environment-agnostic by default**. Skills are an opt-in enhancement, not a dependency. Backward-compatibility contract (below) ensures every agent works without skills regardless of environment.
 
 ---
 

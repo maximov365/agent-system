@@ -92,6 +92,55 @@ Supports Google Gemini, OpenAI, and FLUX models.
 
 ---
 
+## Performance notes
+
+### MCP Tool Search (lazy loading) — Claude Code April 2026+
+
+Claude Code now lazy-loads MCP tool definitions and templates. Instead of pre-loading every server's full tool manifest at session start, it defers `resources/templates/list` until the first `@`-mention of that MCP. Reportedly reduces context usage by up to 95% when multiple MCP servers are configured.
+
+**For our framework:** we use 3 MCP servers (`gsap-master`, `rive-mcp`, `nanobanana`). Thanks to lazy loading, agents that don't touch animation or image generation won't pay context cost for these. No configuration needed — it's automatic in recent Claude Code versions.
+
+### Large result payloads (500K chars)
+
+Some MCP tools (DB schema dumpers, large file readers) return payloads that exceed default truncation limits. Claude Code supports a per-tool override via annotation:
+
+```
+_meta["anthropic/maxResultSizeChars"] = 500000
+```
+
+If an MCP tool you depend on is returning truncated results, check its implementation for this annotation.
+
+---
+
+## Troubleshooting
+
+### Conflicting scope (server defined in multiple places)
+
+Run `/doctor` in Claude Code — it warns when an MCP server is defined in multiple config scopes with different endpoints. Common cause: adding the same server at `user` scope via `claude mcp add -s user` and also in a project's `.cursor/mcp.json` with different arguments.
+
+Resolve by removing one of the duplicates (`claude mcp remove <name> -s <scope>`).
+
+### Server fails to start
+
+Check the startup log shown in Claude Code's MCP panel. Common causes:
+- Missing env var (e.g. `GOOGLE_AI_API_KEY` not set)
+- Node.js < 18 or missing `npx`
+- Network restriction blocking `npm` package download for `-y` (auto-install) servers
+
+### Tool returns truncated result
+
+See "Large result payloads" above — the server may need to set the 500K annotation.
+
+### Security audit
+
+Run MCPWatch (third-party tool) against your configured servers to check for known vulnerabilities:
+```bash
+npx mcpwatch scan
+```
+Covers auth bypass, injection, secrets exposure patterns in MCP implementations.
+
+---
+
 ## Adding new MCP tools
 
 When a new tool-agent requires an external MCP tool:

@@ -384,20 +384,35 @@ def _render_workflow_section(wt: dict) -> str:
     else:
         lines.append(f"| Workflow tracking | _no handoff blocks yet — agents haven't emitted them in recorded sessions_ |")
 
+    # Cache health (F2 from EVOLUTION_LOG 2026-04-24)
+    cache30 = c30.get("cache", {}) or {}
+    hit_ratio = cache30.get("cache_hit_ratio")
+    coverage = cache30.get("cache_coverage")
+    health = cache30.get("health", "unknown")
+    health_icon = {"efficient": "✓", "mixed": "⚠", "poor": "🚨", "unknown": "?"}[health]
+    hr_str = f"{hit_ratio:.0%}" if hit_ratio is not None else "N/A"
+    cov_str = f"{coverage:.0%}" if coverage is not None else "N/A"
+
     lines.extend([
         f"| Cost (last 7 days) | ${c7.get('total_cost_usd', 0):.2f} |",
         f"| Cost (last 30 days) | ${c30.get('total_cost_usd', 0):.2f} |",
+        f"| Cache hit ratio (30d) | {hr_str} {health_icon} {health} |",
+        f"| Cache coverage of input (30d) | {cov_str} |",
+        f"| Cache write spend estimate (30d) | ${cache30.get('cache_write_cost_estimate_usd', 0):.2f} |",
     ])
 
     if c30.get("by_project"):
         top = sorted(c30["by_project"].items(), key=lambda x: -x[1]["cost_usd"])[:5]
-        lines.append("\n**Cost breakdown (30d, top 5 projects):**\n")
-        lines.append("| Project | Input tok | Output tok | Cache read | Cost USD |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("\n**Cost & cache breakdown (30d, top 5 projects):**\n")
+        lines.append("| Project | Input | Cache read | Cache write | Cost | Hit ratio |")
+        lines.append("|---|---|---|---|---|---|")
         for proj, info in top:
             t = info["tokens"]
+            cache = info.get("cache", {})
+            hr = cache.get("cache_hit_ratio")
+            hr_str = f"{hr:.0%}" if hr is not None else "—"
             lines.append(
-                f"| {proj} | {t['input']:,} | {t['output']:,} | {t['cache_read']:,} | ${info['cost_usd']:.2f} |"
+                f"| {proj} | {t['input']:,} | {t['cache_read']:,} | {t['cache_write']:,} | ${info['cost_usd']:.2f} | {hr_str} |"
             )
 
     return "\n".join(lines)

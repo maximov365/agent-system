@@ -1,6 +1,6 @@
 # Framework Metrics
 
-**Snapshot:** 2026-04-24T11:40:48Z
+**Snapshot:** 2026-04-24T11:49:25Z
 **Framework version:** 1.0.23
 
 This file is regenerated on every `python3 metrics.py` run. Append-only history is in `docs/METRICS_HISTORY.jsonl`. See `metrics.py` for the schema.
@@ -52,8 +52,8 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 
 | Metric | Value |
 |---|---|
-| Commits (7d) | 10 |
-| Commits (30d) | 43 |
+| Commits (7d) | 11 |
+| Commits (30d) | 44 |
 | Version bumps (30d) | 24 |
 | Version bumps (90d) | 24 |
 
@@ -63,8 +63,8 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 
 | Metric | Value |
 |---|---|
-| Total reviews logged | 0 |
-| Findings logged | 0 |
+| Total reviews logged | 1 |
+| Findings logged | 9 |
 
 ---
 
@@ -78,16 +78,19 @@ This file is regenerated on every `python3 metrics.py` run. Append-only history 
 | Workflow tracking | _no handoff blocks yet — agents haven't emitted them in recorded sessions_ |
 | Cost (last 7 days) | $80.73 |
 | Cost (last 30 days) | $295.94 |
+| Cache hit ratio (30d) | 98% ✓ efficient |
+| Cache coverage of input (30d) | 100% |
+| Cache write spend estimate (30d) | $63.50 |
 
-**Cost breakdown (30d, top 5 projects):**
+**Cost & cache breakdown (30d, top 5 projects):**
 
-| Project | Input tok | Output tok | Cache read | Cost USD |
-|---|---|---|---|---|
-| probey | 14,923 | 320,829 | 409,974,029 | $138.41 |
-| Voxema (worktree:inspiring chaum) | 5,607 | 433,870 | 114,591,683 | $68.89 |
-| ecom scout | 18,258 | 239,273 | 72,725,661 | $42.57 |
-| agent system (worktree:brave bouman) | 29,121 | 151,001 | 53,959,737 | $38.16 |
-| x5club (worktree:jolly raman) | 298 | 114,573 | 13,013,442 | $7.91 |
+| Project | Input | Cache read | Cache write | Cost | Hit ratio |
+|---|---|---|---|---|---|
+| probey | 14,923 | 409,974,029 | 1,774,046 | $138.41 | 100% |
+| Voxema (worktree:inspiring chaum) | 5,607 | 114,591,683 | 4,677,540 | $68.89 | 96% |
+| ecom scout | 18,258 | 72,725,661 | 2,880,217 | $42.57 | 96% |
+| agent system (worktree:brave bouman) | 29,121 | 53,959,737 | 3,298,444 | $38.16 | 94% |
+| x5club (worktree:jolly raman) | 298 | 13,013,442 | 381,808 | $7.91 | 97% |
 
 ---
 

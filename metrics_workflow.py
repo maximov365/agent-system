@@ -236,6 +236,50 @@ def aggregate_workflows(per_project: dict) -> dict:
     }
 
 
+def _cache_ratios(tokens: dict) -> dict:
+    """
+    Compute cache efficiency signals from token counts.
+
+    - cache_hit_ratio = cache_read / (cache_read + cache_write)
+      How much of our caching activity is productive vs wasted writes.
+      >70% = efficient. 30-70% = mixed. <30% = bad (likely TTL or prompt instability).
+    - cache_coverage = cache_read / (input + cache_read)
+      What fraction of ALL input tokens are served from cache.
+      Higher = better cost optimization.
+    - cache_waste_usd_est = theoretical USD saved if all cache_write had also been cache_read
+      This estimates money "left on the table" — writes that expired before being read.
+    """
+    cr = tokens.get("cache_read", 0)
+    cw = tokens.get("cache_write", 0)
+    inp = tokens.get("input", 0)
+
+    cached_activity = cr + cw
+    hit_ratio = round(cr / cached_activity, 3) if cached_activity else None
+    coverage = round(cr / (inp + cr), 3) if (inp + cr) else None
+
+    # Estimate wasted cost: a write at $3.75/M that isn't read back is ~pure overhead
+    # vs if it had been a read at $0.30/M. Conservative estimate — real waste depends on TTL behavior.
+    avg_write_cost_per_m = 4.88  # midpoint of 5m ($3.75) and 1h ($6.00) cache writes
+    waste_usd_est = round(cw * avg_write_cost_per_m / 1_000_000, 2) if cw else 0.0
+
+    # Health assessment
+    health = "unknown"
+    if hit_ratio is not None:
+        if hit_ratio >= 0.70:
+            health = "efficient"
+        elif hit_ratio >= 0.30:
+            health = "mixed"
+        else:
+            health = "poor"
+
+    return {
+        "cache_hit_ratio": hit_ratio,
+        "cache_coverage": coverage,
+        "cache_write_cost_estimate_usd": waste_usd_est,
+        "health": health,
+    }
+
+
 def aggregate_costs(per_project: dict, since_days: int) -> dict:
     """Total tokens + USD cost across all projects, filtered by recency."""
     cutoff = dt.datetime.now() - dt.timedelta(days=since_days)
@@ -263,13 +307,18 @@ def aggregate_costs(per_project: dict, since_days: int) -> dict:
             sessions_counted += 1
 
         if proj_cost > 0:
-            by_project[proj] = {"tokens": proj_tokens, "cost_usd": round(proj_cost, 2)}
+            by_project[proj] = {
+                "tokens": proj_tokens,
+                "cost_usd": round(proj_cost, 2),
+                "cache": _cache_ratios(proj_tokens),
+            }
 
     return {
         "since_days": since_days,
         "sessions_counted": sessions_counted,
         "total_tokens": totals,
         "total_cost_usd": round(total_cost, 2),
+        "cache": _cache_ratios(totals),
         "by_project": by_project,
     }
 

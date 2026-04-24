@@ -193,6 +193,16 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ---
 
+## Recommended thinking effort
+
+For Spec Reviewer evaluations, Anthropic's Opus 4.7 with `xhigh` effort level (between `high` and `max`) materially improves audit depth — surface deeper PRD/architecture conflicts, catch subtle scope drift, score more consistently across iterations. Set with `/effort xhigh` or via the model picker before invoking this agent on complex artifacts.
+
+For trivial artifacts (single-screen designs, single-step plans, copy-only changes), default `high` is sufficient.
+
+This is a recommendation, not enforced. Falls back gracefully on lower effort if not set.
+
+---
+
 ## Review principles
 
 - Be specific. Vague feedback ("unclear scope") is not actionable — name the exact section or criterion that fails.
