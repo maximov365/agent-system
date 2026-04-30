@@ -25,6 +25,7 @@ You may revise:
 - Decision notes
 - Analytics specifications
 - Design artifacts (UI mockups produced by Designer)
+- Animation, illustration, and video briefs produced by Designer, Animator, Illustrator, or Video Producer
 - UX copy documents (copy produced by UX Writer)
 - Marketing artifacts (strategies, campaigns, launch kits produced by Marketing)
 - Test plans

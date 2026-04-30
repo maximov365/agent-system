@@ -35,8 +35,15 @@ Read in order:
 **For tasks involving code, also read:**
 11. `.cursor/rules.md`
 
+**For tasks involving model routing, external review, sandboxing, or PR-based delivery, also read:**
+12. `docs/MODEL_POLICY.md`
+13. `docs/MODEL_GATEWAY_SETUP.md`
+14. `docs/EXTERNAL_REVIEW_CONTRACT.md`
+15. `docs/SANDBOX_POLICY.md`
+16. `docs/PULL_REQUEST_CONTRACT.md`
+
 **For UI, frontend, or design tasks, also read:**
-12. `docs/BRAND.md`
+17. `docs/BRAND.md`
 
 ---
 

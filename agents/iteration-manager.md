@@ -92,11 +92,20 @@ After **every** completed workflow (`next_action: complete_workflow`), append to
 
 Iteration Manager must track workflow state across agent transitions. State must persist across stage transitions and be updated after each agent output. All routing decisions must consider current state.
 
+Durable workflow state is mandatory. For every active task, Iteration Manager creates and updates:
+
+```text
+.agent/workflows/<task_id>.json
+```
+
+This state file is the source of truth between execution cycles. `handoff.workflow_state` is validated against it and then persisted after each accepted transition. Specialist agents must not edit the state file directly.
+
 | Field | Type | Description |
 |---|---|---|
 | `task_id` | string | Identifier of the task in `docs/TASKS.md`; `"new"` for tasks not yet created |
 | `artifact_id` | string or null | Identifier of the artifact currently under review; `null` when no artifact is active |
 | `current_stage` | enum | Must be one of: `discovery` `product` `analytics` `architecture` `implementation` `validation` `complete` |
+| `workflow_mode` | enum | Rigor mode: `lite`, `standard`, or `strict`; default `standard` |
 | `quality_loop_iteration` | int | Current iteration number when quality loop is active; `0` when inactive |
 | `builder_cycle_count` | int | Number of consecutive Builder review cycles on the current task |
 | `analytics_used` | bool | Whether Analytics Architect was invoked for this feature |
@@ -104,6 +113,8 @@ Iteration Manager must track workflow state across agent transitions. State must
 | `onboarding_phase` | int or null | Current onboarding phase (1–5); `null` when not in onboarding workflow |
 
 `current_stage` must always be set to one of the enum values above — never free text. The value maps to workflow position as follows: `discovery` while Discovery is active; `product` while Product, its quality loop, or Designer is active; `analytics` while Analytics Architect or its quality loop is active; `architecture` while Architect, its quality loop, or Test Strategist is active; `implementation` while Builder, Analytics Validator, or Security Reviewer is active; `validation` while Reviewer is active; `complete` after Reviewer approval and all completion conditions are met.
+
+`workflow_mode` must be set during initial routing. Default to `standard`. Use `lite` for small low-risk tasks and `strict` for high-risk, cross-module, security-sensitive, analytics-sensitive, or release-critical tasks as defined in `AGENTS.md`.
 
 **State lifecycle rules:**
 
@@ -114,6 +125,8 @@ Iteration Manager must track workflow state across agent transitions. State must
 `analytics_used` is set to `true` when Analytics Architect is invoked and must not revert to `false` for the same task.
 
 State must never carry over from a previous task. Each new `task_id` starts with a fresh initialised state. State initialisations are defined in the relevant mode files.
+
+When initial routing uses `task_id: "new"`, Iteration Manager may create a temporary state file named `.agent/workflows/new.json`. As soon as the task receives a stable identifier, Iteration Manager must rename or recreate the state file under the stable `task_id` and preserve the latest handoff history.
 
 ---
 
@@ -228,6 +241,7 @@ Iteration Manager always responds with a single JSON block.
     "task_id": "<task id from docs/TASKS.md, or 'new'>",
     "artifact_id": null,
     "current_stage": "discovery | product | analytics | architecture | implementation | validation | complete",
+    "workflow_mode": "lite | standard | strict",
     "quality_loop_iteration": 0,
     "builder_cycle_count": 0,
     "analytics_used": false,
@@ -255,6 +269,7 @@ Iteration Manager always responds with a single JSON block.
     "task_id": "<task id or 'new'>",
     "artifact_id": "<artifact id or null>",
     "current_stage": "discovery | product | analytics | architecture | implementation | validation | complete",
+    "workflow_mode": "lite | standard | strict",
     "quality_loop_iteration": 0,
     "builder_cycle_count": 0,
     "analytics_used": false,
@@ -263,7 +278,7 @@ Iteration Manager always responds with a single JSON block.
 }
 ```
 
-Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when loop applies. `quality_loop_iteration` = 1–3 when active, `null` in initial_routing, `0` when inactive. `next_action` = `complete_workflow` | `escalate_to_user` when appropriate. `escalation_reason` populated only on escalation. `analytics_required` = `true` when Analytics Architect must run. `workflow_state.current_stage` uses enum from Workflow state tracking. `workflow_state` present in every output.
+Field rules: `quality_loop_required`/`quality_loop_active` = `true` only when loop applies. `quality_loop_iteration` = 1–3 when active, `null` in initial_routing, `0` when inactive. `next_action` = `complete_workflow` | `escalate_to_user` when appropriate. `escalation_reason` populated only on escalation. `analytics_required` = `true` when Analytics Architect must run. `workflow_state.current_stage` uses enum from Workflow state tracking. `workflow_state.workflow_mode` uses `lite`, `standard`, or `strict` and defaults to `standard`. `workflow_state` present in every output.
 
 ---
 

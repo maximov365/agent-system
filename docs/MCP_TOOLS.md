@@ -10,7 +10,7 @@ For optional methodological augmentation via Claude skills (prompt templates, no
 
 ## Image Generation (Illustrator agent)
 
-The Illustrator agent requires an MCP server for AI image generation. Configure one of the following in your project's `.cursor/mcp.json`.
+The Illustrator agent requires an MCP server or provider integration for AI image generation. Configure one of the following in your project's `.cursor/mcp.json`.
 
 ### Option A: nanobanana-mcp (recommended)
 
@@ -75,15 +75,53 @@ Supports Google Gemini, OpenAI, and FLUX models.
 
 **Models available:** `nano-banana-2`, `nano-banana-pro`, `gpt-image-1.5`, `flux-2-klein`, `flux-2-pro`
 
+### Option D: GPT Image direct/provider integration
+
+Use GPT Image when it is available through your MCP server, provider SDK, OpenRouter, or LiteLLM route. The framework treats it as a media tool model, not as an autonomous agent.
+
+---
+
+## Video Generation (Video Producer agent)
+
+The Video Producer agent requires an MCP server or direct provider integration for AI video generation. Video providers change quickly, so project teams should configure the provider that is currently available and cost-effective.
+
+Supported model families may include:
+
+- Kling
+- Veo
+- Runway
+- Pika
+- Any MCP server exposing `video_generate` or equivalent
+
+Example project-local MCP configuration shape:
+
+```json
+{
+  "mcpServers": {
+    "video-generation": {
+      "command": "npx",
+      "args": ["-y", "<video-generation-mcp-package>"],
+      "env": {
+        "VIDEO_PROVIDER_API_KEY": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+Direct provider APIs are also acceptable when no MCP server exists. In that case, the runtime or tool wrapper must still return generated asset paths and metadata to Video Producer.
+
+**Important:** Kling, Veo, Runway, Pika, GPT Image, Nano Banana, and similar media models are tool models. They execute a brief; they do not make product, visual, motion, review, or workflow decisions.
+
 ---
 
 ## Setup instructions
 
-1. Choose an MCP server option above
+1. Choose an MCP server or provider option above
 2. Get the required API key(s)
 3. Create or edit `.cursor/mcp.json` in your project root
 4. Restart Cursor to activate the MCP server
-5. Verify by asking Illustrator to generate a test image
+5. Verify by asking Illustrator to generate a test image or Video Producer to generate a short test clip
 
 **Security:**
 - Never commit API keys to the repository

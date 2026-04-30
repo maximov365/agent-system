@@ -27,6 +27,7 @@ Classify every incoming request before selecting an agent.
 | `analytics_validation` | Builder changed instrumentation; Analytics Validator must run |
 | `copy_creation` | Feature has user-facing text; copy needs to be written or reviewed |
 | `illustration_needed` | Visual briefs produced by Designer or Marketing; image generation required |
+| `video_needed` | Video briefs produced by Designer, Animator, or Marketing; video generation required |
 | `standalone_copy` | Release notes, emails, notifications, or other copy request |
 | `marketing_strategy` | Marketing strategy, campaign creation, launch preparation, or marketing review |
 | `non_code_artifact_improvement` | Feature spec, task breakdown, or plan needs quality review |
@@ -50,6 +51,7 @@ Classify every incoming request before selecting an agent.
 | Design approved; feature has 3+ screens / 5+ custom components / complex responsive or motion specs / user requested structured handoff | `Designer` (handoff-spec mode, before UI Builder) |
 | Design approved; feature has motion, animation, or transitions | `Animator` |
 | Designer or Marketing produced visual briefs needing image generation | `Illustrator` |
+| Designer, Animator, or Marketing produced video briefs needing generation | `Video Producer` |
 | Design/animation approved (or no Designer); feature has user-facing text | `UX Writer` |
 | Standalone copy request (release notes, emails, notifications) | `UX Writer` |
 | Marketing strategy, campaign creation, launch preparation | `Marketing` |

@@ -151,7 +151,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ```json
 {
-  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | test_plan",
+  "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | video | test_plan",
   "artifact_path": "<path or title of the artifact being reviewed>",
   "iteration": "<current iteration number, e.g. 1>",
   "cove_applied": true,

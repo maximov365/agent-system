@@ -49,6 +49,7 @@ The project prioritizes:
 | **Designer** | `agents/designer.md` | Create UI mockups and visual prototypes via specialized modes (`agents/designer-modes/`): default (built-in), onboarding-intake, handoff-spec | Write code; define product scope |
 | **Animator** | `agents/animator.md` | Define motion design, animations, and transitions for approved UI designs | Write code; change visual design; make product decisions |
 | **Illustrator** | `agents/illustrator.md` | Generate images via MCP tools (Nano Banana, etc.) from visual briefs | Make design decisions; write code; choose what to create |
+| **Video Producer** | `agents/video-producer.md` | Generate video assets via MCP tools or provider APIs (Kling, Veo, etc.) from approved video briefs | Make product, visual, or motion decisions; write code; choose what to create |
 | **UX Writer** | `agents/ux-writer.md` | Write and review all user-facing text; ensure consistent tone of voice | Write code; change scope; make design decisions |
 | **Marketing** | `agents/marketing.md` | Analyze product, define marketing strategy, create campaigns, ad copy, email sequences, launch kits | Write code; change product scope; make design decisions |
 | **Analytics Architect** | `agents/analytics-architect.md` | Define analytics events, metrics, and instrumentation locations | Change product scope; implement code |
@@ -71,6 +72,7 @@ The project prioritizes:
 - **Designer** is optional — runs after Product spec is accepted and before Animator/UX Writer or Architect, only when the feature has user-facing UI. Designer can be re-invoked in **handoff-spec mode** after design approval, when the feature is complex (3+ screens, 5+ custom components, non-trivial responsive/motion).
 - **Animator** is optional — runs after Designer when the feature has motion, animations, or transitions. Skipped for static designs.
 - **Illustrator** is a tool-agent — runs when Designer or Marketing produces visual briefs requiring image generation. Returns images to the requesting agent for review. Requires MCP image generation tool (see `docs/MCP_TOOLS.md`).
+- **Video Producer** is a tool-agent — runs when Designer, Animator, or Marketing produces video briefs requiring generated video assets. Returns videos to the requesting agent for review. Requires a configured video generation tool (see `docs/MCP_TOOLS.md`).
 - **UX Writer** is optional — runs after Designer (or after Product if no Designer) and before Architect, when the feature has user-facing text. Also runs after Builder to review copy in code. Can be invoked standalone for release notes, emails, etc.
 - **Marketing** is optional — runs after Product spec is accepted (or after Discovery marketing mode), on demand for campaigns, or before launch. Works with UX Writer for tone consistency and Designer for visual briefs.
 - **Analytics Architect** must run before Architect when required. Architect must include instrumentation in the plan. Architect must not remove or weaken defined analytics events.
@@ -95,6 +97,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 | Accepted spec with user-facing UI | Designer | Backend-only, API-only, trivial UI |
 | Design approved, feature has motion/animation | Animator | Static design; no animation needed |
 | Designer or Marketing produced visual briefs | Illustrator | No image generation needed; no MCP tool configured |
+| Designer, Animator, or Marketing produced video briefs | Video Producer | No video generation needed; no video tool configured |
 | Design approved, feature has user-facing text | UX Writer | No user-facing text; backend-only |
 | Standalone copy request (release notes, emails) | UX Writer | — |
 | Builder completed, feature has user-facing text | UX Writer (copy review) | No user-facing strings in code |
@@ -125,7 +128,7 @@ All requests are first interpreted by Iteration Manager, which determines the ap
 
 Standard workflow for features with measurable outcomes:
 
-Discovery → Product → [Designer] → [Designer handoff-spec] → [Animator] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
+Discovery → Product → [Designer] → [Illustrator/Video Producer] → [Designer handoff-spec] → [Animator] → [Video Producer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder/UI Builder → [Design Reviewer] → [UX Writer copy review] → Analytics Validator → Security Reviewer → Reviewer
 
 Standard workflow for internal technical changes (refactors, configuration, dependency upgrades):
 
@@ -136,6 +139,29 @@ Design Reviewer runs only after UI Builder (not after Builder). UI Builder is us
 Brackets indicate optional steps. Designer runs only for features with user-facing UI. UX Writer runs when the feature has user-facing text (after Designer or after Product if no Designer); also runs after Builder to review copy in code. Test Strategist runs only for tasks with non-trivial testable logic. Earlier stages (Discovery, Product) are optional depending on the request. When Analytics Architect is used, Analytics Validator must run after Builder — unless Builder made no changes to analytics instrumentation, in which case Analytics Validator is skipped. Security Reviewer runs for all code changes; it is skipped only for non-code changes.
 
 All code changes must go through **Security Reviewer** and **Reviewer**. Iteration Manager confirms workflow completion after Reviewer approval.
+
+---
+
+# Workflow Rigor Modes
+
+`workflow_mode` controls how much SDLC ceremony and validation a task receives. It is a rigor axis, not an Iteration Manager mode. Iteration Manager still loads `agents/im-modes/onboarding.md`, `agents/im-modes/standard-workflow.md`, and `agents/im-modes/quality-loop.md` as usual.
+
+Allowed values:
+
+| Mode | Use when | Minimum flow |
+|---|---|---|
+| `lite` | Small, low-risk changes with clear scope and limited blast radius | Architect → Builder/UI Builder → Security Reviewer → Reviewer |
+| `standard` | Default for normal product and technical work | Product/Architect as needed → [Test Strategist] → Builder/UI Builder → required reviewers |
+| `strict` | High-risk, cross-module, security-sensitive, analytics-sensitive, or launch-critical work | Discovery → Product → [Designer/UX/Analytics] → Architect → Test Strategist → Builder/UI Builder → Validators → Security Reviewer → Reviewer → Gatekeeper-style decision evidence |
+
+Rules:
+
+- Default to `standard` when the user does not specify a mode.
+- Use `lite` only when skipping Product, Discovery, Analytics Architect, or Test Strategist does not weaken acceptance criteria or safety.
+- Use `strict` when a task touches security boundaries, migrations, billing, customer data, production infrastructure, analytics correctness, or multiple architectural modules.
+- `lite` never permits skipping Security Reviewer or Reviewer for code changes.
+- `strict` may add external review using `docs/EXTERNAL_REVIEW_CONTRACT.md` and PR evidence using `docs/PULL_REQUEST_CONTRACT.md`.
+- The selected mode must be recorded in `workflow_state.workflow_mode` and the durable state file.
 
 ---
 
@@ -192,6 +218,8 @@ Significant decisions → `docs/DECISIONS.md`. Architecture changes → `docs/AR
 `.cursor/rules.md` is the single source of truth for coding rules (execution style, testing, error handling, safety, git).
 
 `docs/ARCHITECTURE_GUARDRAILS.md` is the single source of truth for architectural constraints.
+
+`docs/MODEL_POLICY.md`, `docs/EXTERNAL_REVIEW_CONTRACT.md`, `docs/SANDBOX_POLICY.md`, and `docs/PULL_REQUEST_CONTRACT.md` govern model routing, external review, runtime safety, and PR evidence respectively. `docs/MODEL_GATEWAY_SETUP.md` is operational guidance for optional gateway setup and must not override `docs/MODEL_POLICY.md`.
 
 `docs/LESSONS_LEARNED.md` and `docs/KNOWN_PATTERNS.md` capture organizational experience; they must not override PRD, architecture, guardrails, or `docs/DECISIONS.md`.
 

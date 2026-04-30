@@ -67,7 +67,8 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 | Designer | Creates UI mockups and iterates with user feedback (optional) |
 | UX Writer | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
 | Marketing | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
-| Illustrator | Generates images via MCP tools (Nano Banana, etc.) from visual briefs (tool-agent) |
+| Illustrator | Generates images via MCP tools or provider APIs (GPT Image, Nano Banana, etc.) from visual briefs (tool-agent) |
+| Video Producer | Generates video assets via MCP tools or provider APIs (Kling, Veo, etc.) from video briefs (tool-agent) |
 | Analytics Architect | Defines analytics events, metrics, and instrumentation requirements |
 | Architect | Plans implementation before coding begins |
 | Test Strategist | Defines test strategy before implementation (optional) |

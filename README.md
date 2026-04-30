@@ -123,7 +123,8 @@ agents/
   designer.md                # UI mockups and visual prototypes
   ux-writer.md               # User-facing copy and tone of voice
   marketing.md               # Marketing strategy, campaigns, launch kits
-  illustrator.md             # Image generation via MCP (tool-agent)
+  illustrator.md             # Image generation via MCP/provider APIs (tool-agent)
+  video-producer.md          # Video generation via MCP/provider APIs (tool-agent)
   analytics-architect.md     # Design observability
   architect.md               # Plan implementation
   test-strategist.md         # Define test strategy
@@ -147,6 +148,11 @@ docs/
   ARCHITECTURE_CHECKLIST.md  # Review checklist
   PIPELINE_CONTRACTS.md      # Stage I/O contracts (you fill this)
   DEPLOY_CONTRACTS.md        # Deployment requirements (you fill this)
+  MODEL_POLICY.md            # Model routing and authority policy
+  MODEL_GATEWAY_SETUP.md     # Optional LiteLLM/OpenRouter setup guidance
+  EXTERNAL_REVIEW_CONTRACT.md # Structured external review contract
+  SANDBOX_POLICY.md          # Runtime and command safety policy
+  PULL_REQUEST_CONTRACT.md   # PR-based delivery and evidence requirements
   TASKS.md                   # Task backlog (managed by agents)
   DECISIONS.md               # Technical decisions (managed by agents)
   LESSONS_LEARNED.md         # Workflow lessons (IM appends; all agents read)
@@ -178,6 +184,17 @@ templates/
   ci/                        # CI/CD workflow templates (copy to your project)
     web-api.yml              #   Next.js + FastAPI + Postgres + Redis
     macos-app.yml            #   Swift/SwiftUI + SPM + Sparkle + DMG
+
+evals/
+  README.md                  # Framework evaluation methodology
+  tasks/                     # Benchmark task prompts
+  expected/                  # Expected acceptance criteria
+  results/                   # Per-run results
+
+.github/
+  pull_request_template.md   # PR evidence template
+  workflows/
+    agent-quality.yml        # Framework quality checks
 
 examples/
   unfolda/                   # Reference project configuration

@@ -150,17 +150,59 @@ Priority within an agent invocation: `AGENTS.md` governs workflow, `.cursor/rule
 
 ## Workflow persistence
 
-The runtime must persist the latest `workflow_state` and the latest handoff block between execution cycles.
+The runtime must persist the latest `workflow_state` and latest handoff block between execution cycles in a dedicated workflow state file:
 
-Persistence may be implemented via:
+```text
+.agent/workflows/<task_id>.json
+```
 
-- conversation state in the runtime (preferred for short workflows)
-- status entries in `docs/TASKS.md` (preferred for long-running workflows)
-- a dedicated workflow state file in the repository
+The state file is the durable source of truth. `handoff.workflow_state` is the in-cycle payload that lets the next Iteration Manager turn validate and update the durable state.
 
-On the next execution cycle, Iteration Manager must reconstruct the workflow context from the persisted state before making a routing decision.
+Conversation state may cache the same information for convenience, and `docs/TASKS.md` remains the task backlog source of truth, but neither replaces the workflow state file.
+
+On the next execution cycle, Iteration Manager must reconstruct workflow context from `.agent/workflows/<task_id>.json` before making a routing decision.
 
 Without persisted state, the workflow must not continue — Iteration Manager must treat it as `insufficient_context` and escalate to the user.
+
+### State file schema
+
+Each workflow state file must contain:
+
+```json
+{
+  "task_id": "TASK-123",
+  "current_stage": "discovery | product | analytics | architecture | implementation | validation | complete",
+  "status": "in_progress | blocked | completed | escalated",
+  "workflow_mode": "lite | standard | strict",
+  "last_agent": "Architect",
+  "next_agent": "Builder",
+  "artifact_id": "ARCH-123",
+  "quality_loop_iteration": 0,
+  "builder_cycle_count": 0,
+  "analytics_used": false,
+  "product_spec_accepted": false,
+  "onboarding_phase": null,
+  "artifacts": {
+    "spec": "docs/features/TASK-123.md",
+    "plan": "docs/plans/TASK-123.md",
+    "reviews": []
+  },
+  "latest_handoff": {},
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ"
+}
+```
+
+`latest_handoff` stores the complete most recent handoff block. The top-level state fields are the routing index that Iteration Manager reads before selecting the next agent.
+
+### State file rules
+
+- Iteration Manager creates the state file during initial routing.
+- Iteration Manager updates the state file after every valid handoff and before invoking the next agent.
+- Specialist agents do not edit state files directly; they only return handoff blocks.
+- The handoff `workflow_state` must match the durable state after Iteration Manager applies the transition.
+- If a handoff and state file disagree, Iteration Manager must prefer the state file, inspect the latest handoff, and escalate unless the mismatch is a deterministic transition it can validate from the previous state.
+- State files must not contain secrets, raw `.env` values, customer data, or unrelated file contents.
+- Completed workflow state files may be retained as audit evidence or archived by project policy.
 
 ---
 

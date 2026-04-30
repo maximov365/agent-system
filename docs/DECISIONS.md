@@ -11,6 +11,9 @@
 | DEC-004 | Push-based auto-sync for downstream projects | accepted | 2026-03-29 |
 | DEC-005 | System Auditor agent for framework self-improvement | accepted | 2026-03-29 |
 | DEC-006 | Agent modes pattern for scalable Discovery roles | accepted | 2026-03-29 |
+| DEC-013 | Agent-system hardening contracts | accepted | 2026-04-30 |
+| DEC-014 | Backward-compatible model gateway rollout | accepted | 2026-04-30 |
+| DEC-015 | Media tool-agents for image and video generation | accepted | 2026-04-30 |
 
 ---
 
@@ -424,3 +427,113 @@ Option 2: Defer. Record for future consideration.
 2. **Multi-model translation for Unfolda** — OmniRoute enables testing and selecting optimal models per language pair for Unfolda's translation pipeline. Current state: all 3 quality tiers use Claude (Haiku/Sonnet/Opus). Opportunity: express tier could use cheaper models (DeepSeek, GLM, Kimi) at comparable quality for certain language pairs; standard tier could use Gemini Pro at ~3x lower cost. OmniRoute's Translator Playground enables side-by-side comparison. Architecturally Unfolda is ready — env vars (`TRANSLATION_MODEL_EXPRESS/STANDARD/PREMIUM`) and single-provider adapter pattern support swapping. This is a natural post-MVP step.
 
 3. **Fallback chains for long workflows** — both Voxema (local LLM summarization) and Unfolda (100K word book translation taking 20-30 min) benefit from automatic fallback when provider rate limits or outages interrupt mid-workflow.
+
+---
+
+## DEC-013: Agent-system hardening contracts
+
+**Date:** 2026-04-30
+**Status:** accepted
+
+### Context
+
+The framework already defines roles, routing, handoff semantics, quality loops, task lifecycle, and organizational memory. As the system is positioned as an SDLC process layer above Cursor/Claude Code, optional runtimes, model gateways, and CI/CD, several boundaries needed first-class contracts: model authority, external review, durable workflow state, sandbox behavior, evals, and PR evidence.
+
+### Decision
+
+Add process contracts rather than replacing the existing Iteration Manager state machine:
+
+- `docs/MODEL_POLICY.md` for model classes, role mappings, and model authority.
+- `docs/EXTERNAL_REVIEW_CONTRACT.md` for strict external review JSON.
+- `docs/SANDBOX_POLICY.md` for runtime and command safety.
+- Mandatory `.agent/workflows/<task_id>.json` workflow state.
+- `workflow_mode: lite | standard | strict` as a rigor axis.
+- First-class `evals/` for process evaluation.
+- `docs/PULL_REQUEST_CONTRACT.md`, PR template, and quality workflow for PR-based delivery.
+
+### Rationale
+
+- Preserves the existing markdown SDLC layer and handoff model.
+- Keeps optional runtimes and model gateways as implementation details.
+- Prevents reviewer models from becoming competing decision-makers.
+- Makes CI/CD and PRs the objective enforcement surface without giving models merge authority.
+- Provides evals so workflow changes can be compared with evidence rather than impressions.
+
+### Implications
+
+- New framework files must be included in audit and sync coverage.
+- Downstream projects receive governance contracts through framework sync.
+- Project-specific PR/CI files are seeded only when absent to avoid overwriting local GitHub configuration.
+- Future model gateway adoption must update `docs/MODEL_POLICY.md` instead of hardcoding providers in agent prompts.
+
+---
+
+## DEC-014: Backward-compatible model gateway rollout
+
+**Date:** 2026-04-30
+**Status:** accepted
+
+### Context
+
+The framework needs concrete model guidance for each agent role and a recommended way to connect LiteLLM, OpenRouter, local models, and future automated runtimes. At the same time, the system must keep working when no gateway is deployed and only the active Claude model is available in Cursor or Claude Code.
+
+### Decision
+
+Adopt a staged model gateway strategy:
+
+1. `claude_only` is the required compatibility baseline.
+2. `openrouter_pilot` may be used for advisory external review reports and model experiments.
+3. `litellm_gateway` is the recommended production gateway for routing, fallbacks, budgets, logs, and local model integration.
+4. `hosted_runtime` integrations call the approved gateway endpoint and must preserve Iteration Manager authority.
+
+`docs/MODEL_POLICY.md` defines the role-to-model matrix and fallback behavior. `docs/MODEL_GATEWAY_SETUP.md` defines operational setup guidance.
+
+### Rationale
+
+- Preserves zero-infrastructure operation for Cursor and Claude Code.
+- Lets the framework experiment with GPT, Kimi, Gemini, and local models without changing workflow authority.
+- Keeps LiteLLM as the eventual policy gateway while using OpenRouter for fast model access when useful.
+- Avoids making external review a hard dependency for normal workflows.
+
+### Implications
+
+- Missing LiteLLM/OpenRouter must degrade to `claude_only`, not block execution.
+- External reviewers remain advisory unless the user explicitly makes them a hard gate.
+- Automated runtimes should call LiteLLM when deployed and must not bypass `docs/MODEL_POLICY.md`.
+- Future model changes should update the model map rather than agent role prompts.
+
+---
+
+## DEC-015: Media tool-agents for image and video generation
+
+**Date:** 2026-04-30
+**Status:** accepted
+
+### Context
+
+The framework already had Illustrator for image generation via MCP tools such as Nano Banana. The media workflow also needs to support GPT Image, Kling, Veo, Runway, Pika, and similar models without treating them as autonomous agents or giving them design/product authority.
+
+### Decision
+
+Keep media generation as a tool-agent pattern:
+
+- `Illustrator` generates image assets from visual briefs using GPT Image, Nano Banana, Imagen, FLUX, or similar media models.
+- `Video Producer` generates video assets from video briefs using Kling, Veo, Runway, Pika, or similar media models.
+- Designer owns visual direction.
+- Animator owns motion direction.
+- Marketing owns campaign context when it requests campaign media.
+- Media models execute briefs and return assets with metadata; they do not make workflow decisions.
+
+### Rationale
+
+- Preserves separation between thinking agents and tool models.
+- Keeps GPT Image/Nano Banana/Kling/Veo optional and replaceable.
+- Allows media provider APIs to evolve without changing core workflow authority.
+- Supports graceful degradation: if no media tool is configured, the tool-agent returns `blocked`.
+
+### Implications
+
+- `docs/MCP_TOOLS.md` documents image and video tool setup.
+- `docs/AGENT_HANDOFF_CONTRACT.md` includes `video` artifacts.
+- Iteration Manager may route Designer, Animator, or Marketing briefs to `Video Producer`.
+- Generated media must be reviewed by the requesting direction owner before downstream implementation or campaign use.

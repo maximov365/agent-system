@@ -1,0 +1,52 @@
+name: Agent Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  framework-audit:
+    name: Framework Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install framework dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-framework.txt
+
+      - name: Run framework audit
+        run: python audit.py --json
+
+  eval-contracts:
+    name: Eval Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate eval files exist
+        run: |
+          test -f evals/README.md
+          test -f evals/expected/acceptance_criteria.yaml
+          test -f evals/tasks/small_bugfix.md
+          test -f evals/tasks/api_endpoint.md
+          test -f evals/tasks/refactor_pipeline.md
+          test -f evals/tasks/ui_component.md
+          test -f evals/tasks/analytics_instrumentation.md
+
+      - name: Validate governance contracts exist
+        run: |
+          test -f docs/MODEL_POLICY.md
+          test -f docs/EXTERNAL_REVIEW_CONTRACT.md
+          test -f docs/SANDBOX_POLICY.md
+          test -f docs/PULL_REQUEST_CONTRACT.md

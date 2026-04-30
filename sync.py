@@ -35,6 +35,11 @@ FRAMEWORK_GLOBS = [
     ".cursor/rules.md",
     "docs/AGENT_HANDOFF_CONTRACT.md",
     "docs/AGENT_EXECUTION_MODEL.md",
+    "docs/MODEL_POLICY.md",
+    "docs/MODEL_GATEWAY_SETUP.md",
+    "docs/EXTERNAL_REVIEW_CONTRACT.md",
+    "docs/SANDBOX_POLICY.md",
+    "docs/PULL_REQUEST_CONTRACT.md",
     "docs/TASK_BACKLOG_AUTOMATION.md",
     "docs/ARCHITECTURE_GUARDRAILS.md",
     "docs/ARCHITECTURE_CHECKLIST.md",
@@ -42,6 +47,9 @@ FRAMEWORK_GLOBS = [
     "docs/ONBOARDING.md",
     "docs/MCP_TOOLS.md",
     "docs/CLAUDE_SKILLS.md",
+    "evals/README.md",
+    "evals/tasks/*.md",
+    "evals/expected/*.yaml",
     "setup.py",
     "requirements-framework.txt",
 ]
@@ -52,6 +60,8 @@ FRAMEWORK_GLOBS = [
 SEED_GLOBS = [
     "docs/PIPELINE_CONTRACTS.md",
     "docs/DEPLOY_CONTRACTS.md",
+    ".github/pull_request_template.md",
+    ".github/workflows/agent-quality.yml",
 ]
 
 GITIGNORE_MARKER_START = "# >>> agent-system framework (managed by sync.py) >>>"
@@ -64,6 +74,11 @@ GITIGNORE_ENTRIES = [
     "/.cursor/rules.md",
     "/docs/AGENT_HANDOFF_CONTRACT.md",
     "/docs/AGENT_EXECUTION_MODEL.md",
+    "/docs/MODEL_POLICY.md",
+    "/docs/MODEL_GATEWAY_SETUP.md",
+    "/docs/EXTERNAL_REVIEW_CONTRACT.md",
+    "/docs/SANDBOX_POLICY.md",
+    "/docs/PULL_REQUEST_CONTRACT.md",
     "/docs/TASK_BACKLOG_AUTOMATION.md",
     "/docs/ARCHITECTURE_GUARDRAILS.md",
     "/docs/ARCHITECTURE_CHECKLIST.md",
@@ -71,6 +86,7 @@ GITIGNORE_ENTRIES = [
     "/docs/ONBOARDING.md",
     "/docs/MCP_TOOLS.md",
     "/docs/CLAUDE_SKILLS.md",
+    "/evals/",
     "/docs/METRICS.md",
     "/setup.py",
     "/requirements-framework.txt",

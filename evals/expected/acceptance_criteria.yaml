@@ -1,0 +1,65 @@
+tasks:
+  small_bugfix:
+    workflow_mode: lite
+    must_include:
+      - architect_plan
+      - builder_changes
+      - focused_test
+      - security_review
+      - final_review
+    must_not:
+      - unrelated_refactor
+      - direct_builder_without_plan
+      - skipped_reviewer
+
+  api_endpoint:
+    workflow_mode: standard
+    must_include:
+      - acceptance_criteria
+      - auth_validation
+      - unauthorized_access_test
+      - authorized_access_test
+      - security_review
+    must_not:
+      - internal_id_leak
+      - missing_auth_check
+      - skipped_security_review
+
+  refactor_pipeline:
+    workflow_mode: strict
+    must_include:
+      - architecture_guardrail_check
+      - implementation_plan_quality_loop
+      - boundary_validation_tests
+      - preserved_existing_behavior
+      - final_review
+    must_not:
+      - new_pipeline_stage_without_approval
+      - hidden_cross_stage_dependency
+      - weakened_contract
+
+  ui_component:
+    workflow_mode: standard
+    must_include:
+      - design_artifact
+      - ui_builder
+      - design_reviewer
+      - ux_writer_copy_review
+      - final_review
+    must_not:
+      - design_reviewer_skip
+      - invented_visual_direction
+      - unreviewed_user_facing_copy
+
+  analytics_instrumentation:
+    workflow_mode: standard
+    must_include:
+      - analytics_spec
+      - architect_plan_instrumentation
+      - builder_event_implementation
+      - analytics_validator
+      - security_review
+    must_not:
+      - analytics_architect_skip
+      - analytics_validator_skip
+      - undocumented_event_properties

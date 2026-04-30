@@ -43,6 +43,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 | `ux_copy` | User-facing copy document or copy review produced by UX Writer |
 | `marketing_campaign` | Marketing strategy, campaign, launch kit, or marketing review produced by Marketing |
 | `illustration` | Generated image(s) with metadata produced by Illustrator via MCP tool |
+| `video` | Generated video asset(s) with metadata produced by Video Producer via MCP tool or provider API |
 | `test_plan` | Test strategy produced by Test Strategist |
 | `code` | Production code, tests, or configuration changed by Builder or UI Builder |
 | `none` | No artifact produced (e.g. routing-only output from Iteration Manager) |
@@ -54,7 +55,7 @@ The `artifact_type` field must be one of the following values. Agents must not i
 `artifact_path` must follow these rules depending on artifact type:
 
 - **Documents** (`feature_spec`, `task_breakdown`, `implementation_plan`, `design_note`, `decision_note`, `analytics_spec`, `test_plan`, `design`, `animation`, `ux_copy`, `marketing_campaign`) — repository-relative path to the file, e.g. `docs/plans/ARCH-42.md`
-- **Illustrations** (`illustration`) — array of repository-relative paths to generated image files, e.g. `["assets/hero.png", "assets/icon.png"]`
+- **Media assets** (`illustration`, `video`) — array of repository-relative paths to generated media files, e.g. `["assets/hero.png", "assets/intro.mp4"]`
 - **Code** — array of repository-relative file paths changed by Builder or UI Builder, e.g. `["src/pipeline.py", "tests/test_pipeline.py"]`
 - **Artifact without a file** — a short human-readable identifier, e.g. `"FEAT-42 feature spec"`
 - **No artifact produced** — `null`
@@ -97,7 +98,7 @@ Every agent appends the following JSON block at the end of its output, after its
 {
   "handoff": {
     "agent": "<agent name>",
-    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | test_plan | code | none",
+    "artifact_type": "feature_spec | task_breakdown | implementation_plan | design_note | decision_note | analytics_spec | design | animation | ux_copy | marketing_campaign | illustration | video | test_plan | code | none",
     "artifact_path": "<path or title; JSON array of paths when artifact_type is code>",
     "status": "<see Allowed statuses>",
     "next_recommended_agent": "<agent name, or null>",
@@ -107,6 +108,7 @@ Every agent appends the following JSON block at the end of its output, after its
       "task_id": "<task id from docs/TASKS.md, or 'new'>",
       "artifact_id": "<artifact id or null>",
       "current_stage": "discovery | product | analytics | architecture | implementation | validation | complete",
+      "workflow_mode": "lite | standard | strict",
       "quality_loop_iteration": 0,
       "builder_cycle_count": 0,
       "analytics_used": false,
@@ -136,7 +138,7 @@ Status values are fixed. No agent may invent new values.
 | `validation_failed` | Analytics instrumentation has must_fix issues | Analytics Validator (verdict: revise) |
 | `security_passed` | No blocking security issues found | Security Reviewer (verdict: pass) |
 | `security_failed` | Security issues require Builder or UI Builder fixes | Security Reviewer (verdict: fail) |
-| `blocked` | Agent cannot proceed due to missing tool or dependency | Illustrator (MCP tool unavailable) |
+| `blocked` | Agent cannot proceed due to missing tool or dependency | Illustrator or Video Producer (MCP/tool unavailable) |
 | `changes_suggested` | Non-blocking copy or content improvements suggested | UX Writer (copy review), Marketing (marketing review) |
 
 **Mapping from agent-native verdicts to handoff status:**
@@ -166,6 +168,8 @@ Status values are fixed. No agent may invent new values.
 | Animator | animation spec complete | `produced` |
 | Illustrator | images generated | `produced` |
 | Illustrator | MCP tool unavailable | `blocked` |
+| Video Producer | videos generated | `produced` |
+| Video Producer | video generation tool unavailable | `blocked` |
 | Designer | design approved by user | `produced` |
 | Test Strategist | test plan complete | `produced` |
 | Architect | plan complete | `produced` |
@@ -201,11 +205,14 @@ When `status` is `escalate`, `changes_required`, `revise`, `validation_failed`, 
 
 Every handoff must carry the current `workflow_state`. Iteration Manager reads this to make routing decisions without re-reading all prior outputs.
 
+The durable source of truth is `.agent/workflows/<task_id>.json` as defined in `docs/AGENT_EXECUTION_MODEL.md`. The handoff block carries the proposed next state for the current cycle; Iteration Manager validates it, applies transition rules, and writes the durable state file. Specialist agents must not edit state files directly.
+
 **Field update rules — agent responsibilities:**
 
 | Agent | Field to update | Rule |
 |---|---|---|
 | All agents | `current_stage` | Set to the enum value matching the current workflow position |
+| Iteration Manager | `workflow_mode` | Set to `lite`, `standard`, or `strict` during initial routing; default to `standard` |
 | Product | `artifact_id` | Set to the feature spec identifier |
 | Gatekeeper (accept for Product spec) | `product_spec_accepted` | Set to `true` |
 | Analytics Architect | `analytics_used` | Set to `true` |
@@ -235,6 +242,7 @@ All agents use the same handoff block structure. The table below defines the age
 | UX Writer | `ux_copy` | `produced`, `approved`, `changes_suggested`, `escalate` | Analytics Architect, Architect, Builder |
 | Marketing | `marketing_campaign` | `produced`, `approved`, `changes_suggested`, `escalate` | UX Writer (tone review), Designer (visual briefs), Spec Reviewer |
 | Illustrator | `illustration` | `produced`, `blocked`, `escalate` | Designer (review), Marketing (review) |
+| Video Producer | `video` | `produced`, `blocked`, `escalate` | Designer (review), Animator (review), Marketing (review) |
 | Analytics Architect | `analytics_spec` | `produced`, `escalate` | Architect, Spec Reviewer |
 | Architect | `implementation_plan` | `produced`, `escalate` | Spec Reviewer |
 | Test Strategist | `test_plan` | `produced`, `escalate` | Builder, UI Builder |
@@ -280,6 +288,8 @@ A handoff block is invalid if:
 - `status` is not one of the allowed values
 - `workflow_state` is missing entirely
 - `workflow_state.current_stage` is not one of the enum values
+- `workflow_state.workflow_mode` is not `lite`, `standard`, or `strict`
+- `workflow_state.task_id` does not match the active `.agent/workflows/<task_id>.json` file, except during initial routing before the file is created
 - `blocking_issues` is non-empty when `status` is `produced`, `accepted`, `approved`, `validation_passed`, or `security_passed`
 - `artifact_type` is not one of the allowed values
 - `agent` does not match the name of the producing agent
