@@ -25,17 +25,20 @@ When a `project_onboarding` request is detected, initialise `workflow_state` as:
 
 ---
 
-## Phase 1 mode selection — structured intake vs idea-intake
+## Phase 1 mode selection — three paths
 
-When entering Phase 1, decide which Discovery intake mode to use:
+When entering Phase 1, decide which Discovery intake mode to use. Check triggers **in priority order**:
 
-| Trigger | Mode | Why |
-|---|---|---|
-| User's first onboarding message contains substantial product context (≥ ~30 words describing what to build, for whom, where) | `idea-intake` (default for new projects) | Inference-first onboarding — skips ~50 questions across phases by reading the idea and asking only about genuine forks with options |
-| User's first message is short / lacks product context (e.g., "Help me set up a project", "I want to use this framework") | structured `Onboarding intake mode` in `agents/discovery.md` | The 13-question structured intake is the right tool when there's nothing to infer from |
-| User explicitly asks for the structured questionnaire ("just ask me the questions one by one") | structured | Respect explicit preference |
+| Priority | Trigger | Mode | Why |
+|---|---|---|---|
+| 1 (highest) | `project.config.yaml` has `output_docs.custom_docs` listing existing discovery/brand/architecture artifacts (PDFs, HTMLs, Markdown briefs) | `import-mode` | The user has done discovery work externally — import and refine, don't restart from zero |
+| 2 | **Either** the user's first onboarding message **OR** `project.config.yaml` `project.description` field contains substantial product context (≥ ~30 words describing what to build, for whom, where) | `idea-intake` (default for new projects with rich context) | Inference-first onboarding — skips ~50 questions by reading the idea and asking only about genuine forks |
+| 3 | First message AND config description are both thin (e.g., "Help me set up a project", default placeholder description, no idea anywhere) | structured `Onboarding intake mode` in `agents/discovery.md` | The 13-question structured intake is the right tool when there is nothing to infer from |
+| Always wins | User explicitly requests `structured` or `import` or `idea-intake` mode by name | the requested mode | Respect explicit preference |
 
-After Discovery completes Phase 1, **Product, Designer, and Architect should also use cascading inference** (per `agents/discovery-modes/idea-intake.md` "Cascading inference" section) — read the Discovery Brief first, ask only about gaps that affect their domain, present options with rationale, cap at 3–5 disambiguation questions per phase.
+**Read the config before asking the user any questions.** The most common error: ignoring the rich `project.description` and `output_docs.custom_docs` because the user's chat message was just "Start onboarding". Always inspect `project.config.yaml` first; the user may have populated it via `init-downstream.sh` or hand-edited.
+
+After Discovery completes Phase 1, **Product, Designer, and Architect should also use cascading inference** (per `agents/discovery-modes/idea-intake.md` "Cascading inference" section) — read the Discovery Brief first, ask only about gaps that affect their domain, present options with rationale, cap at 3–5 disambiguation questions per phase. This applies whether the Brief was produced by `idea-intake`, `import-mode`, or structured intake — the Brief is always the input contract for downstream phases.
 
 If a downstream agent finds the Brief insufficient, it can fall back to its standard onboarding intake mode for its phase only.
 

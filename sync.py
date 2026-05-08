@@ -92,6 +92,7 @@ GITIGNORE_ENTRIES = [
     "/requirements-framework.txt",
     "/.agent-system-version",
     "/.templates/",
+    "/.agent/",
 ]
 
 

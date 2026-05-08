@@ -16,6 +16,9 @@ __pycache__/
 # Downstream registry (machine-specific paths)
 downstream.projects
 
+# Durable workflow state (per-task IM working state, per-machine)
+.agent/
+
 # OS
 .DS_Store
 Thumbs.db
