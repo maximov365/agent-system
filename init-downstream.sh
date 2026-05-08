@@ -204,8 +204,14 @@ echo "  1. cd \"$TARGET_DIR\""
 echo "  2. Edit project.config.yaml (description, pipeline.stages, domain_rules)"
 echo "  3. Re-render after edits: python3 setup.py"
 echo
-echo "${BOLD}Start onboarding:${NC}"
-echo "  • In Cursor:  open the folder, then in chat say \"Start onboarding\""
-echo "  • In Claude Code:  cd \"$TARGET_DIR\" && claude, then say \"Start onboarding\""
-echo "  • Discovery → Product → Designer → Architect intake fills docs/PRD.md, ARCHITECTURE.md, BRAND.md"
+echo "${BOLD}Start onboarding (recommended: just describe your idea):${NC}"
+echo "  • Throw your idea at the agent — one paragraph, multiple paragraphs, anything"
+echo "  • In Cursor:  open the folder, paste your idea into chat"
+echo "  • In Claude Code:  cd \"$TARGET_DIR\" && claude, then paste your idea"
+echo
+echo "  The agent will infer everything it can, then ask 5–8 disambiguation questions"
+echo "  with concrete options + recommendations. No 50-question form-filling."
+echo
+echo "  Don't have an idea yet? Just say \"Start onboarding\" and you'll get the"
+echo "  structured 13-question questionnaire instead."
 echo

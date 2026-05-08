@@ -110,18 +110,28 @@ Print this exact summary:
   • Agent files rendered: 30
   • Registered in downstream.projects: ✓
 
-Next: Edit project.config.yaml description and pipeline.stages to match the project, then run `python3 setup.py` to re-render.
+Ready to onboard. The fastest path: just describe your idea (one paragraph or
+several — whatever you have). I'll infer what I can, then ask 5–8 disambiguation
+questions with concrete options + recommendations. Total: 1 idea + ~14
+disambiguations across all phases instead of ~50 form-fill questions.
 
-Ready to start onboarding (Discovery intake mode)? This walks through 13 structured questions to populate docs/PRD.md, docs/ARCHITECTURE.md, and docs/BRAND.md.
+Don't have an idea yet? Reply "structured" and I'll walk you through the
+13-question questionnaire instead.
 
-Reply "yes" to begin onboarding, or "later" to defer.
+What's the idea?
 ```
 
-### 8. If user replies "yes"
+### 8. If user provides an idea
 
-Re-read this project's `CLAUDE.md`, `AGENTS.md`, and `agents/iteration-manager.md` (now rendered with the project name) to load the local agent context. Then act as Iteration Manager and start the onboarding workflow per `agents/im-modes/onboarding.md` Phase 1: invoke Discovery agent in onboarding intake mode.
+Re-read this project's `CLAUDE.md`, `AGENTS.md`, and `agents/iteration-manager.md` (now rendered with the project name) to load the local agent context. Then act as Iteration Manager and start the onboarding workflow per `agents/im-modes/onboarding.md` — invoke Discovery agent in **idea-intake mode** (per `agents/discovery-modes/idea-intake.md`), passing the user's idea as context. Discovery will infer + ask disambiguation forks; subsequent phases (Product, Designer, Architect) apply cascading inference.
 
-If user replies "later" or anything else, just acknowledge and stop.
+### 8b. If user replies "structured" or asks for the questionnaire
+
+Invoke Discovery agent in the standard `Onboarding intake mode` from `agents/discovery.md` (the 13-question structured intake). Use this when the user lacks a concrete idea or explicitly prefers structured form-filling.
+
+### 8c. If user replies "later" or defers
+
+Acknowledge and stop. The user can return at any time by saying "Start onboarding" or by pasting an idea into the chat.
 
 ## Important rules
 
