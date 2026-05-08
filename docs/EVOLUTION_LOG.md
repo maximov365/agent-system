@@ -533,7 +533,7 @@ Five decisions executed with explicit zero-degradation checks.
   | Environment | GitHub/Anthropic cloud | Local Claude Code |
   | Delivery | Inline PR comments + severity | Handoff JSON + next_recommended_agent |
 
-- **Recommendation: adopt as COMPLEMENT, not replacement.** Anthropic CCR is stronger at code-specific review (parallel specialists, verification step, proven 3× catch-rate improvement). Our Reviewer + Spec Reviewer remain essential for NON-code artifacts (feature specs, design reviews, architecture plans, marketing copy) and for workflow-integrated completion verification (plan adherence check, task scope). Document `/ultrareview` as an **optional post-merge code quality enhancement** in `docs/MCP_TOOLS.md` (or new `docs/EXTERNAL_REVIEWERS.md`).
+- **Recommendation: adopt as COMPLEMENT, not replacement.** Anthropic CCR is stronger at code-specific review (parallel specialists, verification step, proven 3× catch-rate improvement). Our Reviewer + Spec Reviewer remain essential for NON-code artifacts (feature specs, design reviews, architecture plans, marketing copy) and for workflow-integrated completion verification (plan adherence check, task scope). Document `/ultrareview` as an **optional post-merge code quality enhancement** in `docs/MCP_TOOLS.md` "Performance notes" or "Troubleshooting" section.
 - **Quality risk check:** zero — investigation only, no code changes. If we later add CCR integration as optional note, still zero — it's an EXTERNAL tool users can invoke, doesn't change our agent definitions.
 
 ### #20 ✅ Investigated Claude Code Agent Teams — architectural option, not adopting

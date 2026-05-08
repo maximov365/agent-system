@@ -52,6 +52,8 @@ FRAMEWORK_GLOBS = [
     "evals/expected/*.yaml",
     "setup.py",
     "requirements-framework.txt",
+    ".github/pull_request_template.md",
+    ".github/workflows/agent-quality.yml",
 ]
 
 # Seed files: copied only when they do NOT exist in the target project.
