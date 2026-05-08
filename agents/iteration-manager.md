@@ -92,13 +92,34 @@ After **every** completed workflow (`next_action: complete_workflow`), append to
 
 Iteration Manager must track workflow state across agent transitions. State must persist across stage transitions and be updated after each agent output. All routing decisions must consider current state.
 
-Durable workflow state is mandatory. For every active task, Iteration Manager creates and updates:
+### Source of truth (portable across environments)
+
+Workflow state lives in three places, all portable across Claude Code, Cursor, direct API, and other clients:
+
+1. **Handoff JSON blocks** — every agent emits `handoff.workflow_state` at the end of its output. The most recent handoff is the authoritative current state.
+2. **`docs/TASKS.md`** — task lifecycle (created → planned → in_progress → complete). Git-tracked.
+3. **Artifact files** (`docs/PRD.md`, `docs/ARCHITECTURE.md`, plan documents in `docs/plans/`, etc.) — the substance of the work. Git-tracked.
+
+To reconstruct state at any point, IM reads the latest handoff JSON in the conversation, cross-checks task status in `docs/TASKS.md`, and confirms artifacts exist on disk.
+
+### Optional local cache (`.agent/workflows/<task_id>.json`)
+
+For long-running multi-session work, IM **may** maintain a per-task cache file at:
 
 ```text
 .agent/workflows/<task_id>.json
 ```
 
-This state file is the source of truth between execution cycles. `handoff.workflow_state` is validated against it and then persisted after each accepted transition. Specialist agents must not edit the state file directly.
+This is a **local working cache**, not source of truth. It mirrors the latest `handoff.workflow_state` and lets IM resume mid-workflow without re-parsing transcript history when a session is interrupted.
+
+Properties of the cache:
+- Per-machine, per-user (gitignored — see `.gitignore`)
+- Created on demand when IM sees value (long workflows, multi-session continuation); skipped for short single-session tasks
+- Specialist agents must never read or write it
+- Missing or stale cache → IM reconstructs state from handoff JSON + docs (the cache is rebuilt on next agent transition)
+- Conflicts between cache and latest handoff → handoff wins; cache is updated
+
+For new projects, downstream syncs, and most short workflows, the cache is unnecessary. The handoff JSON + git-tracked docs are sufficient.
 
 | Field | Type | Description |
 |---|---|---|
@@ -126,7 +147,7 @@ This state file is the source of truth between execution cycles. `handoff.workfl
 
 State must never carry over from a previous task. Each new `task_id` starts with a fresh initialised state. State initialisations are defined in the relevant mode files.
 
-When initial routing uses `task_id: "new"`, Iteration Manager may create a temporary state file named `.agent/workflows/new.json`. As soon as the task receives a stable identifier, Iteration Manager must rename or recreate the state file under the stable `task_id` and preserve the latest handoff history.
+When initial routing uses `task_id: "new"`, Iteration Manager carries the temporary identifier in `handoff.workflow_state.task_id` until the task receives a stable identifier (typically when Product proposes it or when IM commits it to `docs/TASKS.md`). At that point, all subsequent handoffs use the stable id. If a local cache file (see Optional local cache above) was created under `.agent/workflows/new.json`, rename it to the stable identifier; if no cache exists, no action is needed.
 
 ---
 
