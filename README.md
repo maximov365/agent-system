@@ -46,7 +46,19 @@ ln -sf "$(pwd)/hooks/pre-commit" .git/hooks/pre-commit
 
 The install script bakes your local `agent-system` path into the slash command, so each machine resolves the framework correctly. Re-run `bash install-slash-commands.sh` after every framework `git pull` to pick up updated commands.
 
-### Deploy a new downstream project (recommended flow)
+### Deploy a new downstream project
+
+Both flows do the same 5 steps (create folder → write `project.config.yaml` → register in `downstream.projects` → run `sync.py --render` → verify deployment). Pick whichever fits your editor.
+
+#### Option A — Universal bash script (works in Cursor, terminal, VSCode, anywhere)
+
+```bash
+bash /path/to/agent-system/init-downstream.sh "Your Project Name" /path/to/your-project
+```
+
+The script is idempotent (safe to re-run), refuses to overwrite a different project, and refuses to deploy on top of an `agent-system` clone. After it finishes, open the project in your editor and say "Start onboarding" in the chat.
+
+#### Option B — Claude Code slash command
 
 ```bash
 mkdir -p /path/to/your-project && cd /path/to/your-project
@@ -59,11 +71,9 @@ Then in the Claude Code session:
 /init-downstream "Your Project Name"
 ```
 
-This will:
-1. Create `project.config.yaml` with the project name
-2. Register the path in `agent-system/downstream.projects`
-3. Sync framework files and render templates
-4. Offer to start the onboarding workflow (Discovery intake mode)
+After deployment, the slash command will offer to start onboarding (Discovery intake mode) immediately in the same session.
+
+Both options leave the project in identical state. Internally the slash command and the bash script implement the same logic.
 
 ### Framework health & evolution
 
