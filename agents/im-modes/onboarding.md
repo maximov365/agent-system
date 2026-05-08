@@ -25,20 +25,57 @@ When a `project_onboarding` request is detected, initialise `workflow_state` as:
 
 ---
 
-## Phase 1 mode selection — three paths
+## Phase 1 mode selection — invitation-first, never jump to structured
 
-When entering Phase 1, decide which Discovery intake mode to use. Check triggers **in priority order**:
+**Cardinal rule: never start Phase 1 with the 13-question structured form.** The structured intake is a last-resort fallback that runs only after the user explicitly opts in. The default behavior is to invite the user to share any product context they have, no matter how thin.
 
-| Priority | Trigger | Mode | Why |
-|---|---|---|---|
-| 1 (highest) | `project.config.yaml` has `output_docs.custom_docs` listing existing discovery/brand/architecture artifacts (PDFs, HTMLs, Markdown briefs) | `import-mode` | The user has done discovery work externally — import and refine, don't restart from zero |
-| 2 | **Either** the user's first onboarding message **OR** `project.config.yaml` `project.description` field contains substantial product context (≥ ~30 words describing what to build, for whom, where) | `idea-intake` (default for new projects with rich context) | Inference-first onboarding — skips ~50 questions by reading the idea and asking only about genuine forks |
-| 3 | First message AND config description are both thin (e.g., "Help me set up a project", default placeholder description, no idea anywhere) | structured `Onboarding intake mode` in `agents/discovery.md` | The 13-question structured intake is the right tool when there is nothing to infer from |
-| Always wins | User explicitly requests `structured` or `import` or `idea-intake` mode by name | the requested mode | Respect explicit preference |
+### Decision logic (in priority order)
 
-**Read the config before asking the user any questions.** The most common error: ignoring the rich `project.description` and `output_docs.custom_docs` because the user's chat message was just "Start onboarding". Always inspect `project.config.yaml` first; the user may have populated it via `init-downstream.sh` or hand-edited.
+| Priority | Trigger | Action |
+|---|---|---|
+| 1 (highest) | `project.config.yaml` has `output_docs.custom_docs` listing existing artifacts (PDFs, HTMLs, MD briefs) | Run **`import-mode`** immediately. The user already did discovery work externally; don't ask anything yet — read the artifacts first. |
+| 2 | **Either** user's first onboarding message **OR** `project.config.yaml` `project.description` contains substantial product context (≥ ~30 words describing what / for whom / where) | Run **`idea-intake`** immediately. Parse the rich context; produce the inference summary + 5–8 disambiguation picks. |
+| 3 | First message AND config description are both thin (placeholder, "Start onboarding", "Help me set up a project") | Send the **invitation message** (template below). Wait for user response. **Do NOT start the 13-question form.** |
+| Always wins | User explicitly types `structured`, `walk me through`, `ask me one by one`, "questionnaire", or names a mode | Honour the request. If they say "structured", run `Onboarding intake mode` in `agents/discovery.md`. If they say a different mode, run that. |
 
-After Discovery completes Phase 1, **Product, Designer, and Architect should also use cascading inference** (per `agents/discovery-modes/idea-intake.md` "Cascading inference" section) — read the Discovery Brief first, ask only about gaps that affect their domain, present options with rationale, cap at 3–5 disambiguation questions per phase. This applies whether the Brief was produced by `idea-intake`, `import-mode`, or structured intake — the Brief is always the input contract for downstream phases.
+### Invitation message (used only when Priority 3 triggers)
+
+When the user's first message is thin AND config is placeholder, **send this exact invitation as your first turn**, then wait:
+
+```
+I'd like to start with your idea, however rough.
+
+You can give me:
+
+- A one-line summary ("Aggregator for X", "Internal tool for Y team")
+- A paragraph or several — anything you have written down
+- A reference to an existing product ("Like Linear but for design teams")
+- Bullet points of features you imagine
+- A problem you want solved (without a solution yet)
+
+Even one sentence is enough — I'll infer everything I can and ask you only
+5–8 sharp questions about genuine forks, with options and a recommendation.
+
+If you genuinely have nothing yet — no idea, no problem statement, no
+reference — reply with `walk me through` and I'll switch to a structured
+13-question questionnaire that builds context from scratch.
+
+What do you have?
+```
+
+After the user responds:
+
+- **They share an idea (any length, any form)** → re-evaluate Priority 2 with the new context. The user's response itself is now "first message with substantial product context" — almost always enough to trigger `idea-intake`. Run `idea-intake` mode.
+- **They reply `walk me through` / `structured` / equivalent** → run `Onboarding intake mode` in `agents/discovery.md` (the 13-question form).
+- **They reply something ambiguous** ("just start", "let's go", a brief phrase that's neither an idea nor a structured request) → ask once more with sharper framing: "Sorry, was that an idea or a request to walk through structured questions? If it's an idea, expand it just a bit."
+
+### Always read the config first
+
+Before deciding mode, **always read `project.config.yaml` in full**, including `output_docs.custom_docs` and `project.description`. The most common error: ignoring rich context the user populated via `init-downstream.sh` or hand-edited, then jumping to structured because the user's chat message was just "Start onboarding".
+
+### Cascading inference downstream
+
+After Discovery completes Phase 1 (in any of the three modes), Product, Designer, and Architect apply cascading inference per `agents/discovery-modes/idea-intake.md` "Cascading inference" section — read the Brief first, ask only about gaps in their domain, present options with rationale, cap at 3–5 picks per phase. The Brief is the input contract for downstream phases regardless of which Phase 1 mode produced it.
 
 If a downstream agent finds the Brief insufficient, it can fall back to its standard onboarding intake mode for its phase only.
 

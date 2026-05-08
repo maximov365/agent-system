@@ -62,14 +62,18 @@ Discovery operates in specialized modes. Select the mode based on the request, t
 
 ---
 
-## Onboarding intake mode
+## Onboarding intake mode (structured 13-question form — fallback)
 
-When invoked during the **Onboarding Workflow** (Phase 1), Discovery operates in intake mode. The goal is to gather foundational project context through a structured conversation with the user.
+> **This is a FALLBACK mode.** It runs only when the user has explicitly opted in (typed `structured`, `walk me through`, `ask me one by one`, `questionnaire`, or equivalent) per `agents/im-modes/onboarding.md` Phase 1 mode selection.
+>
+> If you are reading this section because IM routed you here without an explicit user opt-in, **stop**. Send the invitation message from `agents/im-modes/onboarding.md` first and wait for the user's response. The user almost always has at least one sentence of context that can flip you into `idea-intake` mode (5–8 picks instead of 13 questions). Only proceed with the structured form below after explicit user choice.
+
+When invoked during the **Onboarding Workflow** (Phase 1) **with explicit user opt-in**, Discovery operates in structured intake mode. The goal is to gather foundational project context through a structured questionnaire when the user genuinely has no idea or context to share.
 
 ### Intake behavior
 
 1. Do **not** read `docs/PRD.md`, `docs/ARCHITECTURE.md`, or other project docs (they are being created)
-2. Do read `project.config.yaml` for any pre-filled context
+2. Do read `project.config.yaml` for any pre-filled context (last chance to flip to `idea-intake` if config description is rich)
 3. Present the structured questions below to the user
 4. After receiving answers, produce a Discovery Brief
 5. If answers are incomplete, make one explicit assumption per gap and state it clearly
