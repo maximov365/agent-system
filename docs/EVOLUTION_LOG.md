@@ -666,6 +666,76 @@ Quality risk for any pending decision: zero or low. All are additive — documen
 
 ---
 
+## Adoption Notes — 2026-04-25 (decisions #25–#31 batch execution)
+
+User requested executing all six actionable decisions (#25, #26, #27, #28, #29, #31 — #30 already deferred pending CoVe data). All six executed; quality regression check zero across all changes.
+
+### ✅ #29 — Ask-before-irreversible rule (HIGHEST severity gap from MAST)
+
+- **`.cursor/rules.md`** gained new "Irreversible-action protocol (cross-agent rule)" section between "Execution rules" and "Architecture rules". Applies to all coding agents.
+- **`agents/builder.md`** gained agent-specific "Irreversible-action protocol" with detailed irreversible-operation taxonomy (destructive file ops / git history rewrite / external API mutations / DB schema changes / deployment / mass notifications / cost-incurring).
+- **`agents/ui-builder.md`** gained UI-specific elaboration (removing routes, replacing components across call sites, renaming URL paths, removing feature flags or accessibility features).
+- Pattern: halt → restate plainly with concrete numbers → confirm intent → wait for explicit go-ahead → document confirmation in handoff as `"user_confirmed_irreversible": [<step>]`.
+- Closes MAST gap #2 (MEDIUM severity, Mode 2.1 Communication Breakdown).
+
+### ✅ #26 — Supabase backend skills (Builder)
+
+- `agents/builder.md` gained "Optional skill augmentation — Supabase backend" section with concrete skill IDs (`supabase:rls`, `supabase:migrations`, `supabase:edge-functions`, `supabase:vector-search`).
+- Critical for Nastan (its stack is `Vercel + Supabase + Inngest + Anthropic`). Optional for other projects.
+- Catalog entry added to `docs/CLAUDE_SKILLS.md` with source attribution + fallback to standard Postgres + Supabase docs.
+
+### ✅ #25 — Web quality skills (Design Reviewer + UI Builder)
+
+- `agents/design-reviewer.md` gained "Optional skill augmentation — Web quality (performance, Core Web Vitals, SEO)" section, complementing the existing WCAG audit.
+- `agents/ui-builder.md` gained matching section for during-implementation use (not just review).
+- Concrete skill IDs: `web-quality:core-web-vitals`, `web-quality:performance`, `web-quality:seo`, `web-quality:best-practices` (source: [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills)).
+- Catalog entry added to `docs/CLAUDE_SKILLS.md`.
+- Particularly valuable for: Nastan (PWA, SEO-critical), Probey (WebView, perf-critical), Voxema (web).
+
+### ✅ #27 — Marketing & SEO skills (Marketing agent)
+
+- `agents/marketing.md` gained "Optional skill augmentation — SaaS marketing toolkit" section.
+- Concrete skill IDs: `marketing:ai-seo`, `marketing:ab-test-setup`, `marketing:ad-creative`, `marketing:cold-email`, `marketing:churn-prevention`, `marketing:analytics-tracking`, `marketing:competitor-analysis` (source: Corey Haines official skills).
+- Catalog entry added to `docs/CLAUDE_SKILLS.md`. No active GTM in portfolio today; future-leverage.
+
+### ✅ #28 — IM session-restore protocol
+
+- `agents/iteration-manager.md` gained "Session-restore protocol (MAST gap #1 — Loss of History)" section before "Optional local cache".
+- Explicit 4-step reconstruction order: latest handoff JSON → `docs/TASKS.md` → artifact files on disk → optional `.agent/workflows/<task_id>.json` cache.
+- Conflicts: handoff JSON wins for state; TASKS.md wins for task existence.
+- After reconstruction, IM announces resumption to user and proceeds with next transition.
+- Closes MAST gap #1 (LOW severity, Mode 1.3 Loss of History).
+
+### ✅ #31 — Q2 2026 MAST PDF read reminder
+
+- `docs/MAST_MAPPING.md` row #4 status updated: "Scheduled Q2 2026 (cron-like reminder via AI Landscape Review weekly cadence)".
+- The launchd Monday review notification (already installed via `setup-weekly-review.sh`) will naturally surface this as the AI landscape review approaches Q2; reviewer will be prompted to read [arxiv:2503.13657](https://arxiv.org/abs/2503.13657) and complete the remaining 5 of 14 MAST modes.
+- No separate scheduling needed; the weekly mechanism is sufficient.
+
+### ⏸ #30 — Producer-side CoVe (deferred per prior decision, no action)
+
+Still waiting for Spec Reviewer `cove_applied` data to validate ROI before extending CoVe to producer agents (Architect, Product, Designer).
+
+### Quality regression check (per file)
+
+| File | Change | Risk |
+|---|---|---|
+| `.cursor/rules.md` | +1 section "Irreversible-action protocol" | 0 — new rule, no existing rule modified |
+| `agents/builder.md` | +2 sections (irreversible protocol + Supabase skill) | 0 — additive |
+| `agents/ui-builder.md` | +2 sections (irreversible UI + web-quality skill) | 0 — additive |
+| `agents/design-reviewer.md` | +1 section (web-quality skill) | 0 — additive, parallel to existing accessibility-review skill |
+| `agents/marketing.md` | +1 section (marketing skill) | 0 — additive |
+| `agents/iteration-manager.md` | +1 section (session-restore protocol) | 0 — formalizes implicit behavior; before this commit, IM had no documented recovery procedure |
+| `docs/CLAUDE_SKILLS.md` | +3 catalog entries | 0 — documentation |
+| `docs/MAST_MAPPING.md` | 2 gap statuses updated to "Patched" | 0 — status tracking |
+| `docs/EVOLUTION_LOG.md` | +1 adoption notes block | 0 — history log |
+
+**Net agent-behavior change:** Builder and UI Builder now have an explicit halt-on-irreversible protocol. This is a NEW safety check that did not exist before. It can only add a confirmation prompt; it cannot break an existing workflow. Risk: zero degradation, positive safety gain.
+
+**Backward compatibility:** All skill augmentations are gated by skill availability detection per `docs/CLAUDE_SKILLS.md` contract. In environments without skills (Cursor, direct API, no plugin), agents use built-in fallbacks — output remains valid, only depth differs.
+
+---
+
 ---
 
 

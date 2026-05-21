@@ -91,6 +91,37 @@ The following skills are referenced by framework agents. Each entry lists: which
 | Built-in fallback | Built-in handoff-spec output format in `agents/designer.md` (Handoff-spec mode section) |
 | Source plugin | `frontend-design` / Cowork design plugin |
 
+### `web-quality:*` (Core Web Vitals, performance, SEO)
+
+| Field | Value |
+|---|---|
+| Used by | Design Reviewer (audit) + UI Builder (during implementation) |
+| Provides | Lighthouse-style audits: Core Web Vitals (LCP, INP, CLS), performance budget analysis, SEO crawlability + structured data, best-practices (modern web APIs, deprecated patterns) |
+| Built-in fallback | Cross-check `docs/ARCHITECTURE_GUARDRAILS.md` performance targets + [web.dev](https://web.dev) best practices manually |
+| Source plugin | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) (Addy Osmani, Google Chrome team) |
+| Specific skill IDs | `web-quality:core-web-vitals`, `web-quality:performance`, `web-quality:seo`, `web-quality:best-practices` |
+
+### `supabase:*` (RLS, migrations, edge functions, vector search)
+
+| Field | Value |
+|---|---|
+| Used by | Builder (when project uses Supabase backend) |
+| Provides | Supabase-specific implementation patterns: RLS policy design (security-critical), idiomatic SQL migrations, Deno Edge Functions, pgvector semantic search setup |
+| Built-in fallback | Standard PostgreSQL + Supabase docs at [supabase.com/docs](https://supabase.com/docs) |
+| Source plugin | Supabase official agent skills (when published / community equivalents) |
+| Specific skill IDs | `supabase:rls`, `supabase:migrations`, `supabase:edge-functions`, `supabase:vector-search` |
+| Critical for | Nastan (uses Supabase per `project.config.yaml` stack). Optional for any project that adopts Supabase. |
+
+### `marketing:*` (SaaS marketing — SEO, A/B, ad creative, cold email)
+
+| Field | Value |
+|---|---|
+| Used by | Marketing agent (when producing channel-specific artifacts) |
+| Provides | Channel-specific best-practice templates: AI-SEO, A/B test setup, ad creative for Google/Meta/LinkedIn/X/TikTok, cold-email deliverability, churn-prevention sequences, analytics taxonomy, competitor analysis |
+| Built-in fallback | Generic best-practice copy + channel patterns from `docs/BRAND.md` tone |
+| Source plugin | [Corey Haines](https://github.com/coreyhaines) official marketing skills (or equivalent SaaS marketing collections) |
+| Specific skill IDs | `marketing:ai-seo`, `marketing:ab-test-setup`, `marketing:ad-creative`, `marketing:cold-email`, `marketing:churn-prevention`, `marketing:analytics-tracking`, `marketing:competitor-analysis` |
+
 ---
 
 ## Integration pattern (for agent authors)

@@ -56,6 +56,34 @@ After each meaningful change:
 
 ---
 
+## Irreversible-action protocol (cross-agent rule)
+
+For **irreversible operations**, documenting an assumption in the handoff is **not sufficient**. If the plan or instruction is ambiguous about an irreversible step, **STOP and ask the user before proceeding**. Documenting assumptions is acceptable only for additive or reversible operations.
+
+Irreversible operations include (non-exhaustive — apply judgment liberally; when in doubt, treat as irreversible and ask):
+
+- **Destructive file ops:** `rm -rf`, `git rm` of un-backed files, deleting non-gitignored generated artifacts
+- **Git history rewrite:** `git push --force`, `git rebase` on shared branches, `git reset --hard` past pushed commits, remote branch deletion
+- **External API mutations:** payment processor calls (Stripe charge/refund), notification sends (Twilio SMS, email), posts to social/messaging APIs, webhook fires to third parties
+- **Database schema/data:** `DROP TABLE`/`DROP COLUMN`/`TRUNCATE`/`DELETE` without `WHERE`, migrations losing data on rollback, production DB writes outside the planned scope
+- **Deployment & infrastructure:** production deploys, secret rotation, Terraform `destroy`, revoking API keys, cloud-resource deletion
+- **Mass notifications:** email/SMS/push to >10 users
+- **Cost-incurring:** spinning up paid infra, LLM/API calls with >$1 estimated cost, without explicit budget approval
+
+When you encounter an irreversible step:
+
+1. Halt before executing
+2. Restate what you're about to do in plain language with concrete numbers ("I'm about to: DELETE the `users_archive_2023` table — 14,000 rows — per plan step 4")
+3. Confirm intent: "Plan says X but I want to confirm: proceed, modify, or skip?"
+4. Wait for explicit go-ahead — do NOT proceed on silence or non-answers
+5. Document confirmation in the handoff: `"user_confirmed_irreversible": [<step>]`
+
+Builder and UI Builder agents have agent-specific elaborations of this rule (see their `Irreversible-action protocol` sections).
+
+This rule applies to **all coding agents** invoked via the framework. Defense-in-depth measure derived from MAST taxonomy Mode 2.1 (Communication Breakdown) — see `docs/MAST_MAPPING.md`.
+
+---
+
 ## Architecture rules
 
 {% if pipeline.stages %}

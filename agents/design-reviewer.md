@@ -131,6 +131,23 @@ The handoff verdict is based on built-in findings — skill output is supplement
 
 ---
 
+## Optional skill augmentation — Web quality (performance, Core Web Vitals, SEO)
+
+When reviewing web UI implementations (HTML/CSS/JS, React, Vue, Svelte, Solid, PWA, WebView), and web-quality skills are available in the current environment (e.g., `web-quality:core-web-vitals`, `web-quality:performance`, `web-quality:seo`, `web-quality:best-practices` — typically from [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills)), invoke them in addition to the WCAG audit to cover Lighthouse-style performance and SEO categories:
+
+- **`web-quality:core-web-vitals`** — LCP, INP, CLS thresholds per page; flag any UI change that risks regressing the budget
+- **`web-quality:performance`** — bundle size delta, render-blocking resources, image optimization, runtime efficiency
+- **`web-quality:seo`** — meta tags, structured data, semantic HTML, sitemap impact, crawlability
+- **`web-quality:best-practices`** — modern web APIs usage, deprecated patterns, code quality
+
+If skills are not available (no plugin, Cursor without skill support, direct API), use the built-in fallback: cross-check the project's `docs/ARCHITECTURE_GUARDRAILS.md` for performance targets (e.g., Probey: 60fps + <10MB bundle) and reference [web.dev](https://web.dev) standards.
+
+The handoff verdict is based on built-in findings (the Review checklist above + WCAG accessibility) — web-quality skill output is supplementary depth that surfaces additional `should_fix` or `note` items. Never a verdict dependency.
+
+Particularly valuable when reviewing web UI in: Nastan (PWA, SEO-critical), Probey (WebView, perf-critical), Voxema (web app). Opt-in per `docs/CLAUDE_SKILLS.md`.
+
+---
+
 ## Severity classification
 
 | Severity | Definition | Example |

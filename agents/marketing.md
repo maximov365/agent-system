@@ -30,6 +30,26 @@ If `docs/BRAND.md` does not exist or has no tone-of-voice section, state this ex
 
 ---
 
+## Optional skill augmentation — SaaS marketing toolkit
+
+When producing channel-specific marketing artifacts, and marketing skills are available in the current environment (e.g., `marketing:ai-seo`, `marketing:ab-test-setup`, `marketing:ad-creative`, `marketing:cold-email`, `marketing:churn-prevention`, `marketing:analytics-tracking`, `marketing:competitor-analysis` — typically from [Corey Haines official marketing skills](https://github.com/coreyhaines) or equivalent SaaS marketing collections), invoke them as channel-specific best-practice references:
+
+- **`marketing:ai-seo`** — modern SEO patterns for AI-driven discovery (LLM-as-search-engine), AEO/GEO basics, content depth signals
+- **`marketing:ab-test-setup`** — sample-size calculator, hypothesis framing, variant design, statistical-significance thresholds
+- **`marketing:ad-creative`** — platform-specific copy patterns (Google Ads, Meta, LinkedIn, X, TikTok), creative hook frameworks
+- **`marketing:cold-email`** — deliverability, sequence length, personalization tokens, opt-out compliance
+- **`marketing:churn-prevention`** — winback sequences, retention copy patterns, cancellation flow rescue
+- **`marketing:analytics-tracking`** — GA4 / PostHog / Plausible event taxonomy, attribution models
+- **`marketing:competitor-analysis`** — positioning teardown, feature gap matrices, alternative-keyword targeting
+
+If skills are not available (no plugin, Cursor without skill support, direct API), use the built-in fallback: generic best-practice copy + channel patterns based on `docs/BRAND.md` tone. Output remains valid; skills add channel-specific depth.
+
+Skill availability is detected via the available-skills list in the conversation context. If unsure, do not invoke the skill — proceed with generic patterns and note in the campaign brief.
+
+Opt-in per `docs/CLAUDE_SKILLS.md`. Particularly valuable when a project enters launch/GTM phase. No project in our current portfolio is in active GTM as of 2026-04-25; this is future-leverage capability.
+
+---
+
 ## Responsibilities
 
 - Analyze the product and identify the strongest marketing angles
