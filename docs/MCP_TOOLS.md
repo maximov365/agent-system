@@ -179,6 +179,38 @@ Covers auth bypass, injection, secrets exposure patterns in MCP implementations.
 
 ---
 
+## External code-review companions (optional)
+
+These are not MCP tools strictly, but they're Claude-Code-native external review services that complement our `Reviewer` + `Security Reviewer` + `Spec Reviewer` agents. They run on Anthropic infrastructure for code-specific deep review.
+
+### Anthropic Code Review for Claude Code (`/ultrareview`)
+
+Multi-agent PR review by Anthropic — a fleet of specialized agents analyzes diff + surrounding code in parallel on Anthropic cloud, each targeting a different issue class (logic errors, security vulnerabilities, broken edge cases, subtle regressions). A verification step filters false positives. Findings posted as inline comments on PR with severity ranking.
+
+**Performance:** Before adopting CCR internally at Anthropic, 16% of PRs received substantive review comments; after, 54%. Average completion time ~20 min.
+
+**Availability:** Research preview for Team and Enterprise Claude Code users. Pro and Max users get 3 free reviews per month while in preview.
+
+**Trigger options:**
+- `/ultrareview` slash command (CLI ≥ 2.1.86)
+- `@claude review` comment on any PR
+- Auto-fire on PR open, on every push, or manual — configurable per repo
+
+**Cost:** ~$15–25 per review, scaling with PR size and complexity.
+
+**When to use vs our framework agents:**
+
+| Concern | Use |
+|---|---|
+| Code-specific deep review on a PR (logic / security / edge cases) | Anthropic CCR / `/ultrareview` — parallel specialists outperform single-agent review |
+| Non-code artifact review (specs, designs, plans, copy, analytics specs) | Our `Spec Reviewer` (per quality loop) — Anthropic CCR is code-only |
+| Workflow-integrated completion verification (plan adherence, scope check) | Our `Reviewer` — integrated with handoff contract and `builder_cycle_count` |
+| Pre-merge security gate | Both — `Security Reviewer` runs in workflow; CCR runs on PR as cross-check |
+
+CCR is a **complement, not replacement**. Adopt by enabling in Claude Code's repository settings; no framework changes required.
+
+---
+
 ## Adding new MCP tools
 
 When a new tool-agent requires an external MCP tool:

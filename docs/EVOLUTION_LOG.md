@@ -581,4 +581,91 @@ Five decisions executed with explicit zero-degradation checks.
 
 ---
 
+## Adoption Notes — 2026-04-25 (F30, F18, F10 execution batch)
+
+User requested executing three pending recommendations from the digest with zero-degradation guarantee.
+
+### F30 ✅ done — Documented `/ultrareview` in `docs/MCP_TOOLS.md`
+
+New section "External code-review companions (optional)" added between Troubleshooting and Adding new MCP tools. Documents Anthropic Code Review for Claude Code with:
+- Performance data (16% → 54% PR coverage improvement at Anthropic internally)
+- Availability (research preview, Team/Enterprise; Pro/Max gets 3 free reviews/month)
+- Triggers (`/ultrareview` CLI ≥2.1.86, `@claude review`, auto on PR open)
+- Cost (~$15–25 per review)
+- Decision matrix: when to use Anthropic CCR vs our `Spec Reviewer` / `Reviewer` / `Security Reviewer`
+- Explicit position as **complement, not replacement**
+
+Quality risk: zero — documentation only, no agent behavior changes.
+
+### F18 ✅ done — Browsed VoltAgent catalog, identified 3 high-fit candidates
+
+Spent 30 min on [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) and cross-references. Catalog has 1000+ skills across categories; filtered by relevance to our 21-agent system and our current downstream portfolio.
+
+**Top 3 candidates (not yet adopted — awaiting user pick):**
+
+#### Candidate 1: Web Quality Skills (Addy Osmani — Google Chrome team)
+- **Source:** [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills)
+- **Adds:** Core Web Vitals (LCP/INP/CLS), performance audit, SEO crawlability, structured data, modern web APIs — Lighthouse-style automated review
+- **Augments:** `Design Reviewer` (currently has WCAG via `design:accessibility-review`) and `UI Builder`
+- **Fits downstream portfolio:** Nastan (PWA, SEO-critical for organic discovery), Probey (WebView perf-critical for ≤10MB bundle / 60fps target), Voxema (web app)
+- **Effort:** Small — add as optional skill augmentation per CLAUDE_SKILLS.md pattern in Design Reviewer and UI Builder
+- **Why not yet adopted:** Pending user approval (F18 was browse + identify, not adopt)
+
+#### Candidate 2: Supabase Backend Skills (official)
+- **Source:** Supabase official agent skills (RLS policies, migrations, edge functions, vector search)
+- **Augments:** `Builder` when working with Supabase backends
+- **Fits downstream portfolio:** **Nastan uses Supabase per project.config.yaml stack** ("Vercel + Supabase + Inngest + Anthropic"). Direct, immediate value.
+- **Effort:** Small — Builder gets optional `supabase:*` skill references for migrations, RLS, vector search patterns
+- **Why not yet adopted:** Pending user approval
+
+#### Candidate 3: Marketing & SEO Skills (Corey Haines — SaaS marketing)
+- **Source:** Corey Haines official skills (AI-SEO optimization, A/B test setup, ad creative generation, analytics tracking, churn prevention, cold email, competitor analysis)
+- **Augments:** `Marketing` agent
+- **Fits downstream portfolio:** Any project entering GTM phase (Nastan Phase 0 monetization with affiliate + concierge; Probey launch promotion; Voxema, etc.)
+- **Effort:** Small — Marketing agent gets optional skill references for specific channels
+- **Why not yet adopted:** Pending user approval
+
+**Other notable candidates considered but NOT recommended:**
+- **Obra Superpowers** (40.9k stars, biggest community library) — overlaps too heavily with our 21-agent workflow; would create conflicting orchestration
+- **Anthropic frontend-design skill** (277k installs, most popular Anthropic skill) — overlaps with our Designer + Designer-modes; would create design-direction conflicts
+- **DevOps basics** (yaml validator, ssh key manager, version bumper, Terraform) — already covered by Architect + Builder for our scale; revisit if/when we need dedicated DevOps agent
+- **VMware vCenter operations** — irrelevant to our portfolio
+
+Quality risk if user approves any/all: zero on adoption — pattern is identical to existing 4 design:* skill integrations (optional augmentation with built-in fallback per CLAUDE_SKILLS.md backward-compat contract).
+
+### F10 ✅ done — MAST mapping audit created in `docs/MAST_MAPPING.md`
+
+Cross-referenced the 9 publicly-documented MAST failure modes (of 14 total) against our framework's existing guardrails. Methodology and findings documented in `docs/MAST_MAPPING.md`.
+
+**Summary of findings:**
+- **9 of 9 mapped modes** have at least Moderate coverage
+- **7 of 9** are Well Covered (Modes 1.1 Role Ambiguity, 1.2 Step Repetition, 1.4 Termination, 2.2 Info Withholding, 3.1 Superficial Verification, 3.2 Premature Stop, plus partial coverage on 2.3)
+- **2 real gaps identified:**
+  - **Mode 1.3 Loss of History** (LOW severity): IM lacks explicit "session-restore protocol" for context loss recovery; implicit workaround exists via handoff JSON + docs/TASKS.md
+  - **Mode 2.1 Communication Breakdown** (MEDIUM severity): no explicit "ask before acting on irreversible operations" rule; agents currently document assumptions and proceed, which is risky for deletions/deployments/external mutations
+- **1 LOW gap** in Mode 2.3 Reasoning Mismatch: in-flight check absent (post-hoc only via Spec Reviewer + CoVe). Deferred — wait for CoVe ROI data first.
+- **5 of 14 modes** not publicly enumerated at audit time; scheduled for Q2 2026 quarterly review (read full [arxiv:2503.13657](https://arxiv.org/abs/2503.13657)).
+
+**Macro validation:** MAST industry failure distribution (42% spec / 37% inter-agent / 21% verification) maps directly onto our framework's three pillars (quality loop / handoff contract / multi-layer review). The framework's structural integrity is validated against an empirical taxonomy of 1,600+ traces across 7 multi-agent systems.
+
+Quality risk: zero — audit document only, no behavior changes. Gaps identified are recommendations for future patches, not active fixes.
+
+### Decisions arising from this batch
+
+| # | Question | Recommended |
+|---|---|---|
+| 25 | Adopt Web Quality Skills (Addy Osmani) for Design Reviewer + UI Builder? | yes (high fit for Nastan / Probey / Voxema) |
+| 26 | Adopt Supabase Backend Skills for Builder? | yes (immediate value for Nastan) |
+| 27 | Adopt Marketing & SEO Skills (Corey Haines) for Marketing agent? | yes (low cost, high optionality for GTM phases) |
+| 28 | Patch MAST gap #1 (IM session-restore protocol)? | yes (LOW severity, simple doc addition) |
+| 29 | Patch MAST gap #2 (ask-before-irreversible rule for Builder/UI Builder)? | yes (MEDIUM severity, real production risk) |
+| 30 | Patch MAST gap #3 (producer-side CoVe)? | defer (wait for Spec Reviewer CoVe data first) |
+| 31 | Schedule reading full MAST paper at Q2 quarterly review? | yes (closes 5 unmapped modes) |
+
+Quality risk for any pending decision: zero or low. All are additive — documentation, optional augmentations, or new fallback rules. No agent definitions removed, no transitions broken, no handoff contract changes.
+
+---
+
+---
+
 
