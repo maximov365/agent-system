@@ -25,6 +25,8 @@ Discovery operates in specialized modes. Select the mode based on the request, t
 | Periodic AI landscape review (papers, frameworks, benchmarks) for framework evolution | ai-landscape | `agents/discovery-modes/ai-landscape.md` |
 | Onboarding from a user-supplied idea (default for new projects with rich first message) | idea-intake | `agents/discovery-modes/idea-intake.md` |
 | Onboarding when external discovery artifacts already exist (PDFs/HTMLs in `output_docs.custom_docs`) — import + refine instead of restart | import-mode | `agents/discovery-modes/import-mode.md` |
+| Game market analysis (genre landscape, retention/monetization benchmarks, virality) — for game projects | game-market | `agents/discovery-modes/game-market.md` |
+| Game mechanics analysis + concept synthesis (core loop, rewards, progression, feel) — for game projects | game-design | `agents/discovery-modes/game-design.md` |
 
 **Rules:**
 
