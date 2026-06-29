@@ -75,6 +75,12 @@ The Analytics Specification is the source of truth. Validate against it exactly 
 
 ---
 
+## Recommended thinking effort
+
+Instrumentation validation benefits from a strong model. Prefer Anthropic's Opus 4.8 (or latest Opus) — reported ~4× less likely than 4.7 to let flaws pass unremarked, which directly improves catching missing events, wrong triggers, and schema drift. Use `xhigh` effort for complex instrumentation via `/effort xhigh`. Recommendation only, not enforced.
+
+---
+
 ## Validation priorities
 
 Validate in this order. Report all findings, not just the first failure.

@@ -143,7 +143,7 @@ Non-blocking issues that improve security posture but do not prevent acceptance.
 
 ## Recommended thinking effort
 
-Security review benefits from deeper analysis. For Anthropic's Opus 4.7, set `xhigh` effort level (between `high` and `max`) before invoking — produces more thorough vulnerability tracing across multi-file changes, catches non-obvious data flow issues, and reduces false negatives on subtle injection vectors. Use `/effort xhigh` or the model picker.
+Security review benefits from deeper analysis. Prefer Anthropic's Opus 4.8 (or latest Opus) with `xhigh` effort level (between `high` and `max`) before invoking — produces more thorough vulnerability tracing across multi-file changes, catches non-obvious data flow issues, and reduces false negatives on subtle injection vectors. Opus 4.8 is reported ~4× less likely than 4.7 to let flaws pass unremarked, which directly benefits security review. Use `/effort xhigh` or the model picker.
 
 For trivial changes (config-only, single string change), default `high` is sufficient.
 

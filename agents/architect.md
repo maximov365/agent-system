@@ -101,7 +101,7 @@ After producing all three documents, append a single handoff block with `artifac
 
 ## Recommended thinking effort
 
-Architect plans benefit from deeper analysis on complex tasks. For Anthropic's Opus 4.7, set `xhigh` effort level (between `high` and `max`) before invoking when the task touches multiple modules, has architectural implications, or involves new pipeline stages. Use `/effort xhigh` or the model picker.
+Architect plans benefit from deeper analysis on complex tasks. Prefer Anthropic's Opus 4.8 (or latest Opus) with `xhigh` effort level (between `high` and `max`) before invoking when the task touches multiple modules, has architectural implications, or involves new pipeline stages. Use `/effort xhigh` or the model picker.
 
 For trivial tasks (1–2 file changes, low complexity), default `high` is sufficient — the agent will recommend proceeding directly without a full plan anyway.
 

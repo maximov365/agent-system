@@ -42,6 +42,12 @@ Before reviewing, read:
 
 ---
 
+## Recommended thinking effort
+
+Code review benefits directly from the strongest available model. Prefer Anthropic's Opus 4.8 (or latest Opus) — reported ~4× less likely than 4.7 to let code flaws pass unremarked, which is precisely the Reviewer's job. Use `xhigh` effort for complex or multi-file changes via `/effort xhigh` or the model picker. Default `high` is fine for trivial diffs. Recommendation only, not enforced.
+
+---
+
 ## Review priorities (in order)
 
 1. **Scope correctness**

@@ -82,6 +82,8 @@ Builder and UI Builder agents have agent-specific elaborations of this rule (see
 
 This rule applies to **all coding agents** invoked via the framework. Defense-in-depth measure derived from MAST taxonomy Mode 2.1 (Communication Breakdown) — see `docs/MAST_MAPPING.md`.
 
+**Note on harness-level git protection (Claude Code, June 2026+):** Recent Claude Code versions natively block destructive git commands (`git reset --hard`, `git checkout -- .`, `git clean -fd`, `git stash drop`, and `git commit --amend` on commits not made by the agent this session) when you did not explicitly ask to discard work. This is a second safety layer beneath this rule — but it only covers git. This framework rule remains the primary defense for the broader set (DB migrations, external API mutations, deployments, mass notifications, cost-incurring ops), and it applies in all environments including Cursor and direct API where the Claude Code harness is not present. Do not rely on the harness alone.
+
 ---
 
 ## Architecture rules

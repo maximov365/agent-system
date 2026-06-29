@@ -82,10 +82,10 @@ Concrete model names change over time. Treat this table as a recommended startin
 
 | Model class | Primary | Fallback | Use when gateway is unavailable |
 |---|---|---|---|
-| `frontier_reasoning` | Claude Opus 4.7 | Claude Sonnet 4.6, GPT-5.5 | Active Claude model |
-| `coding_builder` | Claude Sonnet 4.6 | GPT-5.3 Codex, GPT-5.5, Claude Opus 4.7 | Active Claude model |
-| `strict_reviewer` | GPT-5.5 | GPT-5.4, Claude Opus 4.7 | Active Claude model acting as Reviewer |
-| `long_context_reviewer` | Gemini 3.1 Pro | Claude Opus 4.7, Kimi K2.6 | Active Claude model with narrowed context |
+| `frontier_reasoning` | Claude Opus 4.8 | Claude Sonnet 4.6, GPT-5.5 | Active Claude model |
+| `coding_builder` | Claude Sonnet 4.6 | GPT-5.3 Codex, GPT-5.5, Claude Opus 4.8 | Active Claude model |
+| `strict_reviewer` | GPT-5.5 | GPT-5.4, Claude Opus 4.8 | Active Claude model acting as Reviewer |
+| `long_context_reviewer` | Gemini 3.1 Pro | Claude Opus 4.8, Kimi K2.6 | Active Claude model with narrowed context |
 | `cheap_summarizer` | Gemini Flash / GPT mini class | Kimi/Qwen/DeepSeek hosted cheap model | Active Claude model, or skip if summary is nonessential |
 | `local_private` | Ollama Qwen/DeepSeek/Llama class | None | Skip local-only optimization |
 

@@ -736,6 +736,46 @@ Still waiting for Spec Reviewer `cove_applied` data to validate ROI before exten
 
 ---
 
+## AI Landscape Review — 2026-06 (ad-hoc news scan)
+
+**Reviewer:** Discovery (ai-landscape mode), ad-hoc (user request, not scheduled slash command)
+**Scope:** framework
+**Sources scanned:** Tier 1 (Anthropic ecosystem + Claude Code changelog), models, Tier 2 (agent frameworks + MCP)
+**Time period:** ~6 weeks since 2026-04-25 reviews
+
+### Findings + same-session adoption
+
+#### A1 ✅ adopted — Claude Opus 4.8 (released May 28, 2026)
+
+- **Source:** [Anthropic model timeline](https://www.scriptbyai.com/anthropic-claude-timeline/), [Claude models overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+- **What it is:** Opus 4.8 — reported **~4× less likely than Opus 4.7 to let flaws in code pass unremarked**; first Claude with production-grade browser agents (84% Online-Mind2Web); first with quantified reliability gain.
+- **Why it matters to us:** Directly improves review-class agents — catching flaws is literally their job. Our effort-recommendation sections referenced Opus 4.7.
+- **Adopted:** Updated `agents/architect.md`, `agents/spec-reviewer.md`, `agents/security-reviewer.md` (Opus 4.7 → 4.8). Extended the recommendation to the other review-class agents that lacked it: `agents/reviewer.md`, `agents/design-reviewer.md`, `agents/analytics-validator.md` (added "Recommended thinking effort" sections, Opus 4.8 + xhigh). Updated `docs/MODEL_POLICY.md` concrete mapping table (4 refs 4.7 → 4.8).
+- **Risk:** zero — model recommendations are advisory, not enforced; "or latest Opus" phrasing future-proofs against the next bump.
+
+#### A2 ✅ adopted — Claude Code native destructive-git blocking
+
+- **Source:** [Claude Code changelog](https://code.claude.com/docs/en/changelog), [Releasebot Claude Code June 2026](https://releasebot.io/updates/anthropic/claude-code)
+- **What it is:** Claude Code now blocks `git reset --hard`, `git checkout -- .`, `git clean -fd`, `git stash drop`, and `git commit --amend` (on non-agent commits) when the user did not ask to discard work.
+- **Why it matters to us:** Validates our #29 irreversible-action protocol and adds a harness-level second layer for the git subset.
+- **Adopted:** Added a "Note on harness-level git protection" to `.cursor/rules.md` Irreversible-action protocol — clarifies the harness covers git only; our rule remains primary for DB/API/deploy/notifications and applies in Cursor + direct API where the harness is absent. Do-not-rely-on-harness-alone.
+- **Risk:** zero — documentation note.
+
+### Findings — monitor / no-action
+
+- **Claude Fable 5 (GA June 9) + Mythos 5** — **export-control suspended June 12, 2026** per US government directive. Not actionable; both unavailable. Closes prior F4/F26 Mythos thread definitively (now suspended even for the enterprise tier it had).
+- **Claude Code `/config key=value`** — minor; we already have `update-config` skill.
+- **Background subagents surface permission prompts in main session** — relevant only if we adopt background agents. Monitor.
+- **Claude Agent SDK separate billing credit (June 15)** — cost note; we don't build on Agent SDK.
+- **MCP 200+ server implementations; ACP merged into A2A under Linux Foundation** — ecosystem maturation signal; no action (already on MCP).
+- **CrewAI 1.14.6 (native MCP + A2A), LangGraph 1.1.3 (deep agent templates, distributed runtime)** — competing frameworks; we don't build on them. Continue monitoring per Tier 2.
+
+### Notes
+
+Opus 4.8's reliability gain is the kind of upstream improvement that benefits us for free — no framework change strictly required, but updating the recommendations ensures users running review-class agents reach for the right model. The harness-level git protection is a good example of the platform absorbing a safety concern we had independently addressed; our rule stays because it is broader (non-git irreversible ops) and portable (non-Claude-Code environments).
+
+---
+
 ---
 
 

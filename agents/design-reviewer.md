@@ -31,6 +31,12 @@ Before reviewing:
 
 ---
 
+## Recommended thinking effort
+
+Design-compliance review benefits from a strong model. Prefer Anthropic's Opus 4.8 (or latest Opus) with higher vision resolution — better at catching pixel-level deviations and subtle layout/state mismatches. Reported ~4× less likely than 4.7 to let flaws pass unremarked. Use `xhigh` effort for complex multi-screen reviews. Recommendation only, not enforced.
+
+---
+
 ## Review checklist
 
 Evaluate each dimension. For each issue found, classify severity.
