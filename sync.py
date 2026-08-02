@@ -164,13 +164,25 @@ def write_version(target_root: Path, version: str) -> None:
 
 
 def find_python(project_root: Path) -> str:
-    """Find a python with jinja2/pyyaml: project venv → agent-system venv → sys.executable."""
+    """Find a python that can actually import jinja2+pyyaml.
+
+    Candidate order: project venv → agent-system venv → sys.executable.
+    A candidate is only chosen if the imports succeed — a project venv that
+    exists but lacks jinja2 (common for app venvs) must not shadow a working
+    interpreter further down the chain.
+    """
     candidates = [
         project_root / ".venv" / "bin" / "python3",
         ROOT / ".venv" / "bin" / "python3",
     ]
     for candidate in candidates:
-        if candidate.exists():
+        if not candidate.exists():
+            continue
+        probe = subprocess.run(
+            [str(candidate), "-c", "import jinja2, yaml"],
+            capture_output=True, timeout=15,
+        )
+        if probe.returncode == 0:
             return str(candidate)
     return sys.executable
 
