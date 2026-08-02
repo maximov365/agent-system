@@ -172,7 +172,7 @@ Our framework's three structural pillars map directly to these categories (valid
 
 | # | Gap | Severity | Recommendation | Status |
 |---|---|---|---|---|
-| 1 | No explicit session-restore protocol for IM after context loss | LOW | Add brief "Session-restore protocol" section to `agents/iteration-manager.md` | **✅ Patched 2026-04-25** — see `agents/iteration-manager.md` "Session-restore protocol" section |
+| 1 | No explicit session-restore protocol for IM after context loss | LOW | Add brief "Session-restore protocol" section to `agents/iteration-manager.md` | **✅ Patched 2026-04-25** — protocol now lives in `agents/im-modes/session-restore.md` (extracted 2026-08 during IM lean-down; loaded on demand) |
 | 2 | No "ask before acting" rule for irreversible operations | MEDIUM | Add to `.cursor/rules.md` and Builder/UI Builder definitions | **✅ Patched 2026-04-25** — see `.cursor/rules.md` "Irreversible-action protocol" + per-agent elaborations in `agents/builder.md` and `agents/ui-builder.md` |
 | 3 | No in-flight reasoning consistency check for producer agents | LOW | Wait for `cove_applied` data; revisit if Spec Reviewer's CoVe shows clear ROI | Deferred (need data) |
 | 4 | 5 of 14 MAST modes not yet mapped | INFO | Read full PDF at next quarterly review | Scheduled Q2 2026 (cron-like reminder via AI Landscape Review weekly cadence) |

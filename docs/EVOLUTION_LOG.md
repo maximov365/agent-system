@@ -812,6 +812,32 @@ Zero — all changes are advisory model recommendations and documentation. No ro
 
 ---
 
+## IM Lean-Down — 2026-08 (family-5 overload follow-up)
+
+**Trigger:** Follow-up flagged in the Model-Generation Audit: `agents/iteration-manager.md` at 2,781 words was the framework's largest prompt, and the Claude 5 family's overloaded-prompt penalty upgraded trimming from a cost concern to a quality concern.
+
+### Changes
+
+1. **Extracted `agents/im-modes/trust-boundary.md`** (476 words) — full injection-marker table, detection/response protocol, trust contract. Loaded only when a new user request enters (initial routing). Dispatcher keeps a 2-paragraph pointer with the contract summary.
+2. **Extracted `agents/im-modes/session-restore.md`** (477 words) — session-restore reconstruction protocol + optional `.agent/workflows/` cache spec (merged, they are one story). Loaded only when resuming after context loss. Dispatcher keeps a 1-paragraph pointer with the never-restart rule.
+3. **Mode selection table** gained 2 rows with explicit load-when semantics; load rules updated (trust-boundary with routing-tables on initial routing only; session-restore only on context loss).
+4. **"Inputs" → Required/Situational reading split** (the established P1 pattern, finally applied to IM itself): 12 mandatory doc reads → 4 required (request/handoff, AGENTS.md, TASKS.md, AGENT_EXECUTION_MODEL.md) + 8 situational with explicit conditions (PRD/ARCHITECTURE/DECISIONS on initial routing of substantive requests; GUARDRAILS/PIPELINE_CONTRACTS when boundaries matter; LESSONS/PATTERNS at completion; CLAUDE.md at completion; rules.md on policy conflicts).
+5. **Cross-references updated:** `research-synthesis.md`, `docs/KNOWN_PATTERNS.md` (Trust boundary pattern), `docs/MAST_MAPPING.md` (gap #1 status) now point to the new mode files.
+
+### Results
+
+- Dispatcher: **2,781 → 2,159 words (−22%)**
+- Effective context per turn: continuation turns load 2,159 (was 2,781); initial routing 2,159+476=2,635; restore turns 2,159+477=2,636 — every turn type now loads less than before
+- Bigger win: required doc reads per invocation cut from 12 to 4 (thousands of tokens per turn)
+- **Behavior preservation verified with a 17-point checklist** — injection markers, override logging, trust contract, restore order, conflict rules, never-restart, cache properties, state table, lifecycle rules, output JSONs, constitutional rules, escalation logic: all present in dispatcher or mode files
+- All 6 im-modes files referenced in the dispatcher's Mode selection table; render check passes
+
+### Quality regression check
+
+Zero content loss — everything moved, nothing deleted. Load-when semantics are explicit so the situational content arrives exactly when needed. Remaining dispatcher content (output JSONs, state table, constitutional rules, escalation, principles, org memory) is load-bearing on every turn and was intentionally kept.
+
+---
+
 ---
 
 
