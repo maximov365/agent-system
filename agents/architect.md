@@ -101,11 +101,7 @@ After producing all three documents, append a single handoff block with `artifac
 
 ## Recommended thinking effort
 
-Architect plans benefit from deeper analysis on complex tasks. Prefer Anthropic's Opus 4.8 (or latest Opus) with `xhigh` effort level (between `high` and `max`) before invoking when the task touches multiple modules, has architectural implications, or involves new pipeline stages. Use `/effort xhigh` or the model picker.
-
-For trivial tasks (1–2 file changes, low complexity), default `high` is sufficient — the agent will recommend proceeding directly without a full plan anyway.
-
-This is a recommendation, not enforced.
+Prefer the strongest available Claude model (Opus 5 generation or newer) at `high` effort minimum. Use `xhigh` (or `max` on Opus 5) when the task touches multiple modules, has architectural implications, or adds pipeline stages; `high` is sufficient for trivial tasks — the agent will recommend skipping the full plan anyway. If plan depth seems shallow, raise effort rather than adding prompt workarounds. Recommendation only, not enforced — see `docs/MODEL_POLICY.md`.
 
 ---
 

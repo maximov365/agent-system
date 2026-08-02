@@ -776,6 +776,42 @@ Opus 4.8's reliability gain is the kind of upstream improvement that benefits us
 
 ---
 
+## Model-Generation Audit — 2026-08 (Claude 5 family + GPT-5.6)
+
+**Trigger:** User asked whether prompts need adapting for newly released models (Fable, "Sol"). Ad-hoc audit, framework scope.
+
+### Landscape facts established
+
+- **"Sol" is not Anthropic** — it is the flagship tier of OpenAI's GPT-5.6 (launched June 26 behind a government-managed access list; family: Sol flagship / Terra balanced / Luna fast-cheap).
+- **Claude 5 family:** Opus 5 (July 24; $5/$25; thinking on by default; explicit `max` effort tier; 512-token cache minimum), Sonnet 5 (intro pricing through Aug 31), Fable 5 (redeployed globally July 1 with cybersecurity safeguards after the June export-control suspension; $10/$50 = 2× Opus 5).
+- **Family-5 behavioral shifts** (per Anthropic migration guidance): more literal instruction-following; effort respected strictly — at `low`/`medium` the model scopes work to exactly what was asked; adaptive reasoning by default (raise effort instead of prompt workarounds); worse response to overloaded prompts; "show/explain your thinking" instructions can trigger refusals on Fable 5.
+
+### Audit results
+
+| Axis | Result |
+|---|---|
+| "Show your thinking" instructions (Fable 5 refusal risk) | ✅ CLEAN — zero occurrences; CoVe already "internal scratch only"; output fields ask for justification (`verdict_reason`), not internal reasoning |
+| Effort phrasing (`xhigh` between `high`/`max`) | ✅ still valid in family 5 |
+| Model authority rules (MODEL_POLICY) | ✅ model-agnostic, unaffected |
+| MODEL_POLICY concrete mapping | 🔴 generation-stale (Opus 4.8 / Sonnet 4.6 / GPT-5.5) — **updated** |
+| 6 agent effort sections | 🔴 stale claims ("4× less than 4.7") — **rewritten** |
+| Overloaded-prompt exposure | 🟡 IM at 2,781 words is the largest file; family-5 penalty makes this a quality risk — flagged as follow-up |
+
+### Changes applied (same session)
+
+1. **`docs/MODEL_POLICY.md`** — concrete mapping refreshed to Opus 5 / Sonnet 5 / Fable 5 / GPT-5.6 (Terra as accessible strict-reviewer tier; Sol noted as access-restricted). Added "Generation notes (August 2026)" pricing/behavior block. Added new section **"Claude 5 Family Prompting Notes"** encoding the 4 behavioral rules for agent authors — including the hard rule: **never run review-class agents below `high` effort** (family-5 literal scoping at low/medium under-reviews by design).
+2. **6 agent effort sections** (architect, spec-reviewer, security-reviewer, reviewer, design-reviewer, analytics-validator) — rewritten generation-neutral ("Opus 5 generation or newer; Fable 5 for hardest tasks"), added the `high`-minimum rule, removed stale 4.x claims, and **shortened** each section (family-5 overload penalty makes brevity a quality lever).
+
+### Follow-up flagged (not executed)
+
+- **IM word-count trim** — `agents/iteration-manager.md` grew to 2,781 words (trust boundary + session-restore + cache sections added since the P4 trim). Family-5's overloaded-prompt penalty upgrades this from cost concern to quality concern. Candidate next step: extract Trust boundary check and Session-restore protocol into `agents/im-modes/` files loaded on demand. Needs its own consistency pass — do not rush.
+
+### Quality regression check
+
+Zero — all changes are advisory model recommendations and documentation. No routing/handoff/workflow changes. "Or newer" phrasing future-proofs against the next generation bump.
+
+---
+
 ---
 
 

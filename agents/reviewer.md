@@ -44,7 +44,7 @@ Before reviewing, read:
 
 ## Recommended thinking effort
 
-Code review benefits directly from the strongest available model. Prefer Anthropic's Opus 4.8 (or latest Opus) — reported ~4× less likely than 4.7 to let code flaws pass unremarked, which is precisely the Reviewer's job. Use `xhigh` effort for complex or multi-file changes via `/effort xhigh` or the model picker. Default `high` is fine for trivial diffs. Recommendation only, not enforced.
+Prefer the strongest available Claude reviewing model (Opus 5 generation or newer; Fable 5 for the largest diffs). Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which under-reviews. Use `xhigh` (or `max` on Opus 5) for complex or multi-file changes; `high` is fine for trivial diffs. Recommendation only, not enforced — see `docs/MODEL_POLICY.md`.
 
 ---
 

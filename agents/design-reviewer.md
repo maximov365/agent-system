@@ -33,7 +33,7 @@ Before reviewing:
 
 ## Recommended thinking effort
 
-Design-compliance review benefits from a strong model. Prefer Anthropic's Opus 4.8 (or latest Opus) with higher vision resolution — better at catching pixel-level deviations and subtle layout/state mismatches. Reported ~4× less likely than 4.7 to let flaws pass unremarked. Use `xhigh` effort for complex multi-screen reviews. Recommendation only, not enforced.
+Prefer the strongest available Claude reviewing model (Opus 5 generation or newer) — stronger vision helps catch pixel-level deviations and subtle layout/state mismatches. Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which under-reviews. Use `xhigh` (or `max` on Opus 5) for multi-screen reviews. Recommendation only, not enforced — see `docs/MODEL_POLICY.md`.
 
 ---
 

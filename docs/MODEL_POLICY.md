@@ -82,18 +82,25 @@ Concrete model names change over time. Treat this table as a recommended startin
 
 | Model class | Primary | Fallback | Use when gateway is unavailable |
 |---|---|---|---|
-| `frontier_reasoning` | Claude Opus 4.8 | Claude Sonnet 4.6, GPT-5.5 | Active Claude model |
-| `coding_builder` | Claude Sonnet 4.6 | GPT-5.3 Codex, GPT-5.5, Claude Opus 4.8 | Active Claude model |
-| `strict_reviewer` | GPT-5.5 | GPT-5.4, Claude Opus 4.8 | Active Claude model acting as Reviewer |
-| `long_context_reviewer` | Gemini 3.1 Pro | Claude Opus 4.8, Kimi K2.6 | Active Claude model with narrowed context |
-| `cheap_summarizer` | Gemini Flash / GPT mini class | Kimi/Qwen/DeepSeek hosted cheap model | Active Claude model, or skip if summary is nonessential |
+| `frontier_reasoning` | Claude Opus 5 | Claude Fable 5 (hardest tasks; 2× Opus 5 cost), Claude Sonnet 5, GPT-5.6 Terra | Active Claude model |
+| `coding_builder` | Claude Sonnet 5 | GPT-5.3 Codex / GPT-5.6 Luna, Claude Opus 5 | Active Claude model |
+| `strict_reviewer` | GPT-5.6 Terra | GPT-5.5, Claude Opus 5 | Active Claude model acting as Reviewer |
+| `long_context_reviewer` | Gemini 3.1 Pro | Claude Fable 5, Kimi K2.6 | Active Claude model with narrowed context |
+| `cheap_summarizer` | Gemini Flash / GPT-5.6 Luna / GPT mini class | Kimi/Qwen/DeepSeek hosted cheap model | Active Claude model, or skip if summary is nonessential |
 | `local_private` | Ollama Qwen/DeepSeek/Llama class | None | Skip local-only optimization |
+
+Generation notes (August 2026):
+
+- **Claude Opus 5** (July 2026): $5/$25 per M tokens; thinking on by default; explicit `max` effort tier; 512-token prompt-cache minimum.
+- **Claude Fable 5**: $10/$50 per M — exactly 2× Opus 5 on both meters. Reserve for the hardest reasoning/review tasks where the delta matters; Opus 5 is the default frontier pick.
+- **Claude Sonnet 5**: introductory pricing through August 31, 2026.
+- **GPT-5.6 family**: Sol (flagship) sits behind a government-managed access list — do not plan on it as a default; Terra is the accessible strong tier, Luna the fast/cheap tier.
 
 Role mapping:
 
 | Agent | Primary class | Concrete preference | Fallback behavior |
 |---|---|---|---|
-| Iteration Manager | `frontier_reasoning` | Claude Sonnet 4.6; Opus for strict/high-risk routing | Active Claude model |
+| Iteration Manager | `frontier_reasoning` | Claude Sonnet 5; Opus for strict/high-risk routing | Active Claude model |
 | Discovery | `frontier_reasoning` plus web/search tool when available | Perplexity/Sonar for current research, Claude for synthesis | Claude-only synthesis from available context |
 | Product | `frontier_reasoning` | Claude Opus for ambiguous scope; Sonnet for standard specs | Active Claude model |
 | Designer | `frontier_reasoning` | Claude Sonnet/Opus | Active Claude model |
@@ -104,16 +111,27 @@ Role mapping:
 | Video Producer | External media tool model | Kling / Veo / Runway / Pika via MCP or provider API | Return `blocked` if tool unavailable |
 | Analytics Architect | `frontier_reasoning` | Claude Opus/Sonnet | Active Claude model |
 | Architect | `frontier_reasoning` | Claude Opus for strict; Sonnet for standard | Active Claude model |
-| Test Strategist | `strict_reviewer` | GPT-5.5/GPT-5.4 | Active Claude model |
+| Test Strategist | `strict_reviewer` | GPT-5.6 Terra / GPT-5.5 | Active Claude model |
 | Builder | `coding_builder` | Claude Sonnet; GPT Codex for terminal-heavy repair | Active Claude model |
 | UI Builder | `coding_builder` | Claude Sonnet; Gemini/Kimi as advisory external UI reviewer | Active Claude model |
-| Security Reviewer | `strict_reviewer` | GPT-5.5 plus CI/security scan evidence | Active Claude model |
-| Reviewer | `strict_reviewer` | GPT-5.5, with Opus/Gemini/Kimi for secondary long-context pass | Active Claude model |
-| Spec Reviewer | `strict_reviewer` | GPT-5.5 or Claude Opus | Active Claude model |
+| Security Reviewer | `strict_reviewer` | GPT-5.6 Terra plus CI/security scan evidence | Active Claude model |
+| Reviewer | `strict_reviewer` | GPT-5.6 Terra, with Opus/Fable/Gemini/Kimi for secondary long-context pass | Active Claude model |
+| Spec Reviewer | `strict_reviewer` | GPT-5.6 Terra or Claude Opus 5 | Active Claude model |
 | Reviser | `frontier_reasoning` | Claude Sonnet | Active Claude model |
 | Gatekeeper | `frontier_reasoning` | Claude Opus/Sonnet | Active Claude model |
 
 No fallback may grant a model extra authority. A fallback reviewer remains a reviewer; a fallback builder remains Builder only when Iteration Manager routed to Builder.
+
+---
+
+## Claude 5 Family Prompting Notes
+
+The Claude 5 generation (Opus 5, Sonnet 5, Fable 5) behaves differently from the 4.x generation in ways that affect how agents in this framework should be run and authored:
+
+1. **Effort is respected strictly; low/medium scopes work literally.** Family-5 models at `low`/`medium` effort do exactly what was asked and no more. **Never run review-class agents (Spec Reviewer, Reviewer, Security Reviewer, Design Reviewer, Analytics Validator, Gatekeeper) below `high` effort** — their job is to find what was not asked about.
+2. **Reasoning is adaptive by default.** If output reasoning seems shallow on a complex task, raise effort (`high` → `xhigh` → `max` on Opus 5) instead of adding "think harder" prompt workarounds — Anthropic's guidance is that effort control replaces prompt-level reasoning hacks.
+3. **Overloaded prompts degrade output.** Family-5 responds worse to bloated instructions than 4.x did. Keep agent files lean: follow the Required/Optional reading pattern, prefer removing stale sections over adding new ones, and treat agent word count as a quality budget, not just a token budget.
+4. **Never instruct a model to "show/explain your thinking" in response text.** On Fable 5 such instructions can trigger refusals and fallback to earlier models. Ask for conclusions and justification fields (e.g., `verdict_reason`) — not internal reasoning. Self-check frames (CoVe) must stay "internal scratch only", as `agents/spec-reviewer.md` already specifies.
 
 Media models such as GPT Image, Nano Banana, Kling, Veo, Runway, and Pika are tool models. They receive structured briefs and return assets; they do not own design direction, motion direction, product scope, review verdicts, or workflow routing.
 

@@ -77,7 +77,7 @@ The Analytics Specification is the source of truth. Validate against it exactly 
 
 ## Recommended thinking effort
 
-Instrumentation validation benefits from a strong model. Prefer Anthropic's Opus 4.8 (or latest Opus) — reported ~4× less likely than 4.7 to let flaws pass unremarked, which directly improves catching missing events, wrong triggers, and schema drift. Use `xhigh` effort for complex instrumentation via `/effort xhigh`. Recommendation only, not enforced.
+Prefer the strongest available Claude reviewing model (Opus 5 generation or newer). Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which misses events and schema drift not explicitly listed. Use `xhigh` (or `max` on Opus 5) for complex instrumentation. Recommendation only, not enforced — see `docs/MODEL_POLICY.md`.
 
 ---
 

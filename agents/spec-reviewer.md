@@ -196,11 +196,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ## Recommended thinking effort
 
-For Spec Reviewer evaluations, prefer Anthropic's Opus 4.8 (or latest Opus) with `xhigh` effort level (between `high` and `max`) — materially improves audit depth, surfaces deeper PRD/architecture conflicts, catches subtle scope drift, scores more consistently across iterations. Opus 4.8 is reported ~4× less likely than 4.7 to let flaws pass unremarked, which directly benefits review-class work. Set with `/effort xhigh` or via the model picker before invoking this agent on complex artifacts.
-
-For trivial artifacts (single-screen designs, single-step plans, copy-only changes), default `high` is sufficient.
-
-This is a recommendation, not enforced. Falls back gracefully on lower effort if not set.
+Prefer the strongest available Claude reviewing model (Opus 5 generation or newer; Fable 5 for the hardest artifacts). Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which under-reviews. Use `xhigh` (or `max` on Opus 5) for complex artifacts; `high` is sufficient for trivial ones. If audit depth seems shallow, raise effort rather than adding prompt workarounds. Recommendation only, not enforced — see `docs/MODEL_POLICY.md` "Claude 5 Family Prompting Notes".
 
 ---
 
