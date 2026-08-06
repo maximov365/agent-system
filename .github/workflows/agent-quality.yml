@@ -7,8 +7,33 @@ on:
       - main
 
 jobs:
+  # Downstream project repos gitignore framework files (requirements-framework.txt,
+  # evals/, docs governance contracts), so framework CI cannot run there. If this
+  # workflow ends up committed in a downstream repo anyway, skip gracefully instead
+  # of failing every push.
+  detect-framework:
+    name: Detect Framework Files
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.check.outputs.present }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check framework files presence
+        id: check
+        run: |
+          if [ -f requirements-framework.txt ] && [ -d evals ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "Framework files are gitignored in downstream repos — skipping framework CI."
+          fi
+
   framework-audit:
     name: Framework Audit
+    needs: detect-framework
+    if: needs.detect-framework.outputs.present == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -29,6 +54,8 @@ jobs:
 
   eval-contracts:
     name: Eval Contracts
+    needs: detect-framework
+    if: needs.detect-framework.outputs.present == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

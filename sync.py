@@ -92,6 +92,10 @@ GITIGNORE_ENTRIES = [
     "/docs/METRICS.md",
     "/setup.py",
     "/requirements-framework.txt",
+    # Framework CI must not be committed in downstream repos: its dependencies
+    # (requirements-framework.txt, evals/) are gitignored above, so the workflow
+    # can never pass there — it belongs to the framework repo only.
+    "/.github/workflows/agent-quality.yml",
     "/.agent-system-version",
     "/.templates/",
     "/.agent/",
