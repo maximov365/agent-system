@@ -19,8 +19,6 @@ if [ ! -d "$SOURCE_DIR" ]; then
   exit 1
 fi
 
-mkdir -p "$TARGET_DIR"
-
 if [ "${1:-}" = "--check" ]; then
   echo "Available commands in $SOURCE_DIR:"
   ls "$SOURCE_DIR" 2>/dev/null | sed 's/^/  /'
@@ -29,6 +27,8 @@ if [ "${1:-}" = "--check" ]; then
   ls "$TARGET_DIR" 2>/dev/null | sed 's/^/  /' || echo "  (none)"
   exit 0
 fi
+
+mkdir -p "$TARGET_DIR"
 
 count=0
 for src in "$SOURCE_DIR"/*.md; do

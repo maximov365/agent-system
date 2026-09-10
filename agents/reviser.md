@@ -35,7 +35,7 @@ You must not modify:
 - Source code
 - Tests
 - Configuration files
-- Repository rules (`AGENTS.md`, `.cursor/rules.md`, `CLAUDE.md`)
+- Repository rules (`AGENTS.md`, `docs/CODING_RULES.md`, `CLAUDE.md`)
 
 Those belong to other agents.
 
@@ -46,7 +46,7 @@ Those belong to other agents.
 Before revising, read:
 
 1. `AGENTS.md`
-2. `.cursor/rules.md`
+2. `docs/CODING_RULES.md`
 3. `CLAUDE.md`
 4. `docs/PRD.md`
 5. `docs/ARCHITECTURE.md`

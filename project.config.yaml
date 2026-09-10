@@ -10,14 +10,9 @@ project:
     A brief description of your project.
     What it does and who it serves.
 
+# Leave empty for apps/games without a processing pipeline.
 pipeline:
-  stages:
-    - name: ingest
-      description: "Parse and normalize input"
-    - name: process
-      description: "Core processing logic"
-    - name: export
-      description: "Produce final output"
+  stages: []
 
 analytics_by_default: false
 

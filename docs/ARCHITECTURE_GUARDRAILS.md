@@ -15,6 +15,8 @@ If a proposed change conflicts with any guardrail in this document, the change m
 
 # Rule Precedence
 
+System/runtime constraints and current user instructions have the precedence described in `AGENTS.md`. The order below resolves conflicts among project artifacts; it does not require repeating approval already given for the current task.
+
 If guidance conflicts across project documents, use the following priority order:
 
 1. `docs/ARCHITECTURE_GUARDRAILS.md`
@@ -23,7 +25,7 @@ If guidance conflicts across project documents, use the following priority order
 4. task-specific implementation plans
 5. task descriptions
 
-> Note: `AGENTS.md` and `.cursor/rules.md` define agent workflow rules, not architectural constraints, and are not part of this precedence order.
+> Note: `AGENTS.md` and `docs/CODING_RULES.md` define agent workflow rules, not architectural constraints, and are not part of this precedence order.
 
 If a lower-priority artifact conflicts with a higher-priority rule, **stop and escalate**.
 
@@ -37,7 +39,7 @@ Agents must not override architecture constraints based on task descriptions alo
 The system is built around a deterministic processing pipeline: `{{ pipeline.stages | map(attribute='name') | join(' → ') }}`
 {% endif %}
 
-This pipeline is the backbone of the system.
+Pipeline-specific rules apply only when the project defines processing stages. Apps and games may use other documented architectures.
 
 The following invariants must always hold:
 
@@ -187,7 +189,7 @@ This is especially important for non-LLM pipeline stages, validation, and orches
 
 For LLM-related components:
 
-- deterministic or low-temperature settings should be used for non-creative stages
+- use supported model parameters and deterministic validation; do not assume temperature support or deterministic LLM output
 - prompt templates must live in `prompts/`
 - model names must not be hardcoded in implementation logic
 - prompt changes affecting pipeline behavior should be treated as architectural decisions

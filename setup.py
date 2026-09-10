@@ -16,6 +16,9 @@ import shutil
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+from framework_manifest import TEMPLATE_GLOBS
+
 try:
     import yaml
 except ImportError:
@@ -26,30 +29,35 @@ try:
 except ImportError:
     sys.exit("Missing dependency: pip install jinja2")
 
-ROOT = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == ".agent-system" else SCRIPT_DIR
 CONFIG_PATH = ROOT / "project.config.yaml"
 TEMPLATES_DIR = ROOT / ".templates"
 
 JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}|\{%.+?%\}")
 
-TEMPLATE_GLOBS = [
-    "agents/*.md",
-    "agents/designer-modes/*.md",
-    "CLAUDE.md",
-    "AGENTS.md",
-    ".cursor/rules.md",
-    "docs/AGENT_HANDOFF_CONTRACT.md",
-    "docs/AGENT_EXECUTION_MODEL.md",
-    "docs/TASK_BACKLOG_AUTOMATION.md",
-    "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/TASK_TEMPLATE.md",
-    "docs/DEPLOY_CONTRACTS.md",
-]
-
-
-def load_config() -> dict:
-    with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+def load_config(path: Path = None) -> dict:
+    with open(path or CONFIG_PATH) as f:
+        config = yaml.safe_load(f)
+    if not isinstance(config, dict):
+        raise ValueError("Project configuration must be a YAML mapping")
+    project = config.get("project")
+    if not isinstance(project, dict) or not isinstance(project.get("name"), str) or not project["name"].strip():
+        raise ValueError("project.name must be a nonempty string")
+    project.setdefault("description", "")
+    if not isinstance(project["description"], str):
+        raise ValueError("project.description must be a string")
+    pipeline = config.setdefault("pipeline", {"stages": []})
+    if not isinstance(pipeline, dict) or not isinstance(pipeline.get("stages", []), list):
+        raise ValueError("pipeline.stages must be a list")
+    pipeline.setdefault("stages", [])
+    for stage in pipeline["stages"]:
+        if not isinstance(stage, dict) or not isinstance(stage.get("name"), str) or not stage["name"].strip():
+            raise ValueError("Each pipeline stage needs a nonempty name")
+    config.setdefault("analytics_by_default", False)
+    if not isinstance(config["analytics_by_default"], bool):
+        raise ValueError("analytics_by_default must be a boolean")
+    return config
 
 
 def has_variables(text: str) -> bool:
@@ -74,7 +82,19 @@ def collect_template_paths() -> list[Path]:
     paths = []
     for pattern in TEMPLATE_GLOBS:
         paths.extend(ROOT.glob(pattern))
+    for path in paths:
+        assert_safe_path(path)
     return sorted(set(paths))
+
+
+def assert_safe_path(path: Path) -> None:
+    """Do not render through symlinks or outside the chosen project."""
+    rel = path.relative_to(ROOT)
+    cursor = ROOT
+    for part in rel.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise ValueError(f"Refusing symlink in framework path: {cursor}")
 
 
 def template_backup_path(source: Path) -> Path:
@@ -94,6 +114,7 @@ def discover_templates() -> list[tuple[Path, Path]]:
     if TEMPLATES_DIR.exists():
         for target in collect_template_paths():
             backup = template_backup_path(target)
+            assert_safe_path(backup)
             target_text = target.read_text()
             if has_variables(target_text):
                 pairs.append((target, target))
@@ -117,9 +138,9 @@ def save_template(source: Path) -> None:
 def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
     results = []
     pairs = discover_templates()
+    pending = []
 
     if not pairs:
-        print("No templates found.")
         return results
 
     for source, target in pairs:
@@ -141,13 +162,18 @@ def cmd_render(config: dict, dry_run: bool = False) -> list[dict]:
             results.append(entry)
             continue
 
-        if not dry_run:
-            if source.parent == target.parent:
-                save_template(source)
-            target.write_text(rendered)
-
+        pending.append((source, target, rendered))
         results.append(entry)
 
+    # Validate the entire batch before the first write.
+    if not dry_run and not any(r["status"] == "error" for r in results):
+        for source, target, rendered in pending:
+            assert_safe_path(target)
+            assert_safe_path(template_backup_path(target))
+        for source, target, rendered in pending:
+            if source == target:
+                save_template(source)
+            target.write_text(rendered)
     return results
 
 
@@ -156,9 +182,14 @@ def cmd_restore() -> list[str]:
         return []
 
     restored = []
-    for backup in sorted(TEMPLATES_DIR.rglob("*.md")):
-        rel = backup.relative_to(TEMPLATES_DIR)
-        target = ROOT / rel
+    # Restore only current framework-owned templates, never arbitrary backups.
+    pairs = [(template_backup_path(target), target) for target in collect_template_paths()
+             if template_backup_path(target).exists()]
+    for backup, target in pairs:
+        assert_safe_path(backup)
+        assert_safe_path(target)
+    for backup, target in pairs:
+        rel = target.relative_to(ROOT)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(backup, target)
         restored.append(str(rel))
@@ -170,6 +201,8 @@ def print_results(results: list[dict], dry_run: bool) -> None:
     ok = [r for r in results if r["status"] == "ok"]
 
     action = "Would render" if dry_run else "Rendered"
+    if errors and not dry_run:
+        action = "Validated (batch not written)"
 
     if ok:
         print(f"\n{action} {len(ok)} file(s):\n")
@@ -181,9 +214,10 @@ def print_results(results: list[dict], dry_run: bool) -> None:
         for r in errors:
             print(f"  ✗ {r['file']}: {r['error']}", file=sys.stderr)
 
-    if not dry_run and ok:
+    if not dry_run and ok and not errors:
         print(f"\nTemplates preserved in .templates/")
-        print("Run `python setup.py --restore` to get Jinja2 templates back.")
+        script = ".agent-system/setup.py" if SCRIPT_DIR.name == ".agent-system" else "setup.py"
+        print(f"Run `python {script} --restore` to get Jinja2 templates back.")
 
 
 def main() -> None:
@@ -208,7 +242,10 @@ def main() -> None:
     if not CONFIG_PATH.exists():
         sys.exit(f"Config not found: {CONFIG_PATH}")
 
-    config = load_config()
+    try:
+        config = load_config()
+    except (ValueError, yaml.YAMLError) as exc:
+        sys.exit(f"Invalid config: {exc}")
     project_name = config.get("project", {}).get("name", "?")
     print(f"Config:  {CONFIG_PATH.name}")
     print(f"Project: {project_name}")

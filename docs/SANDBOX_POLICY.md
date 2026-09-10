@@ -2,7 +2,7 @@
 
 This document defines safety constraints for agent command execution and optional automated runtimes.
 
-It applies to Cursor, Claude Code, OpenHands, OpenAI Agents SDK, LangGraph, local scripts, CI jobs, and any other runtime that executes agent-selected commands.
+It applies to Codex, Cursor, Claude Code, OpenHands, OpenAI Agents SDK, LangGraph, local scripts, CI jobs, and any other runtime that executes agent-selected commands.
 
 ---
 
@@ -16,7 +16,7 @@ It applies to Cursor, Claude Code, OpenHands, OpenAI Agents SDK, LangGraph, loca
 
 ## Baseline Rules
 
-- Agents work on feature branches, not directly on `main` or `master`.
+- Prefer a feature branch or isolated worktree for substantial/concurrent work when the runtime permits it; preserve the current workspace and user changes.
 - Destructive commands require explicit user confirmation.
 - Secrets, tokens, credentials, private keys, and `.env` files must not be read unless the user explicitly authorizes that operation.
 - Network access should be limited to required package managers, VCS remotes, and approved services.
@@ -36,7 +36,7 @@ It applies to Cursor, Claude Code, OpenHands, OpenAI Agents SDK, LangGraph, loca
 - Installing or starting persistent system services.
 - Opening broad network access for unreviewed tools.
 
-If a task appears to require one of these actions, stop and ask the user for confirmation with the exact command or access requested.
+First check existing task authorization and runtime permissions. If the action is already authorized, proceed within that scope. Otherwise prepare the concrete reviewable action and request the missing approval. Do not bypass runtime denials.
 
 ---
 

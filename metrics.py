@@ -46,6 +46,10 @@ THRESHOLDS = {
 }
 
 
+def format_usd(value) -> str:
+    return "unknown" if value is None else f"${value:.2f}"
+
+
 def utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -394,8 +398,8 @@ def _render_workflow_section(wt: dict) -> str:
     cov_str = f"{coverage:.0%}" if coverage is not None else "N/A"
 
     lines.extend([
-        f"| Cost (last 7 days) | ${c7.get('total_cost_usd', 0):.2f} |",
-        f"| Cost (last 30 days) | ${c30.get('total_cost_usd', 0):.2f} |",
+        f"| Cost (last 7 days) | {format_usd(c7.get('total_cost_usd'))} |",
+        f"| Cost (last 30 days) | {format_usd(c30.get('total_cost_usd'))} |",
         f"| Cache hit ratio (30d) | {hr_str} {health_icon} {health} |",
         f"| Cache coverage of input (30d) | {cov_str} |",
         f"| Cache write spend estimate (30d) | ${cache30.get('cache_write_cost_estimate_usd', 0):.2f} |",
@@ -652,7 +656,7 @@ def main() -> int:
             kn = snapshot.get("knowledge", {})
             print(f"  Knowledge:        {kn.get('lessons_total', 0)} lessons, {kn.get('patterns_total', 0)} patterns")
             print(f"  Workflows:        {wf.get('workflow_count', 0)} tracked")
-            print(f"  Cost (30d):       ${c30.get('total_cost_usd', 0):.2f}")
+            print(f"  Cost (30d):       {format_usd(c30.get('total_cost_usd'))}")
             print(f"  Snapshot:         {out_md}")
         return 0
 
@@ -701,7 +705,7 @@ def main() -> int:
         cr = wf.get("completion_rate")
         cr_str = f"{cr:.0%}" if cr is not None else "N/A"
         print(f"  Workflows: {wf.get('workflow_count', 0)} tracked, completion rate: {cr_str}")
-        print(f"  Cost (30d): ${c30.get('total_cost_usd', 0):.2f}")
+        print(f"  Cost (30d): {format_usd(c30.get('total_cost_usd'))}")
         print(f"  Snapshot:  {METRICS_MD.relative_to(ROOT)}")
         if args.append:
             print(f"  Appended:  {HISTORY_JSONL.relative_to(ROOT)}")

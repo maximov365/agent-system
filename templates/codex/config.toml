@@ -1,0 +1,4 @@
+# Optional example; merge into the intended trusted Codex config layer.
+# Do not overwrite existing credentials, permissions, or tool configuration.
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"

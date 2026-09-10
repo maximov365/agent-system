@@ -1,461 +1,225 @@
 #!/usr/bin/env python3
-"""
-Sync agent-system framework files to downstream projects.
-
-Usage:
-    python sync.py --target /path/to/project              # sync one project
-    python sync.py --target /path/to/project --render      # sync + render templates
-    python sync.py --target /path/to/project --dry-run     # preview without writing
-    python sync.py --target /path/to/project --diff        # show unified diff
-    python sync.py --all                                   # sync all registered projects
-    python sync.py --all --render                          # sync + render all projects
-
-Downstream projects are registered in downstream.projects (one path per line).
-Framework files are overwritten; project-specific files are never touched.
-"""
+"""Preview or sync framework files without altering downstream Git tracking."""
 
 import argparse
 import difflib
-import shutil
+import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
+
+from framework_manifest import (FRAMEWORK_GLOBS, SEED_GLOBS, TEMPLATE_GLOBS,
+                                deployment_sources, seed_sources)
+from setup import has_variables, load_config, render_text
 
 ROOT = Path(__file__).resolve().parent
 VERSION_FILE = ROOT / "VERSION"
 DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
-
-FRAMEWORK_GLOBS = [
-    "agents/*.md",
-    "agents/discovery-modes/*.md",
-    "agents/designer-modes/*.md",
-    "agents/im-modes/*.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    ".cursor/rules.md",
-    "docs/AGENT_HANDOFF_CONTRACT.md",
-    "docs/AGENT_EXECUTION_MODEL.md",
-    "docs/MODEL_POLICY.md",
-    "docs/MODEL_GATEWAY_SETUP.md",
-    "docs/EXTERNAL_REVIEW_CONTRACT.md",
-    "docs/SANDBOX_POLICY.md",
-    "docs/PULL_REQUEST_CONTRACT.md",
-    "docs/TASK_BACKLOG_AUTOMATION.md",
-    "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/ARCHITECTURE_CHECKLIST.md",
-    "docs/TASK_TEMPLATE.md",
-    "docs/ONBOARDING.md",
-    "docs/MCP_TOOLS.md",
-    "docs/CLAUDE_SKILLS.md",
-    "evals/README.md",
-    "evals/tasks/*.md",
-    "evals/expected/*.yaml",
-    "setup.py",
-    "requirements-framework.txt",
-    ".github/pull_request_template.md",
-    ".github/workflows/agent-quality.yml",
-]
-
-# Seed files: copied only when they do NOT exist in the target project.
-# These are scaffolds that projects fill in with project-specific content.
-# Once created, they are never overwritten by sync.
-SEED_GLOBS = [
-    "docs/PIPELINE_CONTRACTS.md",
-    "docs/DEPLOY_CONTRACTS.md",
-    ".github/pull_request_template.md",
-    ".github/workflows/agent-quality.yml",
-]
-
 GITIGNORE_MARKER_START = "# >>> agent-system framework (managed by sync.py) >>>"
 GITIGNORE_MARKER_END = "# <<< agent-system framework <<<"
+# Instructions and framework code should survive clone/worktree/CI.
+GITIGNORE_ENTRIES = ["/.templates/", "/.agent/"]
 
-GITIGNORE_ENTRIES = [
-    "/agents/",
-    "/AGENTS.md",
-    "/CLAUDE.md",
-    "/.cursor/rules.md",
-    "/docs/AGENT_HANDOFF_CONTRACT.md",
-    "/docs/AGENT_EXECUTION_MODEL.md",
-    "/docs/MODEL_POLICY.md",
-    "/docs/MODEL_GATEWAY_SETUP.md",
-    "/docs/EXTERNAL_REVIEW_CONTRACT.md",
-    "/docs/SANDBOX_POLICY.md",
-    "/docs/PULL_REQUEST_CONTRACT.md",
-    "/docs/TASK_BACKLOG_AUTOMATION.md",
-    "/docs/ARCHITECTURE_GUARDRAILS.md",
-    "/docs/ARCHITECTURE_CHECKLIST.md",
-    "/docs/TASK_TEMPLATE.md",
-    "/docs/ONBOARDING.md",
-    "/docs/MCP_TOOLS.md",
-    "/docs/CLAUDE_SKILLS.md",
-    "/evals/",
-    "/docs/METRICS.md",
-    "/setup.py",
-    "/requirements-framework.txt",
-    # Framework CI must not be committed in downstream repos: its dependencies
-    # (requirements-framework.txt, evals/) are gitignored above, so the workflow
-    # can never pass there — it belongs to the framework repo only.
-    "/.github/workflows/agent-quality.yml",
-    "/.agent-system-version",
-    "/.templates/",
-    "/.agent/",
-]
+SEED_CONTENT = {
+    "docs/TASKS.md": "# Tasks\n\n| Task ID | Title | Status | Priority | Complexity |\n|---|---|---|---|---|\n",
+    "docs/DECISIONS.md": "# Decisions\n\nRecord significant project decisions here.\n",
+    "docs/LESSONS_LEARNED.md": "# Lessons learned\n\nAppend useful lessons from this project's work.\n",
+    "docs/KNOWN_PATTERNS.md": "# Known patterns\n\nRecord patterns validated in this project.\n",
+}
 
 
 def get_version() -> str:
-    if VERSION_FILE.exists():
-        return VERSION_FILE.read_text().strip()
-    return "unknown"
+    return VERSION_FILE.read_text().strip() if VERSION_FILE.exists() else "unknown"
 
 
 def collect_framework_files() -> list[Path]:
-    paths = []
-    for pattern in FRAMEWORK_GLOBS:
-        paths.extend(ROOT.glob(pattern))
-    return sorted(set(paths))
+    return sorted(deployment_sources(ROOT).values())
 
 
 def collect_seed_files() -> list[Path]:
-    paths = []
-    for pattern in SEED_GLOBS:
-        paths.extend(ROOT.glob(pattern))
-    return sorted(set(paths))
+    return sorted(seed_sources(ROOT).values())
 
 
-def classify_changes(source_root: Path, target_root: Path, files: list[Path]):
-    new, updated, unchanged = [], [], []
-    for src in files:
-        rel = src.relative_to(source_root)
-        tgt = target_root / rel
-        if not tgt.exists():
-            new.append(rel)
-        elif tgt.read_bytes() != src.read_bytes():
-            updated.append(rel)
-        else:
-            unchanged.append(rel)
-    return new, updated, unchanged
+def safe_path(target: Path, rel: Path) -> Path:
+    if rel.is_absolute() or ".." in rel.parts:
+        raise ValueError(f"Invalid destination path: {rel}")
+    cursor = target
+    for part in rel.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise ValueError(f"Refusing symlink in destination: {cursor}")
+        if cursor.exists() and cursor != target / rel and not cursor.is_dir():
+            raise ValueError(f"Not a directory: {cursor}")
+    if cursor.exists() and not cursor.is_file():
+        raise ValueError(f"Destination is not a regular file: {cursor}")
+    return cursor
 
 
-def show_diff(source_root: Path, target_root: Path, rel_path: Path) -> str:
-    src = source_root / rel_path
-    tgt = target_root / rel_path
+def is_template(rel: Path) -> bool:
+    if rel.parts and rel.parts[0] == "agents" and rel.suffix == ".md":
+        return True
+    return any(rel.match(pattern) for pattern in TEMPLATE_GLOBS)
 
-    src_lines = src.read_text().splitlines(keepends=True)
-    if tgt.exists():
-        tgt_lines = tgt.read_text().splitlines(keepends=True)
+
+def build_gitignore_block() -> str:
+    return "\n".join([GITIGNORE_MARKER_START, *GITIGNORE_ENTRIES, GITIGNORE_MARKER_END])
+
+
+def gitignore_content(target: Path) -> bytes:
+    path = safe_path(target, Path(".gitignore"))
+    content = path.read_text() if path.exists() else ""
+    start_count, end_count = content.count(GITIGNORE_MARKER_START), content.count(GITIGNORE_MARKER_END)
+    if (start_count, end_count) not in ((0, 0), (1, 1)):
+        raise ValueError("Malformed or duplicate managed .gitignore block; repair before sync")
+    block = build_gitignore_block()
+    if start_count:
+        start = content.index(GITIGNORE_MARKER_START)
+        end = content.index(GITIGNORE_MARKER_END)
+        if end < start:
+            raise ValueError("Reversed managed .gitignore markers")
+        content = content[:start] + block + content[end + len(GITIGNORE_MARKER_END):]
     else:
-        tgt_lines = []
-
-    diff = difflib.unified_diff(
-        tgt_lines, src_lines,
-        fromfile=f"old/{rel_path}",
-        tofile=f"new/{rel_path}",
-        n=3,
-    )
-    return "".join(diff)
+        content += ("\n" if content and not content.endswith("\n") else "") + block + "\n"
+    return content.encode()
 
 
-def copy_file(source_root: Path, target_root: Path, rel_path: Path) -> None:
-    src = source_root / rel_path
-    tgt = target_root / rel_path
-    tgt.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, tgt)
+def plan_sync(target: Path, render: bool) -> dict[Path, bytes]:
+    """Compute/validate every destination before any mutation, including previews."""
+    target = target.resolve()
+    if target == ROOT.resolve():
+        raise ValueError("Refusing to sync the framework onto itself")
+    # A framework clone/worktree is not a downstream target.
+    if (target / "sync.py").exists() and (target / "framework_manifest.py").exists():
+        raise ValueError("Target appears to be a framework checkout")
+    config = load_config(safe_path(target, Path("project.config.yaml")))
+    pending = {}
+    sources = deployment_sources(ROOT)
+    seeds = seed_sources(ROOT)
+    overlap = sources.keys() & seeds.keys()
+    if overlap:
+        raise ValueError(f"Framework/seed ownership overlap: {sorted(map(str, overlap))}")
+    for rel, src in sources.items():
+        raw = src.read_bytes()
+        if is_template(rel):
+            text = raw.decode()
+            rendered = render_text(text, config) if has_variables(text) else text
+            pending[rel] = rendered.encode() if render else raw
+            # Refresh even for templates that became static: old Jinja backups
+            # must not resurrect removed instructions on the next re-render.
+            pending[Path(".templates") / rel] = raw
+        else:
+            pending[rel] = raw
+    for rel, src in seeds.items():
+        if not (target / rel).exists():
+            content = SEED_CONTENT.get(str(rel), src.read_text())
+            pending[rel] = (render_text(content, config) if has_variables(content) else content).encode()
+    pending[Path(".gitignore")] = gitignore_content(target)
+    pending[Path(".agent-system-version")] = (get_version() + "\n").encode()
+    for rel in pending:
+        safe_path(target, rel)
+    return pending
 
 
-def write_version(target_root: Path, version: str) -> None:
-    version_file = target_root / ".agent-system-version"
-    version_file.write_text(version + "\n")
+def atomic_write(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = path.stat().st_mode & 0o777 if path.exists() else 0o644
+    tmp = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".agent-sync-", delete=False) as f:
+            tmp = Path(f.name)
+            f.write(data)
+        tmp.chmod(mode)
+        os.replace(tmp, path)
+    finally:
+        if tmp is not None and tmp.exists():
+            tmp.unlink()
+
+
+def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False,
+             render: bool = False) -> bool:
+    target = target.resolve()
+    try:
+        if not target.is_dir():
+            raise ValueError(f"Not a project directory: {target}")
+        pending = plan_sync(target, render)
+        changes = {rel: data for rel, data in pending.items()
+                   if not (target / rel).exists() or (target / rel).read_bytes() != data}
+        print(f"Agent System Sync: {target}")
+        print(f"  Version: {get_version()}; {len(changes)} changed file(s)")
+        for rel, data in changes.items():
+            if rel.parts[0] == ".templates":
+                continue
+            print(f"  {'~' if (target / rel).exists() else '+'} {rel}")
+            if show_diffs:
+                old = (target / rel).read_text() if (target / rel).exists() else ""
+                print("".join(difflib.unified_diff(old.splitlines(True), data.decode().splitlines(True),
+                                                   fromfile=f"old/{rel}", tofile=f"new/{rel}")), end="")
+        if dry_run or show_diffs:
+            print("  Preview only; no files or Git index entries changed.")
+            return True
+        # Version is written last; a filesystem failure cannot advertise success.
+        for rel, data in changes.items():
+            if rel != Path(".agent-system-version"):
+                atomic_write(safe_path(target, rel), data)
+        if Path(".agent-system-version") in changes:
+            atomic_write(safe_path(target, Path(".agent-system-version")), changes[Path(".agent-system-version")])
+        print("  Sync complete. Review and stage changes normally; Git index was not modified.")
+        return True
+    except (OSError, ValueError) as exc:
+        print(f"Sync failed: {exc}", file=sys.stderr)
+        return False
+    except Exception as exc:
+        # Jinja/YAML exceptions are reported without executing downstream code.
+        print(f"Sync validation failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return False
 
 
 def find_python(project_root: Path) -> str:
-    """Find a python that can actually import jinja2+pyyaml.
-
-    Candidate order: project venv → agent-system venv → sys.executable.
-    A candidate is only chosen if the imports succeed — a project venv that
-    exists but lacks jinja2 (common for app venvs) must not shadow a working
-    interpreter further down the chain.
-    """
-    candidates = [
-        project_root / ".venv" / "bin" / "python3",
-        ROOT / ".venv" / "bin" / "python3",
-    ]
-    for candidate in candidates:
-        if not candidate.exists():
-            continue
-        probe = subprocess.run(
-            [str(candidate), "-c", "import jinja2, yaml"],
-            capture_output=True, timeout=15,
-        )
-        if probe.returncode == 0:
-            return str(candidate)
+    """Compatibility helper; rendering itself uses this process's dependencies."""
+    for candidate in [project_root / ".venv/bin/python3", ROOT / ".venv/bin/python3"]:
+        if candidate.exists():
+            try:
+                result = subprocess.run([str(candidate), "-c", "import jinja2,yaml"],
+                                        capture_output=True, timeout=15)
+                if result.returncode == 0:
+                    return str(candidate)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
     return sys.executable
-
-
-def run_check(target_root: Path) -> bool:
-    setup_py = target_root / "setup.py"
-    if not setup_py.exists():
-        print("  Warning: setup.py not found in target; skipping render check.")
-        return True
-
-    python = find_python(target_root)
-    result = subprocess.run(
-        [python, str(setup_py), "--check"],
-        capture_output=True, text=True, cwd=str(target_root),
-    )
-    if result.returncode == 0:
-        print("\n  Render check passed (setup.py --check).")
-        return True
-
-    print(f"\n  Render check FAILED:\n{result.stderr}", file=sys.stderr)
-    return False
 
 
 def load_downstream_projects() -> list[Path]:
     if not DOWNSTREAM_REGISTRY.exists():
         return []
-    projects = []
-    for line in DOWNSTREAM_REGISTRY.read_text().splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        path = Path(stripped).expanduser().resolve()
-        projects.append(path)
-    return projects
+    return list(dict.fromkeys(Path(line.strip()).expanduser().resolve()
+                              for line in DOWNSTREAM_REGISTRY.read_text().splitlines()
+                              if line.strip() and not line.strip().startswith("#")))
 
 
-def run_setup(target: Path) -> bool:
-    setup_py = target / "setup.py"
-    if not setup_py.exists():
-        print(f"  Warning: setup.py not found in {target}; skipping render.")
-        return True
-
-    python = find_python(target)
-    print(f"\n  Rendering templates...")
-    result = subprocess.run(
-        [python, str(setup_py)],
-        capture_output=True, text=True, cwd=str(target),
-    )
-    if result.returncode == 0:
-        print(result.stdout.rstrip())
-        return True
-
-    print(f"  Render FAILED:", file=sys.stderr)
-    if result.stderr:
-        print(result.stderr, file=sys.stderr)
-    return False
-
-
-def build_gitignore_block() -> str:
-    lines = [GITIGNORE_MARKER_START]
-    for entry in GITIGNORE_ENTRIES:
-        lines.append(entry)
-    lines.append(GITIGNORE_MARKER_END)
-    return "\n".join(lines)
-
-
-def update_gitignore(target: Path, dry_run: bool = False) -> bool:
-    """Add or update the managed framework block in downstream .gitignore."""
-    gitignore = target / ".gitignore"
-    block = build_gitignore_block()
-
-    if gitignore.exists():
-        content = gitignore.read_text()
-        if GITIGNORE_MARKER_START in content and GITIGNORE_MARKER_END in content:
-            start = content.index(GITIGNORE_MARKER_START)
-            end = content.index(GITIGNORE_MARKER_END) + len(GITIGNORE_MARKER_END)
-            old_block = content[start:end]
-            if old_block == block:
-                return False
-            if not dry_run:
-                new_content = content[:start] + block + content[end:]
-                gitignore.write_text(new_content)
-            return True
-        else:
-            if not dry_run:
-                separator = "\n" if content.endswith("\n") else "\n\n"
-                gitignore.write_text(content + separator + "\n" + block + "\n")
-            return True
-    else:
-        if not dry_run:
-            gitignore.write_text(block + "\n")
-        return True
-
-
-def untrack_framework_files(target: Path) -> list[str]:
-    """Remove framework files from git index (keep on disk). Returns list of untracked files."""
-    git_dir = target / ".git"
-    if not git_dir.exists():
-        return []
-
-    result = subprocess.run(
-        ["git", "ls-files", "--cached"] + [f":{e.lstrip('/')}" for e in GITIGNORE_ENTRIES if not e.endswith("/")],
-        capture_output=True, text=True, cwd=str(target),
-    )
-    tracked_files = [f for f in result.stdout.strip().splitlines() if f]
-
-    result_dirs = subprocess.run(
-        ["git", "ls-files", "--cached", "agents/"],
-        capture_output=True, text=True, cwd=str(target),
-    )
-    tracked_files += [f for f in result_dirs.stdout.strip().splitlines() if f]
-
-    if not tracked_files:
-        return []
-
-    tracked_files = sorted(set(tracked_files))
-    subprocess.run(
-        ["git", "rm", "--cached", "-q"] + tracked_files,
-        capture_output=True, text=True, cwd=str(target),
-    )
-    return tracked_files
-
-
-def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False) -> bool:
-    if not (target / "project.config.yaml").exists():
-        print(
-            f"Error: {target / 'project.config.yaml'} not found.\n"
-            "The target must be an agent-system project with a project.config.yaml.",
-            file=sys.stderr,
-        )
-        return False
-
-    version = get_version()
-    files = collect_framework_files()
-    new, updated, unchanged = classify_changes(ROOT, target, files)
-
-    # Seed files: only copy if they don't exist in target
-    seed_files = collect_seed_files()
-    seeded = []
-    for src in seed_files:
-        rel = src.relative_to(ROOT)
-        tgt = target / rel
-        if not tgt.exists():
-            seeded.append(rel)
-
-    old_version_file = target / ".agent-system-version"
-    old_version = old_version_file.read_text().strip() if old_version_file.exists() else "none"
-
-    print(f"Agent System Sync")
-    print(f"  Source:  {ROOT}")
-    print(f"  Target:  {target}")
-    print(f"  Version: {old_version} -> {version}")
-    print(f"\n  {len(new)} new, {len(updated)} updated, {len(unchanged)} unchanged", end="")
-    if seeded:
-        print(f", {len(seeded)} seeded")
-    else:
-        print()
-
-    if not new and not updated and not seeded:
-        print("\n  Already up to date.")
-        return True
-
-    if new:
-        print(f"\n  New files:")
-        for rel in new:
-            print(f"    + {rel}")
-
-    if seeded:
-        print(f"\n  Seeded files (first-time only):")
-        for rel in seeded:
-            print(f"    * {rel}")
-
-    if updated:
-        print(f"\n  Updated files:")
-        for rel in updated:
-            print(f"    ~ {rel}")
-
-    if show_diffs:
-        for rel in new + updated:
-            diff_text = show_diff(ROOT, target, rel)
-            if diff_text:
-                print(f"\n{'=' * 60}")
-                print(diff_text, end="")
-
-    gitignore_updated = update_gitignore(target, dry_run=(dry_run or show_diffs))
-    if gitignore_updated:
-        action = "would update" if (dry_run or show_diffs) else "updated"
-        print(f"\n  .gitignore: framework block {action}")
-
-    if dry_run or show_diffs:
-        print(f"\n  Dry run — no files written.")
-        return True
-
-    for rel in new + updated + seeded:
-        copy_file(ROOT, target, rel)
-
-    write_version(target, version)
-
-    print(f"\n  Copied {len(new) + len(updated) + len(seeded)} file(s).")
-    print(f"  Version file: .agent-system-version -> {version}")
-
-    untracked = untrack_framework_files(target)
-    if untracked:
-        print(f"  Removed {len(untracked)} file(s) from git tracking (kept on disk)")
-
-    print(f"\n  Running render check...")
-    ok = run_check(target)
-    return ok
-
-
-def cmd_sync_all(render: bool = False, dry_run: bool = False) -> bool:
+def cmd_sync_all(render: bool = False, dry_run: bool = False, show_diffs: bool = False) -> bool:
     projects = load_downstream_projects()
     if not projects:
         print("No downstream projects registered.")
-        print(f"Add project paths to {DOWNSTREAM_REGISTRY} (one per line).")
         return True
-
-    all_ok = True
-    for target in projects:
-        print(f"\n{'=' * 60}")
-        if not target.is_dir():
-            print(f"  SKIP: {target} (directory not found)")
-            continue
-        if not (target / "project.config.yaml").exists():
-            print(f"  SKIP: {target} (no project.config.yaml)")
-            continue
-
-        ok = cmd_sync(target, dry_run=dry_run)
-        if ok and render and not dry_run:
-            ok = run_setup(target)
-        all_ok = all_ok and ok
-
-    print(f"\n{'=' * 60}")
-    status = "All projects synced." if all_ok else "Some projects had errors."
-    print(f"\n{status}")
-    return all_ok
+    results = [cmd_sync(p, dry_run=dry_run, show_diffs=show_diffs, render=render) for p in projects]
+    return all(results)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Sync agent-system framework files to downstream projects.",
-    )
-    target_group = parser.add_mutually_exclusive_group(required=True)
-    target_group.add_argument(
-        "--target", type=Path,
-        help="Path to a single downstream project root",
-    )
-    target_group.add_argument(
-        "--all", action="store_true", dest="sync_all",
-        help="Sync all projects listed in downstream.projects",
-    )
-    parser.add_argument(
-        "--render", action="store_true",
-        help="Run setup.py in each project after syncing to render templates",
-    )
-    mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--dry-run", action="store_true", help="Preview without writing")
-    mode.add_argument("--diff", action="store_true", help="Show unified diff of changes")
+    parser = argparse.ArgumentParser(description=__doc__)
+    target = parser.add_mutually_exclusive_group(required=True)
+    target.add_argument("--target", type=Path)
+    target.add_argument("--all", action="store_true", dest="sync_all")
+    parser.add_argument("--render", action="store_true", help="Render in memory before copying")
+    preview = parser.add_mutually_exclusive_group()
+    preview.add_argument("--dry-run", action="store_true")
+    preview.add_argument("--diff", action="store_true")
     args = parser.parse_args()
-
     if args.sync_all:
-        ok = cmd_sync_all(render=args.render, dry_run=args.dry_run)
+        ok = cmd_sync_all(args.render, args.dry_run, args.diff)
     else:
-        target = args.target.resolve()
-        if not target.is_dir():
-            sys.exit(f"Error: {target} is not a directory.")
-        ok = cmd_sync(target, dry_run=args.dry_run, show_diffs=args.diff)
-        if ok and args.render:
-            ok = run_setup(target)
+        ok = cmd_sync(args.target, args.dry_run, args.diff, args.render)
     if not ok:
         sys.exit(1)
 

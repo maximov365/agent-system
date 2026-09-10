@@ -143,7 +143,7 @@ Non-blocking issues that improve security posture but do not prevent acceptance.
 
 ## Recommended thinking effort
 
-Prefer the strongest available Claude reviewing model (Opus 5 generation or newer; Fable 5 for the highest-risk changes). Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which misses vulnerabilities not explicitly asked about. Use `xhigh` (or `max` on Opus 5) for multi-file or data-flow-heavy changes; `high` is sufficient for config-only diffs. Recommendation only, not enforced — see `docs/MODEL_POLICY.md`.
+Follow `docs/MODEL_POLICY.md` for model and effort selection. Match review depth to risk and available evidence; preserve the active model unless a change is authorized.
 
 ---
 

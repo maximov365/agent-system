@@ -227,3 +227,9 @@ Use one block per closed workflow. Keep it factual and short.
 - MCP servers run locally via npx — zero infrastructure. API key is the only requirement.
 - Visual brief format in Designer gives Illustrator unambiguous input, reducing prompt engineering at the Illustrator level.
 - Pattern is reusable for future tool-agents (voice generation, video, 3D, browser automation).
+
+## 2026-09-10 — Codex / Astra framework adaptation
+
+**Workflow outcome:** implementation validated locally; behavioral model evaluation remains a separate follow-up.
+
+The prior dry-run/render path still wrote files, seed-only CI/PR paths were also overwritten as framework files, and local audit could succeed without doing useful CI checks. Regression tests now exercise the real CLI and temporary downstreams. Template snapshots must be refreshed even when a template becomes static; otherwise old instructions return on re-render. Historical fixture wording and cost tables are not reliable acceptance or billing evidence.

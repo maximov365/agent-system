@@ -28,38 +28,10 @@ ROOT = Path(__file__).resolve().parent
 VERSION_FILE = ROOT / "VERSION"
 DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 
-FRAMEWORK_GLOBS = [
-    "agents/*.md",
-    "agents/discovery-modes/*.md",
-    "agents/designer-modes/*.md",
-    "agents/im-modes/*.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    ".cursor/rules.md",
-    "docs/AGENT_HANDOFF_CONTRACT.md",
-    "docs/AGENT_EXECUTION_MODEL.md",
-    "docs/MODEL_POLICY.md",
-    "docs/MODEL_GATEWAY_SETUP.md",
-    "docs/EXTERNAL_REVIEW_CONTRACT.md",
-    "docs/SANDBOX_POLICY.md",
-    "docs/PULL_REQUEST_CONTRACT.md",
-    "docs/TASK_BACKLOG_AUTOMATION.md",
-    "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/ARCHITECTURE_CHECKLIST.md",
-    "docs/TASK_TEMPLATE.md",
-    "docs/ONBOARDING.md",
-    "docs/MCP_TOOLS.md",
-    "docs/CLAUDE_SKILLS.md",
-    "evals/README.md",
-    "evals/tasks/*.md",
-    "evals/expected/*.yaml",
-    ".github/pull_request_template.md",
-    ".github/workflows/agent-quality.yml",
-    "setup.py",
-    "requirements-framework.txt",
-]
+from framework_manifest import FRAMEWORK_GLOBS, deployment_sources
 
-AVAILABLE_CHECKS = ["version", "integrity", "prompts", "refs", "backlog", "lessons"]
+
+AVAILABLE_CHECKS = ["version", "integrity", "prompts", "refs", "backlog", "lessons", "contracts"]
 
 CHARS_PER_TOKEN = 4
 
@@ -147,38 +119,30 @@ def check_version(projects: list[Path]) -> list[dict]:
 
 def check_integrity(projects: list[Path]) -> list[dict]:
     findings = []
-    source_files = collect_framework_files(ROOT)
-
+    from setup import load_config, render_text, has_variables
+    from sync import is_template
+    source_files = deployment_sources(ROOT)
     for project in projects:
         name = project.name
-        templates_dir = project / ".templates"
-
-        for src in source_files:
-            rel = src.relative_to(ROOT)
+        try:
+            config = load_config(project / "project.config.yaml")
+        except Exception as exc:
+            findings.append(finding(f"I-{name}-config", "critical", "integrity",
+                                    f"{name}: invalid config", str(exc)))
+            continue
+        for rel, src in source_files.items():
             tgt = project / rel
-            if not tgt.exists():
-                findings.append(finding(
-                    f"I-{name}-{rel}", "warning", "integrity",
-                    f"{name}: missing {rel}",
-                    f"Framework file {rel} does not exist in {project}.",
-                    [str(rel)],
-                    f"Run: python sync.py --target {project} --render",
-                ))
+            if not tgt.is_file():
+                findings.append(finding(f"I-{name}-{rel}", "warning", "integrity",
+                                        f"{name}: missing {rel}", "Framework file is missing.", [str(rel)]))
                 continue
-
-            backup = templates_dir / rel
-            if backup.exists():
-                src_text = src.read_text()
-                backup_text = backup.read_text()
-                if src_text != backup_text:
-                    findings.append(finding(
-                        f"I-{name}-{rel}", "info", "integrity",
-                        f"{name}: template differs for {rel}",
-                        f"Template backup for {rel} differs from source. "
-                        "May indicate the project has an older template version.",
-                        [str(rel)],
-                        f"Run: python sync.py --target {project} --render",
-                    ))
+            raw = src.read_text()
+            expected = render_text(raw, config) if is_template(rel) and has_variables(raw) else raw
+            if tgt.read_text() != expected:
+                findings.append(finding(f"I-{name}-{rel}", "warning", "integrity",
+                                        f"{name}: content differs for {rel}",
+                                        "Actual content differs from the current rendered framework. Review local changes before syncing.",
+                                        [str(rel)]))
 
     if not findings:
         findings.append(finding(
@@ -196,7 +160,7 @@ def check_prompts(projects: list[Path]) -> tuple[list[dict], dict]:
     scan_dirs = [ROOT] + projects
     for root_dir in scan_dirs:
         label = root_dir.name
-        for pattern in ["agents/*.md", "agents/discovery-modes/*.md", "agents/im-modes/*.md", "AGENTS.md", "CLAUDE.md", ".cursor/rules.md"]:
+        for pattern in ["agents/*.md", "agents/discovery-modes/*.md", "agents/designer-modes/*.md", "agents/im-modes/*.md", "AGENTS.md", "CLAUDE.md", ".cursor/rules.md"]:
             for f in root_dir.glob(pattern):
                 text = f.read_text()
                 tokens = estimate_tokens(text)
@@ -248,7 +212,7 @@ def check_refs(root_dir: Path) -> list[dict]:
     findings = []
     ref_pattern = re.compile(r"`((?:docs|agents|\.cursor)/[A-Za-z0-9_./\-]+\.(?:md|yaml|txt|py))`")
 
-    md_files = list(root_dir.glob("agents/*.md")) + list(root_dir.glob("agents/discovery-modes/*.md")) + list(root_dir.glob("agents/im-modes/*.md")) + list(root_dir.glob("docs/*.md"))
+    md_files = list(root_dir.glob("agents/**/*.md")) + list(root_dir.glob("docs/*.md"))
     md_files += [root_dir / "AGENTS.md", root_dir / "CLAUDE.md"]
     md_files = [f for f in md_files if f.exists()]
 
@@ -309,12 +273,12 @@ def check_backlog(projects: list[Path]) -> list[dict]:
                  if t["status"] in ("in_progress", "in_review")]
         if stuck:
             findings.append(finding(
-                f"B-{name}-stuck", "warning", "backlog",
-                f"{name}: {len(stuck)} task(s) stuck",
+                f"B-{name}-active", "info", "backlog",
+                f"{name}: {len(stuck)} active task(s)",
                 f"Tasks {', '.join(stuck)} are in non-terminal status. "
-                "May indicate stalled workflows.",
+                "No timestamps are available to infer whether they are stalled.",
                 ["docs/TASKS.md"],
-                "Review these tasks and either complete or cancel them.",
+                "Use last-activity evidence before treating these tasks as stalled.",
             ))
 
         cancelled = [tid for tid, t in statuses.items() if t["status"] == "cancelled"]
@@ -376,6 +340,38 @@ def check_lessons(projects: list[Path]) -> tuple[list[dict], list[dict]]:
     return findings, cross_patterns
 
 
+def check_contracts() -> list[dict]:
+    """Local, deterministic release checks independent of a downstream registry."""
+    from framework_manifest import seed_sources
+    from setup import load_config, cmd_render
+    findings = []
+    sources = deployment_sources(ROOT)
+    overlap = sources.keys() & seed_sources(ROOT).keys()
+    if overlap:
+        findings.append(finding("C-ownership", "critical", "contracts", "Ownership overlap",
+                                str(sorted(map(str, overlap)))))
+    for rel, path in sources.items():
+        if not path.is_file():
+            findings.append(finding(f"C-missing-{rel}", "critical", "contracts", "Missing framework source", str(path)))
+    try:
+        results = cmd_render(load_config(), dry_run=True)
+        for result in results:
+            if result["status"] == "error":
+                findings.append(finding("C-render-" + result["file"], "critical", "contracts",
+                                        "Template render failed", result["error"], [result["file"]]))
+        import yaml
+        criteria = yaml.safe_load((ROOT / "evals/expected/acceptance_criteria.yaml").read_text())
+        for task_id in criteria["tasks"]:
+            if not (ROOT / "evals/tasks" / (task_id + ".md")).is_file():
+                findings.append(finding("C-eval-" + task_id, "critical", "contracts", "Missing eval prompt", task_id))
+    except Exception as exc:
+        findings.append(finding("C-validation", "critical", "contracts", "Contract validation failed", str(exc)))
+    if not findings:
+        findings.append(finding("C-OK", "info", "contracts", "Local contracts valid",
+                                "Ownership, template rendering, and eval prompt coverage passed."))
+    return findings
+
+
 # --- Main ---
 
 def run_audit(projects: list[Path], checks: list[str] = None) -> dict:
@@ -386,10 +382,13 @@ def run_audit(projects: list[Path], checks: list[str] = None) -> dict:
     prompt_health = {}
     cross_patterns = []
 
-    if "version" in checks:
+    if "contracts" in checks:
+        all_findings.extend(check_contracts())
+
+    if "version" in checks and projects:
         all_findings.extend(check_version(projects))
 
-    if "integrity" in checks:
+    if "integrity" in checks and projects:
         all_findings.extend(check_integrity(projects))
 
     if "prompts" in checks:
@@ -402,10 +401,10 @@ def run_audit(projects: list[Path], checks: list[str] = None) -> dict:
         for project in projects:
             all_findings.extend(check_refs(project))
 
-    if "backlog" in checks:
+    if "backlog" in checks and projects:
         all_findings.extend(check_backlog(projects))
 
-    if "lessons" in checks:
+    if "lessons" in checks and projects:
         lf, cp = check_lessons(projects)
         all_findings.extend(lf)
         cross_patterns = cp
@@ -491,6 +490,8 @@ def main() -> None:
         "--list-checks", action="store_true",
         help="List available checks and exit",
     )
+    parser.add_argument("--local", action="store_true", help="Audit the framework without downstream projects")
+    parser.add_argument("--fail-on", choices=["critical", "warning", "never"], default="critical")
     args = parser.parse_args()
 
     if args.list_checks:
@@ -499,14 +500,16 @@ def main() -> None:
             print(f"  {check}")
         return
 
-    if args.project:
+    if args.local and args.project:
+        parser.error("--local and --project cannot be combined")
+    if args.local:
+        projects = []
+    elif args.project:
+        if not args.project.is_dir():
+            parser.error("--project must name an existing directory")
         projects = [args.project.resolve()]
     else:
         projects = load_downstream_projects()
-        if not projects:
-            print("No downstream projects registered in downstream.projects.")
-            print("Use --project /path to audit a specific project.")
-            return
 
     checks = [args.check] if args.check else None
     report = run_audit(projects, checks)
@@ -515,6 +518,10 @@ def main() -> None:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
         print_human(report)
+
+    summary = report["summary"]
+    if args.fail_on != "never" and (summary["critical"] or (args.fail_on == "warning" and summary["warnings"])):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

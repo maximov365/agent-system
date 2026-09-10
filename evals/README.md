@@ -1,86 +1,25 @@
 # Agent System Evals
 
-This directory contains framework-level evaluation tasks for comparing workflow quality across interactive IDE usage, external reviewers, model gateways, and optional automated runtimes.
+Deterministic tooling tests live in `tests/` and run in CI. This directory defines **behavioral evaluation tasks** for actual model sessions; their existence is not evidence that a model passed them.
 
-These evals test the agent-system process layer, not a downstream product.
+## Compare the same work
 
----
+Use a frozen downstream fixture and the same acceptance criteria for a plain Codex baseline and agent-system + GPT-6 Astra. Record exact client/model/effort, revision, tools, task, wall time, tokens/cost when observable, interruptions, tests, meaningful defects, and evidence artifacts. Repeat representative tasks before attributing improvements to the workflow.
 
-## Layout
+Include small fixes, API authorization, refactors, UI, analytics, native image tools, mid-task steering, and a playable game slice. Use `expected/acceptance_criteria.yaml` for acceptance. A role name is not evidence of a review; assess the result and the actual checks performed.
 
-```text
-evals/
-  tasks/                  # Task prompts used as inputs
-  expected/               # Expected routing, criteria, and quality outcomes
-  results/                # Per-run results and metrics
-```
+## Run record
 
----
+Save a JSON record under `evals/results/` with:
 
-## Metrics
+- `run_id`, `runtime`, `model`, `reasoning_effort`, `framework_revision`, `fixture_revision`, `workflow_mode`.
+- `tasks`: task ID, completion status, checks and outcomes, evidence paths, meaningful/escaped defects, independent-review status, manual interventions, and elapsed seconds.
+- `usage` / `cost`: observed value with source or null. Codex subscription usage is not API dollar cost. Do not infer usage from handoff count or a historical Claude pricing table.
+- For visuals: viewed captures, states/viewports, art/coherence/craft/interaction judgments with rubric and rationale, plus measured performance and accessibility defects.
+- For games: playtest inputs/device/duration, state/save flows, frame-time measurements, and player evidence if collected.
 
-Each eval run should record:
+Do not store private session transcripts as evaluation artifacts. Use task-scoped evidence with sensitive data removed.
 
-- `task_completed`: yes / no
-- `tests_passed`: yes / no / not_applicable
-- `review_defects_found`: count
-- `escaped_defects`: count
-- `agent_cycles`: count
-- `cost`: numeric value or unknown
-- `wall_clock_time`: duration
-- `manual_interventions`: count
-- `architecture_violations`: count
-- `workflow_mode`: lite / standard / strict
-- `model_policy`: model map or gateway used
-- `runtime`: Cursor / Claude Code / OpenHands / Agents SDK / LangGraph / other
+## Promotion criteria
 
----
-
-## Run Record Format
-
-Store run results under `evals/results/`:
-
-```text
-evals/results/<YYYYMMDD>-<runtime>-<model-policy>.json
-```
-
-Recommended JSON shape:
-
-```json
-{
-  "run_id": "20260430-cursor-standard",
-  "runtime": "Cursor",
-  "model_policy": "single-primary",
-  "workflow_mode": "standard",
-  "tasks": [
-    {
-      "id": "small_bugfix",
-      "task_completed": true,
-      "tests_passed": true,
-      "review_defects_found": 1,
-      "escaped_defects": 0,
-      "agent_cycles": 4,
-      "cost": null,
-      "wall_clock_time": "00:12:30",
-      "manual_interventions": 0,
-      "architecture_violations": 0
-    }
-  ]
-}
-```
-
----
-
-## Comparison Targets
-
-Use the same task set to compare:
-
-- `agent-system + Claude`
-- `agent-system + Claude + external GPT/Kimi reviewer`
-- `agent-system + LiteLLM/OpenRouter gateway`
-- `OpenHands`
-- `OpenAI Agents SDK`
-- `LangGraph`
-- `SWE-agent` or other benchmark runtimes
-
-The comparison should use objective evidence from tests, review reports, and workflow state files rather than impressions.
+Require preserved correctness/security, fewer unnecessary interventions/ceremony on lite tasks, accurate capability handling, honest unavailable-evidence reporting, and better observed visual/game results on representative tasks. A small noisy sample is exploratory evidence, not a general quality claim. No Astra behavioral benchmark has been run as part of the framework migration; run these tasks before broad rollout claims.

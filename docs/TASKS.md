@@ -16,3 +16,4 @@
 | TASK-008 | Deploy Contracts + CI templates + Architect/Reviewer extensions | completed | high | medium |
 | TASK-009 | Marketing Agent — strategy, campaigns, launch kits | completed | medium | small |
 | TASK-010 | Illustrator tool-agent + MCP integration + Designer visual briefs | completed | medium | small |
+| TASK-011 | Codex / GPT-6 Astra audit, portable execution, visual/game contracts, and safe deployment tooling | completed | high | large |

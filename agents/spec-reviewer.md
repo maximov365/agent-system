@@ -46,7 +46,7 @@ Read additionally when relevant to the artifact under review:
 - `docs/PIPELINE_CONTRACTS.md` — when the artifact touches pipeline stages
 - `docs/KNOWN_PATTERNS.md` — when checking against established patterns
 - `docs/LESSONS_LEARNED.md` — when checking against past failure modes
-- `AGENTS.md`, `.cursor/rules.md`, `CLAUDE.md` — only if there is a suspected conflict with framework or coding rules
+- `AGENTS.md`, `docs/CODING_RULES.md`, `CLAUDE.md` — only if there is a suspected conflict with framework or coding rules
 
 Conflicts with any of these sources must be reported in `source_conflicts` and trigger `escalate` unless they are minor and self-contained.
 
@@ -196,7 +196,7 @@ Use the closest matching `artifact_type` if the artifact does not exactly match 
 
 ## Recommended thinking effort
 
-Prefer the strongest available Claude reviewing model (Opus 5 generation or newer; Fable 5 for the hardest artifacts). Run at `high` effort minimum — Claude 5 family models scope work literally at `low`/`medium`, which under-reviews. Use `xhigh` (or `max` on Opus 5) for complex artifacts; `high` is sufficient for trivial ones. If audit depth seems shallow, raise effort rather than adding prompt workarounds. Recommendation only, not enforced — see `docs/MODEL_POLICY.md` "Claude 5 Family Prompting Notes".
+Follow `docs/MODEL_POLICY.md` for model and effort selection. Match review depth to risk and available evidence; preserve the active model unless a change is authorized.
 
 ---
 

@@ -1,221 +1,27 @@
-# MCP Tools Configuration
+# Tools and media capabilities
 
-This document describes external MCP (Model Context Protocol) tools used by tool-agents in the system.
+The current host's tool list is the source of available capabilities. Framework documents describe possible integrations; they do not install or register tools.
 
-MCP tools extend agent capabilities beyond text generation — enabling image generation, code execution, browser automation, and other external model integrations.
+## Capability order
 
-For optional methodological augmentation via Claude skills (prompt templates, not external services), see `docs/CLAUDE_SKILLS.md`.
+1. Use an appropriate native tool/skill already available in Codex or the current client.
+2. Use an installed connector, MCP server, or project CLI when it fits the task.
+3. Add a provider integration only when the task needs it and installation/account access is authorized.
 
----
+For image generation, use native image generation when present; Illustrator does not require a Cursor MCP server. For editing, follow the applicable image tool/skill and inspect references first. For vector/code-native graphics, use the existing asset/component system. For video/audio/3D, verify a capable tool is present; image output is not equivalent to those asset types.
 
-## Image Generation (Illustrator agent)
+For browser verification, use the host browser tools or the project's established test harness. A screenshot must be viewed to count as visual inspection. For profiling, collect measurements from the actual runtime/target. See `docs/VISUAL_QUALITY.md` and `docs/GAME_DEVELOPMENT.md`.
 
-The Illustrator agent requires an MCP server or provider integration for AI image generation. Configure one of the following in your project's `.cursor/mcp.json`.
+## Configuration
 
-### Option A: nanobanana-mcp (recommended)
+Codex MCP configuration belongs in the appropriate Codex configuration layer; Cursor and Claude Code have their own mechanisms. Follow the active client's current official documentation and the server's supported schema. Never copy `.cursor/mcp.json` into Codex and assume it is recognized.
 
-Google Nano Banana 2 / Nano Banana Pro via `@ycse/nanobanana-mcp`.
+Before introducing a server, verify publisher/source, supported operations, authentication method, version, and data destinations. Use environment/credential facilities instead of committing keys. Prefer pinned reviewed versions to unversioned automatic downloads. Request only task-relevant capabilities; respect the runtime sandbox.
 
-**Prerequisites:** Node.js 18+, Google AI API Key from [Google AI Studio](https://aistudio.google.com/apikey)
+When a tool is unavailable, explain what is missing and continue independent work. Never invent calls, results, model access, or API parameters. Optional gateways and third-party reviews follow `docs/MODEL_POLICY.md` and `docs/EXTERNAL_REVIEW_CONTRACT.md`.
 
-```json
-{
-  "mcpServers": {
-    "nanobanana": {
-      "command": "npx",
-      "args": ["-y", "@ycse/nanobanana-mcp"],
-      "env": {
-        "GOOGLE_AI_API_KEY": "<your-api-key>"
-      }
-    }
-  }
-}
-```
+## Project capability record
 
-**Models available:** `nano-banana-2` (Flash, fast), `nano-banana-pro` (higher quality)
+A project may record image generation/edit, browser/preview, engine/editor, audio/video, asset conversion, and profiling tools with a last-verified date. Record exact exposed tool/version, allowed input surfaces, outputs, limits/budget, and a fallback. Keep this in project-owned configuration so framework sync cannot overwrite it.
 
-### Option B: mcp-image
-
-Nano Banana 2 with automatic prompt optimization.
-
-```json
-{
-  "mcpServers": {
-    "mcp-image": {
-      "command": "npx",
-      "args": ["-y", "mcp-image"],
-      "env": {
-        "GEMINI_API_KEY": "<your-api-key>"
-      }
-    }
-  }
-}
-```
-
-**Features:** Auto-enhances simple prompts using Subject–Context–Style framework. Three quality tiers.
-
-### Option C: Multi-provider (mcp-imagenate)
-
-Supports Google Gemini, OpenAI, and FLUX models.
-
-```json
-{
-  "mcpServers": {
-    "mcp-imagenate": {
-      "command": "npx",
-      "args": ["-y", "mcp-imagenate"],
-      "env": {
-        "GOOGLE_AI_API_KEY": "<your-google-key>",
-        "OPENAI_API_KEY": "<your-openai-key>"
-      }
-    }
-  }
-}
-```
-
-**Models available:** `nano-banana-2`, `nano-banana-pro`, `gpt-image-1.5`, `flux-2-klein`, `flux-2-pro`
-
-### Option D: GPT Image direct/provider integration
-
-Use GPT Image when it is available through your MCP server, provider SDK, OpenRouter, or LiteLLM route. The framework treats it as a media tool model, not as an autonomous agent.
-
----
-
-## Video Generation (Video Producer agent)
-
-The Video Producer agent requires an MCP server or direct provider integration for AI video generation. Video providers change quickly, so project teams should configure the provider that is currently available and cost-effective.
-
-Supported model families may include:
-
-- Kling
-- Veo
-- Runway
-- Pika
-- Any MCP server exposing `video_generate` or equivalent
-
-Example project-local MCP configuration shape:
-
-```json
-{
-  "mcpServers": {
-    "video-generation": {
-      "command": "npx",
-      "args": ["-y", "<video-generation-mcp-package>"],
-      "env": {
-        "VIDEO_PROVIDER_API_KEY": "<your-api-key>"
-      }
-    }
-  }
-}
-```
-
-Direct provider APIs are also acceptable when no MCP server exists. In that case, the runtime or tool wrapper must still return generated asset paths and metadata to Video Producer.
-
-**Important:** Kling, Veo, Runway, Pika, GPT Image, Nano Banana, and similar media models are tool models. They execute a brief; they do not make product, visual, motion, review, or workflow decisions.
-
----
-
-## Setup instructions
-
-1. Choose an MCP server or provider option above
-2. Get the required API key(s)
-3. Create or edit `.cursor/mcp.json` in your project root
-4. Restart Cursor to activate the MCP server
-5. Verify by asking Illustrator to generate a test image or Video Producer to generate a short test clip
-
-**Security:**
-- Never commit API keys to the repository
-- `.cursor/mcp.json` should be added to `.gitignore` if it contains secrets
-- Use environment variables or a secrets manager for team setups
-
----
-
-## Performance notes
-
-### MCP Tool Search (lazy loading) — Claude Code April 2026+
-
-Claude Code now lazy-loads MCP tool definitions and templates. Instead of pre-loading every server's full tool manifest at session start, it defers `resources/templates/list` until the first `@`-mention of that MCP. Reportedly reduces context usage by up to 95% when multiple MCP servers are configured.
-
-**For our framework:** we use 3 MCP servers (`gsap-master`, `rive-mcp`, `nanobanana`). Thanks to lazy loading, agents that don't touch animation or image generation won't pay context cost for these. No configuration needed — it's automatic in recent Claude Code versions.
-
-### Large result payloads (500K chars)
-
-Some MCP tools (DB schema dumpers, large file readers) return payloads that exceed default truncation limits. Claude Code supports a per-tool override via annotation:
-
-```
-_meta["anthropic/maxResultSizeChars"] = 500000
-```
-
-If an MCP tool you depend on is returning truncated results, check its implementation for this annotation.
-
----
-
-## Troubleshooting
-
-### Conflicting scope (server defined in multiple places)
-
-Run `/doctor` in Claude Code — it warns when an MCP server is defined in multiple config scopes with different endpoints. Common cause: adding the same server at `user` scope via `claude mcp add -s user` and also in a project's `.cursor/mcp.json` with different arguments.
-
-Resolve by removing one of the duplicates (`claude mcp remove <name> -s <scope>`).
-
-### Server fails to start
-
-Check the startup log shown in Claude Code's MCP panel. Common causes:
-- Missing env var (e.g. `GOOGLE_AI_API_KEY` not set)
-- Node.js < 18 or missing `npx`
-- Network restriction blocking `npm` package download for `-y` (auto-install) servers
-
-### Tool returns truncated result
-
-See "Large result payloads" above — the server may need to set the 500K annotation.
-
-### Security audit
-
-Run MCPWatch (third-party tool) against your configured servers to check for known vulnerabilities:
-```bash
-npx mcpwatch scan
-```
-Covers auth bypass, injection, secrets exposure patterns in MCP implementations.
-
----
-
-## External code-review companions (optional)
-
-These are not MCP tools strictly, but they're Claude-Code-native external review services that complement our `Reviewer` + `Security Reviewer` + `Spec Reviewer` agents. They run on Anthropic infrastructure for code-specific deep review.
-
-### Anthropic Code Review for Claude Code (`/ultrareview`)
-
-Multi-agent PR review by Anthropic — a fleet of specialized agents analyzes diff + surrounding code in parallel on Anthropic cloud, each targeting a different issue class (logic errors, security vulnerabilities, broken edge cases, subtle regressions). A verification step filters false positives. Findings posted as inline comments on PR with severity ranking.
-
-**Performance:** Before adopting CCR internally at Anthropic, 16% of PRs received substantive review comments; after, 54%. Average completion time ~20 min.
-
-**Availability:** Research preview for Team and Enterprise Claude Code users. Pro and Max users get 3 free reviews per month while in preview.
-
-**Trigger options:**
-- `/ultrareview` slash command (CLI ≥ 2.1.86)
-- `@claude review` comment on any PR
-- Auto-fire on PR open, on every push, or manual — configurable per repo
-
-**Cost:** ~$15–25 per review, scaling with PR size and complexity.
-
-**When to use vs our framework agents:**
-
-| Concern | Use |
-|---|---|
-| Code-specific deep review on a PR (logic / security / edge cases) | Anthropic CCR / `/ultrareview` — parallel specialists outperform single-agent review |
-| Non-code artifact review (specs, designs, plans, copy, analytics specs) | Our `Spec Reviewer` (per quality loop) — Anthropic CCR is code-only |
-| Workflow-integrated completion verification (plan adherence, scope check) | Our `Reviewer` — integrated with handoff contract and `builder_cycle_count` |
-| Pre-merge security gate | Both — `Security Reviewer` runs in workflow; CCR runs on PR as cross-check |
-
-CCR is a **complement, not replacement**. Adopt by enabling in Claude Code's repository settings; no framework changes required.
-
----
-
-## Adding new MCP tools
-
-When a new tool-agent requires an external MCP tool:
-
-1. Document the MCP server configuration in this file
-2. Reference this file from the agent definition
-3. Add the MCP server name to the agent's "MCP tool dependency" section
-4. Ensure the agent handles the "tool unavailable" case gracefully
+Old package rankings, price tables, Claude-specific result-size annotations, and claims that servers are already installed were removed from active guidance. Retain a verified project integration when useful; verify its current documentation before reusing historical setup examples.

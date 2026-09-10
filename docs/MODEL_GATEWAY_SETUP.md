@@ -1,5 +1,7 @@
 # Model Gateway Setup
 
+> Legacy optional adapter reference. Not required in Codex. Verify current provider/client documentation before using commands or model IDs. `AGENTS.md`, `docs/CODEX.md`, and `docs/MODEL_POLICY.md` govern current defaults.
+
 This document describes how to connect optional model gateways while preserving the baseline Claude-only workflow.
 
 The policy source of truth is `docs/MODEL_POLICY.md`. This file is operational guidance.

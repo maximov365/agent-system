@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Phase 2 metrics: workflow telemetry extracted from Claude Code session transcripts.
+Legacy opt-in telemetry extracted from Claude Code session transcripts.
+Not a Codex collector or a reliable current-model cost estimate.
 
 Reads ~/.claude/projects/-Users-dm-projects-*/*.jsonl, finds:
   - Handoff blocks (the JSON our agents emit at end of every output)
@@ -12,8 +13,9 @@ Computes per-project and aggregate:
   - Avg builder_cycle_count per workflow
   - Token cost per workflow (input + output + cache)
 
-Privacy: extracts only handoff JSON and usage metadata. Does not read or store
-user/assistant message content.
+Privacy: the legacy adapter reads full local transcript lines to extract handoffs
+and usage. It does not retain full message content in its report. Use only with
+explicit authorization for this local input surface.
 
 Usage:
     python3 metrics_workflow.py                    # JSON to stdout
@@ -323,7 +325,7 @@ def aggregate_costs(per_project: dict, since_days: int) -> dict:
     }
 
 
-def collect(filter_project: str | None = None, since_days: int | None = None) -> dict:
+def collect_legacy(filter_project: str | None = None, since_days: int | None = None) -> dict:
     files = find_session_files(since_days=since_days)
     per_project: dict[str, list] = defaultdict(list)
 
@@ -341,6 +343,8 @@ def collect(filter_project: str | None = None, since_days: int | None = None) ->
 
     return {
         "ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "adapter": "legacy_claude_transcripts",
+        "cost_basis": "Historical Sonnet 4 rate assumption; not current-model billing or Codex cost",
         "sessions_scanned": sum(len(v) for v in per_project.values()),
         "projects_with_activity": list(per_project.keys()),
         "workflows": workflows,
@@ -349,16 +353,34 @@ def collect(filter_project: str | None = None, since_days: int | None = None) ->
     }
 
 
+def collect(filter_project: str | None = None, since_days: int | None = None) -> dict:
+    """Do not inspect private client transcripts or fabricate Codex usage."""
+    return {
+        "available": False,
+        "error": "Runtime usage unavailable. Use explicit eval records; legacy Claude transcript analysis is opt-in.",
+        "source": None,
+        "cost_7d": {"total_cost_usd": None},
+        "cost_30d": {"total_cost_usd": None},
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", help="Filter to one project name (substring match)")
     ap.add_argument("--since-days", type=int, default=None, help="Only sessions modified in last N days")
     ap.add_argument("--summary", action="store_true", help="Brief human-readable summary instead of JSON")
+    ap.add_argument("--legacy-claude", action="store_true", help="Read legacy local Claude transcripts; pricing is historical, not a bill")
     args = ap.parse_args()
 
-    data = collect(filter_project=args.project, since_days=args.since_days)
+    if not args.legacy_claude:
+        data = collect(filter_project=args.project, since_days=args.since_days)
+        print(data["error"] if args.summary else json.dumps(data, indent=2))
+        return 0
+
+    data = collect_legacy(filter_project=args.project, since_days=args.since_days)
 
     if args.summary:
+        print(data["cost_basis"])
         print(f"=== Workflow telemetry — {data['ts']} ===")
         print(f"Sessions scanned: {data['sessions_scanned']}")
         print(f"Projects with activity: {len(data['projects_with_activity'])}")

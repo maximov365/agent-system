@@ -145,3 +145,11 @@ Avoid one-off bugfixes here — those belong in `LESSONS_LEARNED.md` unless they
 - **Approach:** For autonomous long-running workloads, delegate to a **hosted managed agent runtime** like [Anthropic Claude Managed Agents](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool) (public beta April 2026). The hosted runtime handles sessions, harnesses, sandboxing, state persistence, tool execution, and error recovery. The downstream project retains the framework's agent definitions (roles, handoff contract) but the EXECUTION happens on Anthropic infrastructure with stable interfaces rather than in a local Claude Code window. Not needed for interactive development workflows — only adopt when the workload is genuinely autonomous and long-horizon.
 - **Why it worked (when adopted):** Offloads session management, sandboxing, and durable state to a purpose-built hosted service. Lets the framework focus on WHAT agents do (role definitions, handoff semantics) while hosted runtime handles WHERE and HOW LONG. No downstream project currently needs this — flagged as a future option.
 - **Related:** `docs/EVOLUTION_LOG.md` F29 (2026-04-24 review #4). OpenAI Agents SDK offers similar capability with sandboxing + long-horizon harness (Python).
+
+## 2026-09-10 — Superseded workflow and trust guidance
+
+Earlier patterns in this historical file describing a mandatory Claude-only workflow, an IM-only producer boundary, or pre-trusted JSON/internal docs are superseded by `AGENTS.md`, `docs/AGENT_EXECUTION_MODEL.md`, and `agents/im-modes/trust-boundary.md` (DEC-016). They remain history, not current instructions.
+
+## Pattern: Validate deployment before mutation
+
+Use one ownership manifest, build a complete rendered write plan, check path safety and template validity, then apply individual atomic replacements. Keep project-owned seed files separate and never edit the downstream Git index implicitly. Temporary-project regression tests validated preview safety, preserved project configuration, and repeated upgrades; see DEC-017.

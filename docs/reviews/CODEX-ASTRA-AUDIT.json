@@ -1,0 +1,111 @@
+{
+  "audit_date": "2026-09-10",
+  "framework_version": "1.0.40",
+  "projects_audited": [],
+  "summary": {
+    "critical": 0,
+    "warnings": 1,
+    "info": 2,
+    "total": 3
+  },
+  "findings": [
+    {
+      "id": "C-OK",
+      "severity": "info",
+      "category": "contracts",
+      "title": "Local contracts valid",
+      "description": "Ownership, template rendering, and eval prompt coverage passed.",
+      "files_affected": [],
+      "proposed_fix": ""
+    },
+    {
+      "id": "P-agent-system-agents/discovery-modes/ai-landscape.md",
+      "severity": "warning",
+      "category": "prompt_size",
+      "title": "agent-system/agents/discovery-modes/ai-landscape.md: ~5015 tokens",
+      "description": "File agents/discovery-modes/ai-landscape.md in agent-system is estimated at ~5015 tokens (369 lines). May cause context window pressure.",
+      "files_affected": [
+        "agents/discovery-modes/ai-landscape.md"
+      ],
+      "proposed_fix": "Consider compressing or splitting this file."
+    },
+    {
+      "id": "R-OK",
+      "severity": "info",
+      "category": "dead_reference",
+      "title": "No dead references found",
+      "description": "All file references in agent-system are valid.",
+      "files_affected": [],
+      "proposed_fix": ""
+    }
+  ],
+  "prompt_health": {
+    "total_framework_tokens": 66601,
+    "largest_files": [
+      {
+        "project": "agent-system",
+        "file": "agents/discovery-modes/ai-landscape.md",
+        "tokens_estimate": 5015,
+        "lines": 369
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/analytics-architect.md",
+        "tokens_estimate": 2873,
+        "lines": 381
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/analytics-validator.md",
+        "tokens_estimate": 2867,
+        "lines": 272
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/spec-reviewer.md",
+        "tokens_estimate": 2652,
+        "lines": 249
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/marketing.md",
+        "tokens_estimate": 2502,
+        "lines": 292
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/security-reviewer.md",
+        "tokens_estimate": 2192,
+        "lines": 242
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/im-modes/standard-workflow.md",
+        "tokens_estimate": 2136,
+        "lines": 99
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/discovery-modes/import-mode.md",
+        "tokens_estimate": 2119,
+        "lines": 181
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/discovery-modes/idea-intake.md",
+        "tokens_estimate": 2087,
+        "lines": 186
+      },
+      {
+        "project": "agent-system",
+        "file": "agents/reviewer.md",
+        "tokens_estimate": 1909,
+        "lines": 263
+      }
+    ],
+    "compression_opportunities": [
+      "agents/discovery-modes/ai-landscape.md (agent-system): ~5015 tokens"
+    ]
+  },
+  "cross_project_patterns": []
+}

@@ -1,5 +1,7 @@
 # Claude Skills Integration
 
+> Legacy optional adapter reference. Not required in Codex. Verify current provider/client documentation before using commands or model IDs. `AGENTS.md`, `docs/CODEX.md`, and `docs/MODEL_POLICY.md` govern current defaults.
+
 This document describes how agents in the system use **optional** Claude Code skills as methodological augmentation while preserving full backward compatibility with environments where skills are unavailable.
 
 Claude skills (also called "agent skills") are pre-built prompt templates and methodologies installed via Claude Code plugins (e.g., Cowork plugins). They extend agent capabilities with battle-tested patterns from Anthropic and the community.

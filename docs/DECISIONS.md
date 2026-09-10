@@ -537,3 +537,25 @@ Keep media generation as a tool-agent pattern:
 - `docs/AGENT_HANDOFF_CONTRACT.md` includes `video` artifacts.
 - Iteration Manager may route Designer, Animator, or Marketing briefs to `Video Producer`.
 - Generated media must be reviewed by the requesting direction owner before downstream implementation or campaign use.
+
+---
+
+## DEC-016: Portable task ownership and Codex / GPT-6 Astra
+
+**Date:** 2026-09-10
+**Status:** accepted for this user-requested adaptation
+
+The active agent owns authorized work through completion. Roles are selectively loaded methods; routine local role changes do not require JSON handoffs or another human approval. Rigor is determined by risk and evidence. Actual delegation is opt-in and self-review is identified honestly. AGENTS.md is the portable entry; `docs/CODING_RULES.md` owns coding policy.
+
+GPT-6 Astra is the requested Codex target, with model configuration kept separate from project intent. Native available tools are preferred; gateways and Claude adapters remain optional. This supersedes the mandatory Claude-only baseline and routing-only owner in DEC-013/014 where they conflict. Runtime permissions and current user instructions retain priority.
+
+Visual/game work requires in-product evidence and the production contracts in `docs/VISUAL_QUALITY.md` and `docs/GAME_DEVELOPMENT.md`. These contracts do not claim that behavioral model evals or playtests have already run.
+
+## DEC-017: Safe, reproducible downstream distribution
+
+**Date:** 2026-09-10
+**Status:** accepted
+
+Use one ownership manifest, namespaced downstream tooling, preflight rendering, seed-only project documents, non-mutating previews, and no Git-index edits. Framework CI belongs only to the framework repository. Post-commit previews downstream changes instead of applying them. Existing project guardrails/config/CI and unrelated hooks are preserved.
+
+This supersedes automatic mass synchronization/untracking defaults from earlier decisions. Legacy root setup.py and retired files are not deleted automatically. File replacement is atomic per file; whole-batch rollback and concurrent-writer locking are future work if real usage requires them.

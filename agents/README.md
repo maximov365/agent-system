@@ -14,23 +14,9 @@
 
 ## Development workflow
 
-This repository uses a structured multi-agent workflow for AI-assisted development. All work follows a spec-first approach: no code is written without an Architect plan, and no plan is written without a clear feature specification.
+The active task owner follows `AGENTS.md`, using `lite`, `standard`, or `strict` evidence according to risk. Specialist files are selectively loaded methods, not mandatory separate calls. Codex can plan, build, inspect, review, and continue in one task. Delegation and structured legacy transitions are opt-in under the runtime's instructions.
 
-**Full workflow for features with measurable outcomes:**
-
-Discovery → Product → [Designer] → Analytics Architect → Architect → [Test Strategist] → Builder → Analytics Validator → Security Reviewer → Reviewer
-
-**Lightweight workflow for internal technical changes:**
-
-Discovery → Architect → [Test Strategist] → Builder → Security Reviewer → Reviewer
-
-Brackets indicate optional steps.
-
-Non-code artifacts (feature specs, implementation plans) go through a quality loop before implementation begins:
-
-Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
-
-All requests are interpreted by the **Iteration Manager**, which selects the correct starting agent and manages workflow transitions.
+For UI and graphics use `docs/VISUAL_QUALITY.md`; for games use `docs/GAME_DEVELOPMENT.md`. A self-review is identified as such. Native tools are used when available; MCP is optional.
 
 ---
 
@@ -38,10 +24,10 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 
 | Document | Purpose |
 |---|---|
-| `CLAUDE.md` | Entry contract for Claude Code — default role, routing, and core constraints |
+| `CLAUDE.md` | Claude Code compatibility pointer to AGENTS.md |
 | `AGENTS.md` | Agent roles, routing rules, and workflow definitions |
-| `.cursor/rules.md` | Execution policy for Cursor |
-| `docs/AGENT_EXECUTION_MODEL.md` | How Cursor and Claude Code execute the agent workflow |
+| `docs/CODING_RULES.md` | Portable coding policy |
+| `docs/AGENT_EXECUTION_MODEL.md` | Portable execution and state model, including Codex |
 | `docs/AGENT_HANDOFF_CONTRACT.md` | Standard format for passing results between agents |
 | `docs/TASK_BACKLOG_AUTOMATION.md` | Rules for automated task creation and backlog management |
 | `docs/PRD.md` | Product requirements |
@@ -61,13 +47,13 @@ All requests are interpreted by the **Iteration Manager**, which selects the cor
 
 | Agent | Role |
 |---|---|
-| Iteration Manager | Workflow orchestrator — routes requests, manages transitions via modes (see `im-modes/`) |
+| Iteration Manager | Accountable task owner; selects methods and integrates results |
 | Discovery | Explores options via specialized modes (see `discovery-modes/`): technical, market, references, brand, marketing |
 | Product | Turns ideas into feature specifications and task breakdowns |
 | Designer | Creates UI mockups and iterates with user feedback (optional) |
 | UX Writer | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
 | Marketing | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
-| Illustrator | Generates images via MCP tools or provider APIs (GPT Image, Nano Banana, etc.) from visual briefs (tool-agent) |
+| Illustrator | Generates images via native tools or optional MCP/provider APIs from visual briefs (tool-agent) |
 | Video Producer | Generates video assets via MCP tools or provider APIs (Kling, Veo, etc.) from video briefs (tool-agent) |
 | Analytics Architect | Defines analytics events, metrics, and instrumentation requirements |
 | Architect | Plans implementation before coding begins |

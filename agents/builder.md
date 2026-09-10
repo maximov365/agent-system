@@ -60,7 +60,7 @@ If implementation requires an architectural change — stop, report the issue, a
 
 Never leave the repository in a broken state.
 
-All coding rules (execution style, testing, error handling, safety, git, architecture discipline, file-change limits, dependency discipline) are defined in `.cursor/rules.md`. Builder must follow them.
+All coding rules (execution style, testing, error handling, safety, git, architecture discipline, file-change limits, dependency discipline) are defined in `docs/CODING_RULES.md`. Builder must follow them.
 
 ---
 

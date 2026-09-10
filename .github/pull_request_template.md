@@ -1,43 +1,17 @@
-## Task
+## Change
 
-Task ID:
+What problem does this solve and how does behavior change?
 
-Spec / request link:
+## Verification
 
-Implementation plan:
+Checks actually run, outcomes, and important unverified areas:
 
-## Summary
+For visual work: runtime screenshots/recordings, states/viewports, and relevant performance evidence.
 
-- 
+## Review and risks
 
-## Test Evidence
+Correctness/security review: self-review or independent reviewer, with scope and findings.
 
-- [ ] Tests:
-- [ ] Lint / format:
-- [ ] Typecheck:
-- [ ] Security scan:
-- [ ] Coverage:
+Material limitations, compatibility, and rollback considerations:
 
-## AI Review Evidence
-
-- [ ] Security Reviewer:
-- [ ] Reviewer:
-- [ ] External review reports:
-
-## Known Risks
-
-- 
-
-## Agent Workflow
-
-Workflow mode: `lite | standard | strict`
-
-Workflow state file: `.agent/workflows/<task_id>.json`
-
-## Human Decision
-
-- [ ] Approved
-- [ ] Changes requested
-- [ ] Deferred
-
-Decision notes:
+Task/plan link when applicable. Workflow rigor: lite / standard / strict.

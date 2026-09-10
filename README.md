@@ -1,338 +1,76 @@
 # Agent System
 
-A structured multi-agent workflow framework for AI-assisted software development.
+A portable development workflow for Codex / **GPT-6 Astra**, with compatibility references for Claude Code and Cursor. The active agent owns a task from intent through implementation, visual/runtime verification, and review. Specialist prompts are loaded only when useful.
 
-The system enables predictable, safe, and increasingly autonomous product development while preserving architectural discipline.
-
-## How it works
-
-All work flows through a controlled pipeline of specialized agents:
-
-```
-Discovery → Product → [Designer] → [UX Writer] → Analytics Architect → Architect → [Test Strategist] → Builder → [UX Writer review] → Analytics Validator → Security Reviewer → Reviewer
-```
-
-Every request is routed by the **Iteration Manager**, which selects the correct agent, manages transitions, and enforces quality gates.
-
-Non-code artifacts (specs, plans) go through a quality loop before implementation:
-
-```
-Generator → Spec Reviewer → Gatekeeper → Reviser → Spec Reviewer (repeat until accepted)
-```
+The September 2026 adaptation replaces mandatory routing ceremony with risk-based execution and fixes unsafe downstream updates. Read the [audit and roadmap](docs/AUDIT-CODEX-ASTRA-2026-09-10.md) and [Codex guide](docs/CODEX.md).
 
 ## Quick start
 
-Full onboarding guide: [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
-
-### One-time setup (per machine)
-
-Prerequisites: Python 3.9+, Git, [Claude Code](https://docs.claude.com/claude-code).
+Prerequisites: Python 3.10+, Git, and an available coding-agent client. In the framework repository:
 
 ```bash
-# 1. Clone the framework anywhere you like
-git clone https://github.com/maximov365/agent-system.git ~/projects/agent-system
-cd ~/projects/agent-system
-
-# 2. Install Python deps
-pip install -r requirements-framework.txt
-
-# 3. Install Claude Code slash commands (/init-downstream, /metrics, /ai-landscape-review)
-bash install-slash-commands.sh
-
-# 4. (Optional) Enable post-commit auto-sync of downstream projects
-ln -sf "$(pwd)/hooks/post-commit" .git/hooks/post-commit
-ln -sf "$(pwd)/hooks/pre-commit" .git/hooks/pre-commit
+python3 -m venv .venv
+.venv/bin/python3 -m pip install -r requirements-framework.txt
+bash init-downstream.sh "My Project" /path/to/my-project
 ```
 
-The install script bakes your local `agent-system` path into the slash command, so each machine resolves the framework correctly. Re-run `bash install-slash-commands.sh` after every framework `git pull` to pick up updated commands.
+Open the new folder in Codex, select GPT-6 Astra, and describe your product or task. A Claude installation, gateway, and slash commands are optional. Use `templates/codex/config.toml` as a minimal model/effort example; merge intentionally into your existing configuration rather than overwriting it.
 
-### Deploy a new downstream project
-
-Both flows do the same 5 steps (create folder → write `project.config.yaml` → register in `downstream.projects` → run `sync.py --render` → verify deployment). Pick whichever fits your editor.
-
-#### Option A — Universal bash script (works in Cursor, terminal, VSCode, anywhere)
+For an existing downstream:
 
 ```bash
-bash /path/to/agent-system/init-downstream.sh "Your Project Name" /path/to/your-project
+.venv/bin/python3 sync.py --target /path/to/project --render --diff
+.venv/bin/python3 sync.py --target /path/to/project --render
 ```
 
-The script is idempotent (safe to re-run), refuses to overwrite a different project, and refuses to deploy on top of an `agent-system` clone. After it finishes, open the project in your editor and say "Start onboarding" in the chat.
+For a temporary trial, use `init-downstream.sh "Trial" /path/to/trial --no-register`.
 
-#### Option B — Claude Code slash command
+## How work proceeds
+
+`AGENTS.md` defines the core agreement. `lite` tasks get a brief approach and focused verification; `standard` tasks get acceptance criteria and a short plan; `strict` tasks get durable risk, review, and rollback evidence. All code changes receive proportionate correctness/security review. Visual work is inspected in a running product. Role changes do not force a new user turn or approval.
+
+The existing roles cover research, product, design, motion, copy, analytics, architecture, implementation, and review. They are reference methods, not automatically registered Codex subagents. Delegation is used only when requested/allowed by the task and runtime. A review performed by the same agent is identified as self-review.
+
+## High-quality applications and games
+
+- [Visual production](docs/VISUAL_QUALITY.md): art direction, references, asset briefs/provenance, runtime screenshots, interaction checks, accessibility, and performance evidence.
+- [Game production](docs/GAME_DEVELOPMENT.md): playable vertical slice, simulation/presentation boundaries, animation/audio, frame-time budgets, state/save flows, and real playtesting.
+- [Model policy](docs/MODEL_POLICY.md): Astra defaults, API boundaries, model tiers, and honest cost/quality measurement.
+- [Tool capabilities](docs/MCP_TOOLS.md): native tools first; optional verified provider integrations.
+
+The framework provides a process and acceptance contracts. Final artistic quality, game feel, and commercial readiness still need product-specific iteration and player/user evidence.
+
+## Configuration and ownership
+
+`project.config.yaml` contains project identity, optional processing stages, analytics preference, and domain context. Apps and games default to an empty stage list. Existing pipeline configurations remain supported.
+
+`framework_manifest.py` is the common ownership registry for sync, rendering, audit, and hooks. Project docs (including architecture guardrails), project configuration, CI, and application files are preserved. Framework tooling is installed under `.agent-system/`, leaving an application's root `setup.py` alone.
+
+Downstream reconfiguration:
 
 ```bash
-mkdir -p /path/to/your-project && cd /path/to/your-project
-claude
+python3 .agent-system/setup.py --check
+python3 .agent-system/setup.py
 ```
 
-Then in the Claude Code session:
+Framework instructions and tooling can be committed in downstream repositories so clones, CI, and worktrees receive the same guidance. Sync updates its old managed ignore block, but does not stage/untrack files, delete obsolete files, or change global tool configuration. Additional user-authored ignore rules remain intact.
 
-```
-/init-downstream "Your Project Name"
-```
-
-After deployment, the slash command will offer to start onboarding (Discovery intake mode) immediately in the same session.
-
-Both options leave the project in identical state. Internally the slash command and the bash script implement the same logic.
-
-### Framework health & evolution
-
-```
-/metrics                              # snapshot of portfolio, knowledge, velocity
-/metrics history 10                   # last 10 historical snapshots
-
-/ai-landscape-review                  # weekly scan of AI ecosystem for improvements
-/ai-landscape-review "agent frameworks"  # focused review
-```
-
-`/metrics` writes `docs/METRICS.md` (current snapshot) and appends to `docs/METRICS_HISTORY.jsonl` (timeseries).
-
-`/ai-landscape-review` appends findings to `docs/EVOLUTION_LOG.md`. The review is report-only — the user decides what to adopt.
-
-### Manual setup (alternative)
-
-1. Edit `project.config.yaml` with your project details
-2. Run `python setup.py` to render all templates
-3. Start working — Claude/Cursor will follow the agent workflow automatically
+## Updates and verification
 
 ```bash
-pip install -r requirements-framework.txt
-python setup.py --check    # preview what will be rendered
-python setup.py            # render templates
+.venv/bin/python3 sync.py --all --render --dry-run
+.venv/bin/python3 -m unittest discover -s tests -v
+.venv/bin/python3 audit.py --local --json
 ```
 
-To re-configure after changing the config:
+Preview flags never apply the update, including when combined with `--render`. Rendering is validated before the first copied file; each file is replaced atomically. The operation is not a full filesystem transaction against disk failure or concurrent writers: use a quiet workspace and inspect failures before retrying.
 
-```bash
-python setup.py --restore  # restore Jinja2 templates
-python setup.py            # render with new values
-```
+Hooks are optional. `hooks/pre-commit` can bump VERSION; `hooks/post-commit` now previews downstream changes, which must be applied explicitly. Existing installed scheduler jobs and legacy root setup.py files are not removed by this migration.
 
-## Project structure
+CI runs deterministic regression tests, template validation, and local audit without needing a machine-specific downstream registry. [Evals](evals/README.md) define model/process comparisons; writing an eval prompt is not a completed benchmark.
 
-```
-project.config.yaml          # Your project configuration (name, pipeline, domain rules)
-setup.py                     # Renders Jinja2 templates from config
-sync.py                      # Syncs framework files to downstream projects
-requirements-framework.txt   # Python deps for setup.py (won't overwrite app's requirements.txt)
-VERSION                      # Framework version (auto-bumped by pre-commit hook)
-CLAUDE.md                    # Entry point for Claude Code (bootstrap only)
-AGENTS.md                    # Workflow rules, agent roles, routing
+## Legacy and limitations
 
-agents/
-  README.md                  # Agent directory overview
-  discovery.md               # Discovery dispatcher (selects mode)
-  discovery-modes/           # Specialized Discovery modes
-    technical.md             #   Technical options, architecture, libraries
-    market.md                #   Competitors, market analysis, best practices
-    references.md            #   Visual/UX references, design inspiration
-    brand.md                 #   Brand positioning, naming, identity
-    marketing.md             #   Go-to-market, channels, messaging
-    legal.md                 #   Regulatory compliance, privacy, legal
-  product.md                 # Define features and tasks
-  designer.md                # UI mockups and visual prototypes
-  ux-writer.md               # User-facing copy and tone of voice
-  marketing.md               # Marketing strategy, campaigns, launch kits
-  illustrator.md             # Image generation via MCP/provider APIs (tool-agent)
-  video-producer.md          # Video generation via MCP/provider APIs (tool-agent)
-  analytics-architect.md     # Design observability
-  architect.md               # Plan implementation
-  test-strategist.md         # Define test strategy
-  builder.md                 # Implement code
-  analytics-validator.md     # Verify instrumentation
-  security-reviewer.md       # Security validation
-  reviewer.md                # Review implementation
-  spec-reviewer.md           # Evaluate non-code artifacts
-  reviser.md                 # Fix non-code artifacts
-  gatekeeper.md              # Accept/iterate/escalate decisions
-  iteration-manager.md       # IM dispatcher (classifies, routes)
-  im-modes/                  # Iteration Manager workflow modes
-    onboarding.md            #   Onboarding transitions + assembly
-    standard-workflow.md     #   Implementation workflow transitions
-    quality-loop.md          #   Quality loop lifecycle + termination
+Claude command templates and launchd reminder scripts remain optional compatibility utilities. `/init-downstream` now delegates to the common initializer. The historical transcript metric adapter is explicit opt-in and cannot estimate Astra cost: default metrics report unavailable usage instead of fabricated zero cost. No Codex private transcript format is assumed.
 
-docs/
-  PRD.md                     # Product requirements (you fill this)
-  ARCHITECTURE.md            # System architecture (you fill this)
-  ARCHITECTURE_GUARDRAILS.md # Architectural constraints
-  ARCHITECTURE_CHECKLIST.md  # Review checklist
-  PIPELINE_CONTRACTS.md      # Stage I/O contracts (you fill this)
-  DEPLOY_CONTRACTS.md        # Deployment requirements (you fill this)
-  MODEL_POLICY.md            # Model routing and authority policy
-  MODEL_GATEWAY_SETUP.md     # Optional LiteLLM/OpenRouter setup guidance
-  EXTERNAL_REVIEW_CONTRACT.md # Structured external review contract
-  SANDBOX_POLICY.md          # Runtime and command safety policy
-  PULL_REQUEST_CONTRACT.md   # PR-based delivery and evidence requirements
-  TASKS.md                   # Task backlog (managed by agents)
-  DECISIONS.md               # Technical decisions (managed by agents)
-  LESSONS_LEARNED.md         # Workflow lessons (IM appends; all agents read)
-  KNOWN_PATTERNS.md          # Validated patterns (IM appends; all agents read)
-  FEATURE_MAP.md             # Capability index (you fill this)
-  BRAND.md                   # Brand guide (optional)
-  MCP_TOOLS.md               # MCP tool configuration for tool-agents
-  TASK_TEMPLATE.md           # Template for new tasks
-  AGENT_HANDOFF_CONTRACT.md  # Agent communication format
-  AGENT_EXECUTION_MODEL.md   # Execution mechanics
-  TASK_BACKLOG_AUTOMATION.md # Backlog management rules
-  ONBOARDING.md              # Guide for new and existing projects
-  features/                  # Individual feature spec files
-  plans/                     # Implementation plan files
-  reviews/                   # Review output files
-
-.cursor/
-  rules.md                   # Coding rules (execution, testing, safety, git)
-
-hooks/
-  pre-commit                 # Auto-bump VERSION on framework changes
-  post-commit                # Auto-sync downstream projects on framework changes
-  install.py                 # Install hooks into .git/hooks/
-
-downstream.projects            # Local registry of downstream projects (gitignored)
-audit.py                         # Cross-project audit and health checks
-
-templates/
-  ci/                        # CI/CD workflow templates (copy to your project)
-    web-api.yml              #   Next.js + FastAPI + Postgres + Redis
-    macos-app.yml            #   Swift/SwiftUI + SPM + Sparkle + DMG
-
-evals/
-  README.md                  # Framework evaluation methodology
-  tasks/                     # Benchmark task prompts
-  expected/                  # Expected acceptance criteria
-  results/                   # Per-run results
-
-.github/
-  pull_request_template.md   # PR evidence template
-  workflows/
-    agent-quality.yml        # Framework quality checks
-
-examples/
-  unfolda/                   # Reference project configuration
-```
-
-## Agent roles
-
-| Agent | Role |
-|---|---|
-| **Iteration Manager** | Routes requests, manages transitions via workflow modes (onboarding, standard, quality-loop) |
-| **Discovery** | Explores options via specialized modes: technical, market, references, brand, marketing |
-| **Product** | Turns ideas into feature specs and task breakdowns |
-| **Designer** | Creates UI mockups and iterates with user feedback (optional) |
-| **UX Writer** | Writes and reviews all user-facing text; ensures consistent tone of voice (optional) |
-| **Marketing** | Analyzes product, defines marketing strategy, creates campaigns and launch kits (on demand) |
-| **Illustrator** | Generates images via MCP tools (Nano Banana, etc.) from visual briefs (tool-agent) |
-| **Analytics Architect** | Defines events, metrics, instrumentation |
-| **Architect** | Plans implementation before coding |
-| **Test Strategist** | Defines test strategy before implementation (optional) |
-| **Builder** | Implements approved plans |
-| **Analytics Validator** | Verifies instrumentation correctness |
-| **Security Reviewer** | Validates code for security vulnerabilities and unsafe patterns |
-| **Reviewer** | Reviews code for correctness and architecture compliance |
-| **Spec Reviewer** | Evaluates non-code artifact quality |
-| **Reviser** | Fixes non-code artifacts based on review feedback |
-| **Gatekeeper** | Final accept/iterate/escalate decision |
-| **System Auditor** | Audits framework health; proposes improvements (never implements) |
-
-## Configuration
-
-All project-specific content lives in `project.config.yaml`. The file controls:
-
-- **project** — name, description
-- **pipeline** — processing stages
-- **domain_rules** — LLM rules, pipeline principles
-- **analytics_by_default** — whether features require analytics specs
-- **output_docs** — optional brand guide and custom documentation
-
-`setup.py` passes the entire YAML as the Jinja2 rendering context, so all top-level keys are available. Commonly used template variables: `project.name`, `project.description`, `pipeline.stages`, `analytics_by_default`. Conditional blocks (`{% if analytics_by_default %}`, `{% if pipeline.stages %}`) control optional sections. Keys like `domain_rules`, `output_docs`, and per-stage `description` are not expanded into template files by default — they serve as structured reference data that agents read directly from `project.config.yaml` at runtime.
-
-See [`examples/unfolda/`](examples/unfolda/) for a complete real-world configuration.
-
-## New project setup
-
-1. Create a new repository for your project
-2. Copy `project.config.yaml` from this repo (or use `examples/unfolda/project.config.yaml` as a reference)
-3. Edit `project.config.yaml` with your project details — name, description, pipeline stages, domain rules
-4. Run sync to copy the framework files:
-
-```bash
-# From agent-system repo:
-python sync.py --target /path/to/your-project     # copy framework files
-```
-
-5. Install dependencies and render templates in the new project:
-
-```bash
-cd /path/to/your-project
-pip install -r requirements-framework.txt
-python setup.py            # render templates with your config
-```
-
-6. Add your project-specific docs: `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/PIPELINE_CONTRACTS.md`, etc.
-7. Create empty organizational memory files: `docs/LESSONS_LEARNED.md`, `docs/KNOWN_PATTERNS.md`
-8. Commit and start working
-
-## Upgrading downstream projects
-
-### Automatic (recommended)
-
-Register downstream projects and let the post-commit hook handle sync + render automatically:
-
-```bash
-# 1. Register your projects (one path per line)
-echo "/Users/you/projects/my-app" >> downstream.projects
-
-# 2. Install hooks (once after cloning)
-python3 hooks/install.py
-
-# 3. Commit framework changes — downstream projects update automatically
-git add -A && git commit -m "feat: improve architect agent"
-# post-commit hook detects framework file changes → runs sync.py --all --render
-```
-
-### Manual
-
-```bash
-# Sync + render a single project
-python sync.py --target /path/to/project --render
-
-# Sync all registered projects
-python sync.py --all --render
-
-# Preview without writing
-python sync.py --all --dry-run
-python sync.py --target /path/to/project --diff
-```
-
-**Safety guarantees:**
-- `sync.py` only overwrites framework files (agent definitions, workflow rules, tooling)
-- Project-specific files (`docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, etc.) are never touched
-- `project.config.yaml` is never overwritten — your project identity is preserved
-- Framework files are automatically added to downstream `.gitignore` (managed block)
-- Framework files are removed from downstream git tracking on first sync (`git rm --cached`)
-- `find_python` auto-discovers project venvs for template rendering
-- `downstream.projects` is gitignored (machine-specific paths)
-
-After cloning a downstream project, run `sync.py --target <project> --render` to restore framework files.
-
-## Versioning
-
-`VERSION` is auto-bumped (patch increment) on every commit that changes framework files. A pre-commit hook detects staged framework file changes and increments `VERSION` automatically. A post-commit hook then syncs all registered downstream projects.
-
-To install hooks after cloning:
-
-```bash
-python3 hooks/install.py
-```
-
-## Using this framework
-
-This framework is free to use under the [MIT License](LICENSE).
-
-**One request:** if you build a project on top of this framework, please grant read access to [@maximov365](https://github.com/maximov365) on your repository. This allows the author to study how the framework is used in practice, identify improvement opportunities, and evolve the system based on real-world usage patterns. This is not a license requirement — just a request to help make the framework better for everyone.
-
-To grant access: Repository Settings → Collaborators → Add `maximov365` with **Read** role.
-
-## Language
-
-- Repository artifacts (code, docs, prompts): English
-- Conversational responses: follow the user's language
+[Full onboarding](docs/ONBOARDING.md), [execution model](docs/AGENT_EXECUTION_MODEL.md), and [decisions](docs/DECISIONS.md) explain the remaining contracts. This repository is MIT licensed; see [LICENSE](LICENSE).

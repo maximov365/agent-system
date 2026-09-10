@@ -2,7 +2,7 @@
 
 This document defines the PR-based execution mode for agent-system workflows.
 
-The default interactive workflow remains Iteration Manager → specialist agent → handoff. PR-based mode adds a GitHub pull request as the evidence and approval boundary before changes are merged.
+The default interactive workflow follows `AGENTS.md`: one task owner carries work through proportionate implementation and review. PR-based mode adds a GitHub pull request as the evidence and approval boundary before changes are merged.
 
 ---
 
@@ -26,7 +26,7 @@ Use PR-based mode when:
 Task → branch → implementation → tests → PR → AI reviews → human approval → merge
 ```
 
-Iteration Manager still controls agent routing. The PR is the delivery artifact for code changes, not a replacement for workflow state.
+The task owner integrates the result. Create a PR when requested or part of the authorized delivery workflow; a local code change does not by itself require an external publication.
 
 ---
 
@@ -34,7 +34,7 @@ Iteration Manager still controls agent routing. The PR is the delivery artifact 
 
 Every agent-produced PR must include:
 
-- Task ID.
+- Task ID when one exists.
 - Link to task spec or user request.
 - Link to implementation plan when one exists.
 - Implementation summary.
@@ -53,8 +53,7 @@ The PR template in `.github/pull_request_template.md` encodes these fields.
 - Work must happen on a feature branch.
 - Agents must not push directly to `main` or `master`.
 - Agents must not force-push unless the user explicitly authorizes the exact operation.
-- Agents must not merge their own PRs.
-- Human approval is required before merge.
+- Follow repository protection and existing user authorization for merge. Ask only when the requested action is not already authorized.
 
 ---
 
@@ -66,7 +65,8 @@ Minimum evidence:
 - Lint/format result when available.
 - Typecheck result when available.
 - Security scan result when configured.
-- Review verdicts from `Security Reviewer` and `Reviewer`.
+- Correctness and security review evidence at the chosen rigor, explicitly identifying self-review versus independent review.
+- Viewed runtime screenshots/interaction evidence for visual work, or an explicit verification limitation.
 
 For strict mode:
 
@@ -90,7 +90,7 @@ Recommended checks:
 - Security scan.
 - Eval suite checks for workflow contract changes.
 
-The reference workflow is `.github/workflows/agent-quality.yml`.
+The framework repository uses `.github/workflows/agent-quality.yml`; it is not copied into downstreams. A downstream owns its product CI and required checks.
 
 ---
 

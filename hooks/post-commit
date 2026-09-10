@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Post-commit hook: auto-sync downstream projects when framework files change.
+Post-commit hook: preview downstream updates when framework files change.
 
 Checks the most recent commit for framework file changes. If any are found,
-runs `sync.py --all --render` to push updates to all registered downstream
-projects and render their templates.
+previews `sync.py --all --render --dry-run`. Apply updates explicitly after review.
 
 Install:
     python hooks/install.py
@@ -18,52 +17,21 @@ ROOT = Path(__file__).resolve().parent.parent
 SYNC_SCRIPT = ROOT / "sync.py"
 DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 
-FRAMEWORK_GLOBS = [
-    "agents/*.md",
-    "agents/discovery-modes/*.md",
-    "agents/designer-modes/*.md",
-    "agents/im-modes/*.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    ".cursor/rules.md",
-    "docs/AGENT_HANDOFF_CONTRACT.md",
-    "docs/AGENT_EXECUTION_MODEL.md",
-    "docs/MODEL_POLICY.md",
-    "docs/MODEL_GATEWAY_SETUP.md",
-    "docs/EXTERNAL_REVIEW_CONTRACT.md",
-    "docs/SANDBOX_POLICY.md",
-    "docs/PULL_REQUEST_CONTRACT.md",
-    "docs/TASK_BACKLOG_AUTOMATION.md",
-    "docs/ARCHITECTURE_GUARDRAILS.md",
-    "docs/ARCHITECTURE_CHECKLIST.md",
-    "docs/TASK_TEMPLATE.md",
-    "docs/ONBOARDING.md",
-    "docs/MCP_TOOLS.md",
-    "docs/CLAUDE_SKILLS.md",
-    "evals/README.md",
-    "evals/tasks/*.md",
-    "evals/expected/*.yaml",
-    ".github/pull_request_template.md",
-    ".github/workflows/agent-quality.yml",
-    "setup.py",
-    "requirements-framework.txt",
-]
+sys.path.insert(0, str(ROOT))
+from framework_manifest import framework_change_paths, is_framework_change
+
 
 
 def get_committed_files() -> set[str]:
     result = subprocess.run(
-        ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+        ["git", "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "HEAD"],
         capture_output=True, text=True, cwd=str(ROOT),
     )
     return set(result.stdout.strip().splitlines())
 
 
 def collect_framework_paths() -> set[str]:
-    paths = set()
-    for pattern in FRAMEWORK_GLOBS:
-        for p in ROOT.glob(pattern):
-            paths.add(str(p.relative_to(ROOT)))
-    return paths
+    return framework_change_paths(ROOT)
 
 
 def has_downstream_projects() -> bool:
@@ -81,8 +49,7 @@ def main() -> int:
         return 0
 
     committed = get_committed_files()
-    framework_paths = collect_framework_paths()
-    changed = committed & framework_paths
+    changed = {name for name in committed if is_framework_change(name)}
 
     if not changed:
         return 0
@@ -90,10 +57,10 @@ def main() -> int:
     venv_python = ROOT / ".venv" / "bin" / "python3"
     python = str(venv_python) if venv_python.exists() else sys.executable
 
-    print(f"\n  Framework files changed ({len(changed)}). Syncing downstream projects...")
+    print(f"\n  Framework files changed ({len(changed)}). Previewing downstream updates...")
 
     result = subprocess.run(
-        [python, str(SYNC_SCRIPT), "--all", "--render"],
+        [python, str(SYNC_SCRIPT), "--all", "--render", "--dry-run"],
         cwd=str(ROOT),
     )
     return result.returncode

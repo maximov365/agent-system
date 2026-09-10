@@ -1,228 +1,43 @@
-# Model Policy
+# Model policy
 
-This document defines how the agent workflow may use multiple LLMs through Cursor, Claude Code, LiteLLM, OpenRouter, local models, or another gateway.
+Verified target: **GPT-6 Astra**, model identifier `gpt-6-astra`, 2026-09-10. This is the requested target for Codex use. Model access and selectable effort are determined by the current client/account; do not silently substitute a different model.
 
-The policy applies to model selection and model authority only. Workflow sequencing remains governed by `AGENTS.md`; coding behavior remains governed by `.cursor/rules.md`; external review I/O is governed by `docs/EXTERNAL_REVIEW_CONTRACT.md`.
+## Runtime baseline
 
----
+`single_active` is the portable baseline: all methods use the current model, with no gateway. The old `claude_only` name is a compatibility alias for that behavior in Claude clients. Native tools supply browsing, image generation, and computer use when exposed. A tool's availability is verified, not inferred from a file listing it.
 
-## Goals
+The project YAML documents workflow intent; it does not change the running Codex model. Use the model picker or the configuration example in `docs/CODEX.md`.
 
-- Keep model routing predictable across roles.
-- Prevent multiple reviewer models from becoming competing decision-makers.
-- Allow cheaper or specialized models where risk is low.
-- Preserve a single accountable path for code changes, review decisions, and merges.
+## Recommended effort policy (framework choice, not benchmarked)
 
----
-
-## Model Classes
-
-Use model classes in framework documents and project configuration. Concrete provider names belong in project-specific configuration or the active model gateway.
-
-| Class | Intended use |
-|---|---|
-| `frontier_reasoning` | Architecture, high-risk product decisions, complex code review |
-| `coding_builder` | Implementation, test repair, refactoring |
-| `strict_reviewer` | Code review, security review, acceptance criteria validation |
-| `long_context_reviewer` | Large diffs, long specs, repository-wide review |
-| `cheap_summarizer` | Summaries, log compression, non-authoritative drafts |
-| `local_private` | Sensitive local summarization when available |
-
-Example mappings:
-
-```yaml
-roles:
-  architect:
-    primary: frontier_reasoning
-    reviewer: strict_reviewer
-  builder:
-    primary: coding_builder
-    fallback: frontier_reasoning
-  code_reviewer:
-    primary: strict_reviewer
-    secondary: long_context_reviewer
-  long_context_reviewer:
-    primary: long_context_reviewer
-  security_reviewer:
-    primary: strict_reviewer
-  cheap_summarizer:
-    primary: cheap_summarizer
-    fallback: local_private
-```
-
----
-
-## Compatibility Requirement
-
-The framework must work when no model gateway is deployed.
-
-Supported runtime levels:
-
-| Level | Available models | Required behavior |
+| Work | Starting point | Adjustment |
 |---|---|---|
-| `claude_only` | Only the active Claude/Cursor/Claude Code model | All agents run on the active model; external reviews and cheap summarization are skipped or performed by the active model |
-| `openrouter_pilot` | Active Claude model plus OpenRouter for external reviewers | Primary workflow stays in Claude; OpenRouter produces advisory review reports only |
-| `litellm_gateway` | LiteLLM with provider keys and optional local models | Role-to-model routing, fallbacks, budgets, logs, and local models are enabled |
-| `hosted_runtime` | OpenHands, OpenAI Agents SDK, LangGraph, or similar runtime | Runtime calls the approved gateway endpoint; workflow authority remains in agent-system |
+| Routine bounded changes | Active model, medium | Low for demonstrably simple work if available |
+| Architecture, broad audit, difficult debugging | Astra, high | Raise for unresolved complexity, not file count alone |
+| Security-sensitive or contested review | Astra, high | Stronger supported effort or independent review if useful |
+| Summaries and mechanical work | Active model | Optional cheaper model only when explicitly configured and validated |
+| Image/video assets | Available dedicated media tool | Match brief, quality, budget, and modality |
 
-If a configured model, gateway, or local endpoint is unavailable, Iteration Manager must degrade to the next available level rather than stopping the workflow, unless the user explicitly required that model or external review as a hard gate.
+These are recommendations. Preserve the user's model/effort setting unless a change is requested. Do not force maximum effort or separate calls for every role. Do not pretend that roleplay creates an independent reviewer.
 
-Baseline guarantee:
+## Astra API compatibility
 
-- `claude_only` is always valid.
-- LiteLLM is recommended for production multi-model routing, but never required for basic workflow correctness.
-- OpenRouter is recommended for fast experimentation and external review pilots, but never required for mandatory Security Reviewer or Reviewer steps.
-- Local models are optional accelerators for low-risk summaries only.
+For an API-backed downstream (not merely using Codex): use `gpt-6-astra` and Responses for tool calling. Remove unsupported `temperature`, `top_p`, and `top_logprobs`; inspect logprob options too. Migrate `none`/`minimal` effort to `low`; otherwise preserve effective effort. The published model page lists low, medium, high, xhigh, and max. Verify client-specific options separately. This repository does not implement an API harness.
 
----
+Source: [official Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) and [model specification](https://developers.openai.com/api/docs/models/gpt-6-astra), checked 2026-09-10.
 
-## Recommended Concrete Mapping
+## Optional multiple models
 
-Concrete model names change over time. Treat this table as a recommended starting map, not a permanent benchmark claim.
+Keep existing workload classes when a downstream already has them: `frontier_reasoning`, `coding_builder`, `strict_reviewer`, `long_context_reviewer`, `cheap_summarizer`, and `local_private`. Do not collapse a working tiered router into Astra for every operation.
 
-| Model class | Primary | Fallback | Use when gateway is unavailable |
-|---|---|---|---|
-| `frontier_reasoning` | Claude Opus 5 | Claude Fable 5 (hardest tasks; 2× Opus 5 cost), Claude Sonnet 5, GPT-5.6 Terra | Active Claude model |
-| `coding_builder` | Claude Sonnet 5 | GPT-5.3 Codex / GPT-5.6 Luna, Claude Opus 5 | Active Claude model |
-| `strict_reviewer` | GPT-5.6 Terra | GPT-5.5, Claude Opus 5 | Active Claude model acting as Reviewer |
-| `long_context_reviewer` | Gemini 3.1 Pro | Claude Fable 5, Kimi K2.6 | Active Claude model with narrowed context |
-| `cheap_summarizer` | Gemini Flash / GPT-5.6 Luna / GPT mini class | Kimi/Qwen/DeepSeek hosted cheap model | Active Claude model, or skip if summary is nonessential |
-| `local_private` | Ollama Qwen/DeepSeek/Llama class | None | Skip local-only optimization |
+Gateways and external reviewers are optional infrastructure. `openrouter_pilot`, `litellm_gateway`, and `hosted_runtime` configurations may remain in existing downstreams; consult `docs/MODEL_GATEWAY_SETUP.md` only for those integrations. Each integration needs verified model IDs, capability checks, fallback policy, bounded retries, and usage records. Use only supported request parameters. No gateway is a prerequisite for high-quality Codex work.
 
-Generation notes (August 2026):
+If a configured optional model is unavailable, use an allowed fallback and disclose it. If the exact model is required, explain the blocker instead of silently changing it. External review follows `docs/EXTERNAL_REVIEW_CONTRACT.md`; source material must not be sent to another provider without authorization for that surface.
 
-- **Claude Opus 5** (July 2026): $5/$25 per M tokens; thinking on by default; explicit `max` effort tier; 512-token prompt-cache minimum.
-- **Claude Fable 5**: $10/$50 per M — exactly 2× Opus 5 on both meters. Reserve for the hardest reasoning/review tasks where the delta matters; Opus 5 is the default frontier pick.
-- **Claude Sonnet 5**: introductory pricing through August 31, 2026.
-- **GPT-5.6 family**: Sol (flagship) sits behind a government-managed access list — do not plan on it as a default; Terra is the accessible strong tier, Luna the fast/cheap tier.
+## Authority and measurement
 
-Role mapping:
+A model change cannot grant permission to publish, merge, send messages, access secrets, or spend outside the authorized task. The task owner integrates findings and verifies evidence.
 
-| Agent | Primary class | Concrete preference | Fallback behavior |
-|---|---|---|---|
-| Iteration Manager | `frontier_reasoning` | Claude Sonnet 5; Opus for strict/high-risk routing | Active Claude model |
-| Discovery | `frontier_reasoning` plus web/search tool when available | Perplexity/Sonar for current research, Claude for synthesis | Claude-only synthesis from available context |
-| Product | `frontier_reasoning` | Claude Opus for ambiguous scope; Sonnet for standard specs | Active Claude model |
-| Designer | `frontier_reasoning` | Claude Sonnet/Opus | Active Claude model |
-| Animator | `frontier_reasoning` | Claude Sonnet/Opus | Active Claude model |
-| UX Writer | `frontier_reasoning` or `cheap_summarizer` for drafts | Claude Sonnet; cheap model for variants | Active Claude model |
-| Marketing | `frontier_reasoning` or `cheap_summarizer` for drafts | Claude Sonnet; GPT/Gemini for variants | Active Claude model |
-| Illustrator | External media tool model | Nano Banana / GPT Image / Imagen / FLUX via MCP or provider API | Return `blocked` if tool unavailable |
-| Video Producer | External media tool model | Kling / Veo / Runway / Pika via MCP or provider API | Return `blocked` if tool unavailable |
-| Analytics Architect | `frontier_reasoning` | Claude Opus/Sonnet | Active Claude model |
-| Architect | `frontier_reasoning` | Claude Opus for strict; Sonnet for standard | Active Claude model |
-| Test Strategist | `strict_reviewer` | GPT-5.6 Terra / GPT-5.5 | Active Claude model |
-| Builder | `coding_builder` | Claude Sonnet; GPT Codex for terminal-heavy repair | Active Claude model |
-| UI Builder | `coding_builder` | Claude Sonnet; Gemini/Kimi as advisory external UI reviewer | Active Claude model |
-| Security Reviewer | `strict_reviewer` | GPT-5.6 Terra plus CI/security scan evidence | Active Claude model |
-| Reviewer | `strict_reviewer` | GPT-5.6 Terra, with Opus/Fable/Gemini/Kimi for secondary long-context pass | Active Claude model |
-| Spec Reviewer | `strict_reviewer` | GPT-5.6 Terra or Claude Opus 5 | Active Claude model |
-| Reviser | `frontier_reasoning` | Claude Sonnet | Active Claude model |
-| Gatekeeper | `frontier_reasoning` | Claude Opus/Sonnet | Active Claude model |
+Record exact model/runtime, effort when observable, task, elapsed time, meaningful defects, interventions, and actual usage when available. Keep unknown usage/cost as null, not zero. Subscription usage is not an API invoice. Compare models on the same tasks and acceptance criteria before claiming quality or cost improvements.
 
-No fallback may grant a model extra authority. A fallback reviewer remains a reviewer; a fallback builder remains Builder only when Iteration Manager routed to Builder.
-
----
-
-## Claude 5 Family Prompting Notes
-
-The Claude 5 generation (Opus 5, Sonnet 5, Fable 5) behaves differently from the 4.x generation in ways that affect how agents in this framework should be run and authored:
-
-1. **Effort is respected strictly; low/medium scopes work literally.** Family-5 models at `low`/`medium` effort do exactly what was asked and no more. **Never run review-class agents (Spec Reviewer, Reviewer, Security Reviewer, Design Reviewer, Analytics Validator, Gatekeeper) below `high` effort** — their job is to find what was not asked about.
-2. **Reasoning is adaptive by default.** If output reasoning seems shallow on a complex task, raise effort (`high` → `xhigh` → `max` on Opus 5) instead of adding "think harder" prompt workarounds — Anthropic's guidance is that effort control replaces prompt-level reasoning hacks.
-3. **Overloaded prompts degrade output.** Family-5 responds worse to bloated instructions than 4.x did. Keep agent files lean: follow the Required/Optional reading pattern, prefer removing stale sections over adding new ones, and treat agent word count as a quality budget, not just a token budget.
-4. **Never instruct a model to "show/explain your thinking" in response text.** On Fable 5 such instructions can trigger refusals and fallback to earlier models. Ask for conclusions and justification fields (e.g., `verdict_reason`) — not internal reasoning. Self-check frames (CoVe) must stay "internal scratch only", as `agents/spec-reviewer.md` already specifies.
-
-Media models such as GPT Image, Nano Banana, Kling, Veo, Runway, and Pika are tool models. They receive structured briefs and return assets; they do not own design direction, motion direction, product scope, review verdicts, or workflow routing.
-
----
-
-## Gateway Strategy
-
-Use one official gateway front door for automated runtimes.
-
-Recommended rollout:
-
-1. **Baseline: `claude_only`** — the system runs entirely in Cursor or Claude Code using the active Claude model. This is the compatibility floor.
-2. **Pilot: `openrouter_pilot`** — use OpenRouter only for external review reports and model comparison. Do not route mandatory Builder/Security Reviewer/Reviewer authority through it at first.
-3. **Production: `litellm_gateway`** — deploy LiteLLM as the controlled gateway for automated reviewers, eval runs, local models, budgets, logs, and fallback chains.
-4. **Runtime integration: `hosted_runtime`** — OpenHands, OpenAI Agents SDK, LangGraph, or similar runtimes call LiteLLM. They must not bypass `docs/MODEL_POLICY.md`.
-
-Do not run LiteLLM and OpenRouter as competing top-level gateways. If both are used, LiteLLM is the policy gateway and OpenRouter is just one upstream provider.
-
-Detailed setup guidance lives in `docs/MODEL_GATEWAY_SETUP.md`.
-
----
-
-## Role Authority
-
-Model choice does not change agent authority.
-
-- Only `Builder` or `UI Builder` may modify production code.
-- Reviewer models may only produce review reports.
-- External reviewer findings are advisory until accepted by the workflow authority defined in `docs/EXTERNAL_REVIEW_CONTRACT.md`.
-- `Gatekeeper` decides which external review findings become `must_fix` for non-code artifacts and policy reviews.
-- `Reviewer` decides which external review findings become blocking for code after `Security Reviewer` has passed.
-- No model may merge, push to `main`, force-push, publish releases, or bypass human approval.
-- No model may read secrets or `.env` files unless the user explicitly grants permission for that operation.
-
----
-
-## Gateway Contract
-
-LiteLLM, OpenRouter, local Ollama, provider SDKs, or hosted agent runtimes are optional implementation details. When a gateway is used, it must provide:
-
-- A project-specific model map from model class to concrete provider/model.
-- Fallback order per role.
-- Cost and token logging where supported.
-- Temperature defaults per class.
-- A denylist for models that may not receive sensitive data.
-- A record of which model produced each review report or artifact.
-
-The gateway must not choose a different workflow role. It only chooses the model used to execute the role selected by Iteration Manager.
-
-When no gateway is used, the active interactive model is the implicit gateway and must follow the same authority rules.
-
----
-
-## Defaults
-
-| Agent | Default model class | Notes |
-|---|---|---|
-| Discovery | `frontier_reasoning` | May use web/search tools when available |
-| Product | `frontier_reasoning` | Product scope and acceptance criteria are high leverage |
-| Designer | `frontier_reasoning` | Visual decisions remain with Designer, not tool-agents |
-| Illustrator | external tool model | Follows `docs/MCP_TOOLS.md`; no design authority |
-| Video Producer | external tool model | Follows `docs/MCP_TOOLS.md`; no design or motion authority |
-| Analytics Architect | `frontier_reasoning` | Metrics and instrumentation plans affect downstream validation |
-| Architect | `frontier_reasoning` | Plans must be minimal and implementation-ready |
-| Test Strategist | `strict_reviewer` | Focus on edge cases and objective verification |
-| Builder | `coding_builder` | May modify code only when routed by Iteration Manager |
-| UI Builder | `coding_builder` | Must follow approved design artifacts |
-| Security Reviewer | `strict_reviewer` | Blocks security issues before final review |
-| Reviewer | `strict_reviewer` | Final code validation role |
-| Spec Reviewer | `strict_reviewer` | Produces structured review for Gatekeeper |
-| Reviser | `frontier_reasoning` | Revises artifacts within accepted scope |
-| Gatekeeper | `frontier_reasoning` | Decides accept / iterate / escalate |
-| Iteration Manager | `frontier_reasoning` | Routing authority; does not create artifacts |
-| Summarization-only tasks | `cheap_summarizer` | Never authoritative for acceptance or merge decisions |
-
----
-
-## Sensitive Data Rules
-
-- Prefer `local_private` or the primary interactive model for sensitive summaries when the user has approved the input surface.
-- Do not send secrets, tokens, `.env` values, customer data, or private keys to external reviewers.
-- Redact secrets before review packages are built.
-- If redaction would remove context required for review, escalate to the user rather than sending the data.
-
----
-
-## Change Control
-
-Adding a new model provider, gateway, or role mapping requires:
-
-1. Explicit user approval.
-2. A decision entry in `docs/DECISIONS.md` when the change affects the framework or a downstream project architecture.
-3. Updates to this file and any project-specific model gateway configuration.
-4. Verification that review reports still satisfy `docs/EXTERNAL_REVIEW_CONTRACT.md`.
+Historical provider price tables and access claims from August 2026 were removed from active policy: they were time-sensitive, duplicated role guidance, and were not an executable router. History remains in git and decision logs.
