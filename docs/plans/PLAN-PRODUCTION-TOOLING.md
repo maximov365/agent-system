@@ -13,7 +13,7 @@ Date: 2026-09-10. Owner: current task owner. User approved implementing the eigh
 | TASK-016 | Optional integration example | A polished representative game slice with input, feedback, animation, audio, pause/retry; scripted and exploratory play; measured desktop performance with device limitations | completed |
 | TASK-017 | Project quality profiles | Typed web/mobile/desktop/game/service profiles, explicit runnable checks and budgets; review placeholder pipelines against project evidence; preserve product configuration | completed |
 | TASK-018 | Astra workflow evaluation | Frozen paired fixtures, real model runs when host permits, observed correctness/interventions/time and honest unavailable usage; reusable runner and report | completed |
-| TASK-019 | Downstream release | Verified framework release; 16 downstreams migrated and validated; isolated framework commits in repositories with Git/remotes, preserve application work; publish where an existing remote permits | in_progress |
+| TASK-019 | Downstream release | Verified framework release; 16 downstreams migrated and validated; isolated framework commits in repositories with Git/remotes, preserve application work; publish where an existing remote permits | completed |
 
 ## Verification and boundaries
 
@@ -40,3 +40,5 @@ TASK-016: isolated example completed. Five model tests, four browser journeys/te
 TASK-017: 16 project-owned profiles source-validated; four exact unused pipeline placeholders removed with transaction backups. Three profile-runner tests passed, plus actual tracker_fiz type-check and probey build. Missing native/device/app capabilities remain explicit unavailable checks. See docs/reviews/PROJECT-PROFILES.md.
 
 TASK-018: eight actual paired synthetic Codex/Astra runs completed. Both conditions passed; framework overhead increased on these small tasks. Results, exact snapshot hashes, usage and limitations are recorded in docs/reviews/ASTRA-PAIRED-EVAL.md and evals/results/astra-paired-2026-09-10.json. No general speed/artistic quality claim.
+
+TASK-019: release 1.0.43 published with passing GitHub CI. All 16 downstreams pass version/content/profile/render validation, ten have isolated framework commits, seven existing main branches are published, and Unfolda has isolated draft PR #1 to avoid publishing an unrelated predecessor. Two repositories have no remote; six folders have no Git. All unrelated index/worktree content checked preserved. Full delivery table: docs/reviews/RELEASE-1.0.43.md.

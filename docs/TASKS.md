@@ -24,4 +24,4 @@
 | TASK-016 | Optional integration example and runtime evidence | completed | high | large |
 | TASK-017 | Project-specific quality profiles | completed | high | medium |
 | TASK-018 | Paired Astra workflow evaluation | completed | high | large |
-| TASK-019 | Verified downstream commits and publication | in_progress | high | large |
+| TASK-019 | Verified downstream commits and publication | completed | high | large |
