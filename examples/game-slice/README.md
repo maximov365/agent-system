@@ -4,9 +4,19 @@ A small original browser game used to test framework guidance and tools. No game
 file is installed into downstream projects. This is a test and reference example,
 not a framework runtime feature or a claim of production game readiness.
 
-Run `node server.mjs` here and open `http://127.0.0.1:4321`. The application uses
-native browser APIs and has no package dependencies. Pack three-item orders with
-the pointer or keys 1–4; Escape pauses. A regular session lasts 60 seconds.
+From this directory, run `node server.mjs` and open `http://127.0.0.1:4321`.
+Keep the server running while playing. Do not open `index.html` directly or use a
+static file preview: browser ES modules need the served page. A direct file view
+can display the artwork while leaving the game code and buttons inactive.
+
+Click **Открыть лавку** to start the 60-second session and enable the product
+buttons. Read the three-item shopping list, then click those products on the lower
+shelf or press keys 1–4. The first order is bread, oranges and fish; completing it
+awards 125 points and advances to the next customer. A wrong or repeated item costs
+two seconds. Escape or **Пауза** pauses the session; resume continues it, and the
+result screen offers another evening when time runs out.
+
+The application uses native browser APIs and has no package dependencies.
 
 From the framework root:
 
