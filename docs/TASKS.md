@@ -25,3 +25,7 @@
 | TASK-017 | Project-specific quality profiles | completed | high | medium |
 | TASK-018 | Paired Astra workflow evaluation | completed | high | large |
 | TASK-019 | Verified downstream commits and publication | completed | high | large |
+| TASK-020 | Research and reduce workflow context overhead | done | high | medium |
+| TASK-021 | Project navigation and safe evidence reuse | done | high | large |
+| TASK-022 | Paired efficiency evaluation and regressions | in_progress | high | large |
+| TASK-023 | Publish and propagate efficiency release | planned | high | medium |

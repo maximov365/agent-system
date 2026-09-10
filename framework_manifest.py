@@ -11,7 +11,7 @@ FRAMEWORK_GLOBS = [
     "docs/SANDBOX_POLICY.md", "docs/PULL_REQUEST_CONTRACT.md",
     "docs/TASK_BACKLOG_AUTOMATION.md", "docs/ARCHITECTURE_CHECKLIST.md",
     "docs/TASK_TEMPLATE.md", "docs/ONBOARDING.md", "docs/MCP_TOOLS.md",
-    "docs/CLAUDE_SKILLS.md", "docs/MAST_MAPPING.md", "docs/FRAMEWORK_UPGRADE.md", "docs/VISUAL_RUNNER.md", "docs/ASSET_LIBRARY.md", "docs/QUALITY_PROFILES.md",
+    "docs/CLAUDE_SKILLS.md", "docs/MAST_MAPPING.md", "docs/FRAMEWORK_UPGRADE.md", "docs/VISUAL_RUNNER.md", "docs/ASSET_LIBRARY.md", "docs/QUALITY_PROFILES.md", "docs/WORK_METHODS.md",
     "evals/README.md", "evals/tasks/*.md", "evals/expected/*.yaml",
     "templates/codex/config.toml",
 ]

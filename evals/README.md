@@ -37,6 +37,14 @@ Codex account; no credential discovery or additional provider is required.
 .venv/bin/python3 evals/run_paired.py --codex /path/to/codex --output .agent/evals/new-run --run
 ```
 
+To compare a previous **trusted repository revision** with current framework bytes,
+add `--baseline-ref COMMIT`. Both snapshots are frozen before model calls; condition
+order reverses on alternate repeats. Baseline ownership comes from its own manifest.
+Raw canonical templates stay raw. The report records rendered snapshot hashes, entry
+word counts and command-output characters as well as time, tokens and grading.
+Do not interpret reduced entry size as a proportional latency gain. Only generic
+framework files and synthetic fixtures enter these runs; no child project content.
+
 The first command reports hashes without model calls. The second explicitly runs
 at most eight calls by default, each bounded to 240 seconds. Each fresh fixture is
 outside the framework tree, in a temporary Git repository. The runner freezes

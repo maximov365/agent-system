@@ -31,6 +31,15 @@ For a temporary trial, use `init-downstream.sh "Trial" /path/to/trial --no-regis
 
 The existing roles cover research, product, design, motion, copy, analytics, architecture, implementation, and review. They are reference methods, not automatically registered Codex subagents. Delegation is used only when requested/allowed by the task and runtime. A review performed by the same agent is identified as self-review.
 
+The compact entry points to [task-scoped methods](docs/WORK_METHODS.md) and a
+project-owned [quality profile](docs/QUALITY_PROFILES.md): source/test navigation,
+verified commands and concise check evidence. Independent reads/checks can run
+together. Passing checks are repeated for changed inputs or unresolved concerns;
+explicit short-lived evidence reuse is available only for reviewed deterministic
+checks, with fresh execution required for release/security approval. Model and
+reasoning effort stay as requested. See the [research](docs/reviews/EFFICIENCY-RESEARCH.md)
+for assumptions and measurement limits.
+
 ## High-quality applications and games
 
 - [Visual production](docs/VISUAL_QUALITY.md): art direction, references, asset briefs/provenance, runtime screenshots, interaction checks, accessibility, and performance evidence.
@@ -65,7 +74,10 @@ Framework instructions and tooling can be committed in downstream repositories s
 
 Preview flags never apply the update, including when combined with `--render`. Rendering is validated before the first copied file; each file is replaced atomically. The operation is not a full filesystem transaction against disk failure or concurrent writers: use a quiet workspace and inspect failures before retrying.
 
-Hooks are optional. `hooks/pre-commit` can bump VERSION; `hooks/post-commit` now previews downstream changes, which must be applied explicitly. Existing installed scheduler jobs and legacy root setup.py files are not removed by this migration.
+Hooks are optional. `hooks/pre-commit` can bump VERSION; `hooks/post-commit` previews
+downstream changes, which must be applied explicitly. Installed scheduler jobs
+remain untouched. Known legacy framework `setup.py` files migrate to a wrapper
+only after an exact-hash match; customized/application scripts are preserved.
 
 CI runs deterministic regression tests, template validation, and local audit without needing a machine-specific downstream registry. [Evals](evals/README.md) define model/process comparisons; writing an eval prompt is not a completed benchmark.
 

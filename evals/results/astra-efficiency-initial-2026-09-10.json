@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10T14:15:19.795202+00:00",
+  "model_requested": "gpt-6-astra",
+  "model_resolved": null,
+  "reasoning_effort": "medium",
+  "framework_base_revision": "850af3ef21cf324b70c83f346e6177bfbbf82bd7",
+  "framework_snapshot_sha256": "cea6f771e2f026de778dd6476e8204b8ff5f68c5536d0f927a8f7a3e1e9adee6",
+  "baseline_revision": "850af3ef21cf324b70c83f346e6177bfbbf82bd7",
+  "condition_sha256": {
+    "baseline": "b02a92b25154b6233c1343f90adf4e3028eb4f051708bf87a353a3cae8d8415e",
+    "candidate": "cea6f771e2f026de778dd6476e8204b8ff5f68c5536d0f927a8f7a3e1e9adee6"
+  },
+  "rendered_condition_sha256": {
+    "baseline": "ea65a090599e28b4fe07b1be776055d9929b9e66de6f62e70d8ff567c5ead3dc",
+    "candidate": "aca569f9e53c9c542d78382dc0298d0dc11a5db320b76db707ccc5f27aefb785"
+  },
+  "entry_words": {
+    "baseline": 927,
+    "candidate": 422
+  },
+  "fixture_sha256": {
+    "pagination": "e6251e8680825f662c9925847d69470cf967d4e314376f6f4ec53a4ed7dac8d5",
+    "authorization": "babb39c2b6958d33ae62eac2b5b7f553ec2129aa6ecaed45b89d27d948be6f7c"
+  },
+  "grader_sha256": {
+    "pagination": "7af43a44d5ae6332a119e2126cbe3b81618a95221494a7cac8dd2301fadb6814",
+    "authorization": "bf615801de62dd45a8d503d02611e9e508b4a187f2fb9d58397965bc2c8312bd"
+  },
+  "repeats": 2,
+  "runs": [
+    {
+      "run_id": "pagination-baseline-1",
+      "task": "pagination",
+      "condition": "baseline",
+      "repeat": 1,
+      "elapsed_seconds": 43.911,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 92409,
+        "cached_input_tokens": 82560,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 933,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 3,
+      "observed_command_output_chars": 5586,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-candidate-1",
+      "task": "pagination",
+      "condition": "candidate",
+      "repeat": 1,
+      "elapsed_seconds": 51.739,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 126203,
+        "cached_input_tokens": 110464,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1072,
+        "reasoning_output_tokens": 12
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 7,
+      "observed_command_output_chars": 16506,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-baseline-1",
+      "task": "authorization",
+      "condition": "baseline",
+      "repeat": 1,
+      "elapsed_seconds": 57.541,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 97875,
+        "cached_input_tokens": 85504,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1424,
+        "reasoning_output_tokens": 19
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 33827,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-candidate-1",
+      "task": "authorization",
+      "condition": "candidate",
+      "repeat": 1,
+      "elapsed_seconds": 76.395,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 116411,
+        "cached_input_tokens": 104832,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1974,
+        "reasoning_output_tokens": 73
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 47557,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-candidate-2",
+      "task": "pagination",
+      "condition": "candidate",
+      "repeat": 2,
+      "elapsed_seconds": 53.79,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 124266,
+        "cached_input_tokens": 107776,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1056,
+        "reasoning_output_tokens": 10
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 6,
+      "observed_command_output_chars": 14074,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-baseline-2",
+      "task": "pagination",
+      "condition": "baseline",
+      "repeat": 2,
+      "elapsed_seconds": 48.972,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 92122,
+        "cached_input_tokens": 82304,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1053,
+        "reasoning_output_tokens": 13
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 2,
+      "observed_command_output_chars": 781,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-candidate-2",
+      "task": "authorization",
+      "condition": "candidate",
+      "repeat": 2,
+      "elapsed_seconds": 75.281,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 114223,
+        "cached_input_tokens": 103040,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1854,
+        "reasoning_output_tokens": 222
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 5,
+      "observed_command_output_chars": 48176,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-baseline-2",
+      "task": "authorization",
+      "condition": "baseline",
+      "repeat": 2,
+      "elapsed_seconds": 76.064,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 124702,
+        "cached_input_tokens": 111488,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1919,
+        "reasoning_output_tokens": 70
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 3,
+      "observed_command_output_chars": 31381,
+      "passed": true
+    }
+  ],
+  "cost_usd": null,
+  "limitations": [
+    "Synthetic Python tasks only; no visual/game model comparison.",
+    "Requested model recorded; CLI JSON may not expose independently resolved model identity.",
+    "User config disabled; host built-in instructions/tools still apply to both conditions.",
+    "No independent reviewer. Subscription token counts are not API dollar cost."
+  ],
+  "runtime": "codex-cli 0.153.4"
+}

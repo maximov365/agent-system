@@ -72,6 +72,8 @@ class FrameworkTests(unittest.TestCase):
         self.assertNotIn(Path("setup.py"), framework)
         self.assertNotIn(Path(".github/workflows/agent-quality.yml"), framework)
         self.assertNotIn(Path(".github/workflows/agent-quality.yml"), seeds)
+        self.assertNotIn(Path("quality/profile.json"), framework)
+        self.assertNotIn(Path("quality/profile.json"), seeds)
         self.assertIn(Path(".agent-system/setup.py"), framework)
         self.assertTrue(is_framework_change("agents/deleted-role.md"))
         self.assertFalse(is_framework_change("docs/TASKS.md"))

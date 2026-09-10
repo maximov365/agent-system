@@ -1,0 +1,100 @@
+{
+  "checks": "Existing optional example: five deterministic logic tests; no new game behavior.",
+  "limitations": [
+    "Local 3-repeat convenience sample; not a production benchmark.",
+    "Runtime closure relies on unchanged same-host OS for this experiment.",
+    "No downstream check has reuse enabled."
+  ],
+  "runs": [
+    {
+      "repeat": 1,
+      "mode": "fresh",
+      "status": "passed",
+      "executed": true,
+      "reusable": false,
+      "elapsed_seconds": 0.073,
+      "wall_seconds": 0.0738,
+      "reuse_note": "Fresh execution requested"
+    },
+    {
+      "repeat": 1,
+      "mode": "record",
+      "status": "passed",
+      "executed": true,
+      "reusable": true,
+      "elapsed_seconds": 0.17,
+      "wall_seconds": 0.1709,
+      "reuse_note": null
+    },
+    {
+      "repeat": 1,
+      "mode": "reuse",
+      "status": "reused",
+      "executed": false,
+      "reusable": false,
+      "elapsed_seconds": 0.04,
+      "wall_seconds": 0.0406,
+      "reuse_note": null
+    },
+    {
+      "repeat": 2,
+      "mode": "record",
+      "status": "passed",
+      "executed": true,
+      "reusable": true,
+      "elapsed_seconds": 0.159,
+      "wall_seconds": 0.1599,
+      "reuse_note": null
+    },
+    {
+      "repeat": 2,
+      "mode": "reuse",
+      "status": "reused",
+      "executed": false,
+      "reusable": false,
+      "elapsed_seconds": 0.041,
+      "wall_seconds": 0.0414,
+      "reuse_note": null
+    },
+    {
+      "repeat": 2,
+      "mode": "fresh",
+      "status": "passed",
+      "executed": true,
+      "reusable": false,
+      "elapsed_seconds": 0.075,
+      "wall_seconds": 0.0752,
+      "reuse_note": "Fresh execution requested"
+    },
+    {
+      "repeat": 3,
+      "mode": "fresh",
+      "status": "passed",
+      "executed": true,
+      "reusable": false,
+      "elapsed_seconds": 0.074,
+      "wall_seconds": 0.075,
+      "reuse_note": "Fresh execution requested"
+    },
+    {
+      "repeat": 3,
+      "mode": "record",
+      "status": "passed",
+      "executed": true,
+      "reusable": true,
+      "elapsed_seconds": 0.161,
+      "wall_seconds": 0.1621,
+      "reuse_note": null
+    },
+    {
+      "repeat": 3,
+      "mode": "reuse",
+      "status": "reused",
+      "executed": false,
+      "reusable": false,
+      "elapsed_seconds": 0.04,
+      "wall_seconds": 0.0407,
+      "reuse_note": null
+    }
+  ]
+}
