@@ -114,7 +114,7 @@ This is opt-in augmentation per `docs/CLAUDE_SKILLS.md` backward-compatibility c
 
 If implementation changes system behavior:
 
-- Propose task status changes in the handoff block — only Iteration Manager updates `docs/TASKS.md`
+- The current task owner updates `docs/TASKS.md`; a delegated Builder reports progress to that owner unless assigned task-state edits
 - Update `docs/DECISIONS.md` if a technical decision was made
 - Update `docs/ARCHITECTURE.md` if the architecture changed
 

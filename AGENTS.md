@@ -19,6 +19,7 @@ Start with the relevant code, project configuration, current task/plan, and `doc
 | Deployment | `docs/DEPLOY_CONTRACTS.md`, `docs/SANDBOX_POLICY.md` |
 | Codex setup or model migration | `docs/CODEX.md`, `docs/MODEL_POLICY.md` |
 | Complex orchestration or resumption | `docs/AGENT_EXECUTION_MODEL.md` |
+| Project validation targets | `quality/profile.json` when present, `docs/QUALITY_PROFILES.md` |
 | UI, artwork, animation | `docs/VISUAL_QUALITY.md`, existing brand/design references |
 | Game development | `docs/GAME_DEVELOPMENT.md` |
 | External model review | `docs/EXTERNAL_REVIEW_CONTRACT.md` |

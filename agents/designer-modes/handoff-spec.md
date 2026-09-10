@@ -1,6 +1,6 @@
 # Designer Mode: Handoff Spec
 
-Use this mode when Designer is re-invoked **after** a design has been approved by the user, to produce a structured developer specification that UI Builder consumes alongside the mockups.
+Use this mode when Designer is re-invoked **after** a design direction has been established within the authorized scope, to produce a structured developer specification that UI Builder consumes alongside the mockups.
 
 This mode does **not** create new mockups. It reads the previously approved design and translates it into precise specifications.
 
@@ -46,7 +46,7 @@ Skip this mode for simple features (single screen, standard components, trivial 
 
 ## Optional skill augmentation
 
-If the Claude skill `design:design-handoff` is available in the current environment, invoke it as a methodological reference and to augment the spec with additional structural patterns. Pass the approved design as the argument.
+Use a relevant available design-handoff skill when it improves this task. Discover its actual name and instructions from the current host; no specific client or skill package is required.
 
 If the skill is not available (Cursor, API, or no plugin installed), use the built-in handoff-spec format below — it covers the same essential ground.
 

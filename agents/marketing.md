@@ -284,6 +284,8 @@ all_clear | changes_suggested
 
 ## Handoff
 
+Use the following transport only for an actual delegation or explicitly requested structured workflow. For local work, continue the authorized task and report normally under `AGENTS.md`.
+
 Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "marketing_campaign"`.
 
 For strategy: `status: "produced"`.

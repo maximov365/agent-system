@@ -32,7 +32,8 @@ except ImportError:
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == ".agent-system" else SCRIPT_DIR
 CONFIG_PATH = ROOT / "project.config.yaml"
-TEMPLATES_DIR = ROOT / ".templates"
+TEMPLATES_DIR = (ROOT / ".agent-system/templates" if SCRIPT_DIR.name == ".agent-system"
+                 else ROOT / ".templates")
 
 JINJA_VAR_RE = re.compile(r"\{\{.+?\}\}|\{%.+?%\}")
 
@@ -98,7 +99,7 @@ def assert_safe_path(path: Path) -> None:
 
 
 def template_backup_path(source: Path) -> Path:
-    """Map a source file to its backup location inside .templates/."""
+    """Map a source file to the canonical template location for this checkout."""
     return TEMPLATES_DIR / source.relative_to(ROOT)
 
 
@@ -106,8 +107,8 @@ def discover_templates() -> list[tuple[Path, Path]]:
     """Return (template_source, output_target) pairs.
 
     Priority: if the main file has Jinja2 variables (e.g. freshly synced),
-    use it as source and update .templates/. Otherwise fall back to the
-    .templates/ backup.
+    use it as source and update the canonical template. Otherwise fall back to
+    tracked downstream templates (or the framework development cache).
     """
     pairs = []
 

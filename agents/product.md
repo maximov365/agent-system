@@ -42,7 +42,7 @@ Before writing a feature spec, read:
 - Recommend the smallest useful next task
 - Propose updates to `docs/TASKS.md` when new tasks are defined
 
-Task proposals must follow `docs/TASK_TEMPLATE.md` and must not include task IDs — IDs are assigned by Iteration Manager at commit time. Only Iteration Manager may commit tasks to `docs/TASKS.md`.
+Use `docs/TASK_TEMPLATE.md` when a separate task document helps. The current task owner assigns IDs and updates `docs/TASKS.md`; delegated specialists propose updates within their assignment.
 - Ensure that proposed features fit the system pipeline: {{ pipeline.stages | map(attribute='name') | join(' → ') }}
 
 ---

@@ -559,3 +559,17 @@ Visual/game work requires in-product evidence and the production contracts in `d
 Use one ownership manifest, namespaced downstream tooling, preflight rendering, seed-only project documents, non-mutating previews, and no Git-index edits. Framework CI belongs only to the framework repository. Post-commit previews downstream changes instead of applying them. Existing project guardrails/config/CI and unrelated hooks are preserved.
 
 This supersedes automatic mass synchronization/untracking defaults from earlier decisions. Legacy root setup.py and retired files are not deleted automatically. File replacement is atomic per file; whole-batch rollback and concurrent-writer locking are future work if real usage requires them.
+
+
+## DEC-018 — Complete portable task ownership (2026-09-10)
+
+The task owner may create, implement, review, and complete tasks. Legacy routing/backlog/onboarding methods now use the same authority rules as AGENTS.md: selective methods, risk-based evidence, no per-role approval or automatic three-attempt stop, and artifact-based resumption. External review JSON remains an optional transport contract. Historical records are retained as history.
+
+
+## DEC-019 — Recoverable per-project framework updates (2026-09-10)
+
+Sync now creates private outside-project before/after recovery records, uses a cooperative OS writer lock, rolls back caught write failures, and offers conflict-aware restore. Only SHA-256-recognized legacy setup.py copies become compatibility entry points. This preserves application-owned scripts while preventing stale framework rendering. Batch-wide/power-loss atomicity is not claimed.
+
+## DEC-020 — Clean framework and clone-safe tooling (2026-09-10)
+
+Application examples, their art/audio and developer evidence are optional and excluded from downstream deployment. Project quality profiles are project-owned and opt-in. Original render templates are tracked under `.agent-system/templates/` downstream so a clone can reconfigure; legacy `.templates/` caches are not authoritative. Actual model evaluations use synthetic fixtures, and results never imply general visual or production quality.

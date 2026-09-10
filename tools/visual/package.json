@@ -1,0 +1,7 @@
+{
+  "name": "agent-system-visual",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test test/*.test.mjs"},
+  "dependencies": {"playwright": "1.62.1", "pngjs": "7.0.0", "pixelmatch": "7.2.0"}
+}

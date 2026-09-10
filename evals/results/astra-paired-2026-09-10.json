@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10T13:39:07.119747+00:00",
+  "model_requested": "gpt-6-astra",
+  "model_resolved": null,
+  "reasoning_effort": "medium",
+  "framework_base_revision": "10f548898ab2ef9837ac1f64d36846e2bd2bd9ee",
+  "framework_snapshot_sha256": "ff39a8deebe6b96eb617190ed5d94d822ec65246f649d863c1d2d950139d429a",
+  "fixture_sha256": {
+    "pagination": "e6251e8680825f662c9925847d69470cf967d4e314376f6f4ec53a4ed7dac8d5",
+    "authorization": "babb39c2b6958d33ae62eac2b5b7f553ec2129aa6ecaed45b89d27d948be6f7c"
+  },
+  "grader_sha256": {
+    "pagination": "7af43a44d5ae6332a119e2126cbe3b81618a95221494a7cac8dd2301fadb6814",
+    "authorization": "bf615801de62dd45a8d503d02611e9e508b4a187f2fb9d58397965bc2c8312bd"
+  },
+  "repeats": 2,
+  "runs": [
+    {
+      "run_id": "pagination-plain-1",
+      "task": "pagination",
+      "condition": "plain",
+      "repeat": 1,
+      "elapsed_seconds": 42.222,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 63223,
+        "cached_input_tokens": 57344,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 959,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-framework-1",
+      "task": "pagination",
+      "condition": "framework",
+      "repeat": 1,
+      "elapsed_seconds": 46.176,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 96534,
+        "cached_input_tokens": 85632,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1044,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-plain-1",
+      "task": "authorization",
+      "condition": "plain",
+      "repeat": 1,
+      "elapsed_seconds": 59.2,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 80379,
+        "cached_input_tokens": 65408,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1441,
+        "reasoning_output_tokens": 24
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-framework-1",
+      "task": "authorization",
+      "condition": "framework",
+      "repeat": 1,
+      "elapsed_seconds": 91.976,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 142995,
+        "cached_input_tokens": 129920,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1872,
+        "reasoning_output_tokens": 31
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-framework-2",
+      "task": "pagination",
+      "condition": "framework",
+      "repeat": 2,
+      "elapsed_seconds": 48.369,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 95419,
+        "cached_input_tokens": 84736,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1072,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 3,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-plain-2",
+      "task": "pagination",
+      "condition": "plain",
+      "repeat": 2,
+      "elapsed_seconds": 45.302,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 80034,
+        "cached_input_tokens": 73728,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 917,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-framework-2",
+      "task": "authorization",
+      "condition": "framework",
+      "repeat": 2,
+      "elapsed_seconds": 58.136,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 107030,
+        "cached_input_tokens": 86400,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1378,
+        "reasoning_output_tokens": 32
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 5,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-plain-2",
+      "task": "authorization",
+      "condition": "plain",
+      "repeat": 2,
+      "elapsed_seconds": 70.547,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 80245,
+        "cached_input_tokens": 69376,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1343,
+        "reasoning_output_tokens": 37
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "passed": true
+    }
+  ],
+  "cost_usd": null,
+  "limitations": [
+    "Synthetic Python tasks only; no visual/game model comparison.",
+    "Requested model recorded; CLI JSON may not expose independently resolved model identity.",
+    "User config disabled; host built-in instructions/tools still apply to both conditions.",
+    "No independent reviewer. Subscription token counts are not API dollar cost.",
+    "Template-persistence and malformed-input hardening were added after the frozen run snapshot; the exact snapshot hash identifies what was evaluated."
+  ],
+  "runtime": "codex-cli 0.153.4",
+  "summary": {
+    "plain": {
+      "passed": 4,
+      "runs": 4,
+      "mean_seconds": 54.318,
+      "mean_input_tokens": 75970.2,
+      "mean_output_tokens": 1165,
+      "manual_interventions": 0
+    },
+    "framework": {
+      "passed": 4,
+      "runs": 4,
+      "mean_seconds": 61.164,
+      "mean_input_tokens": 110494.5,
+      "mean_output_tokens": 1341.5,
+      "manual_interventions": 0
+    }
+  }
+}

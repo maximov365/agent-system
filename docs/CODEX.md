@@ -37,7 +37,7 @@ Use built-in task scheduling only when a user requests recurring work; do not in
 
 ## Validation and rollout
 
-In the framework repository, install `requirements-framework.txt` into an appropriate Python environment and run:
+In the framework repository, install `requirements-dev.txt` into an appropriate Python environment for the complete regression suite (`requirements-framework.txt` remains sufficient for sync/render only), then run:
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -46,7 +46,7 @@ python3 audit.py --local --json --fail-on critical
 
 Review the diff for one downstream before rolling out more widely. Existing project config, product docs, local CI, and application setup.py remain project-owned. Downstream framework instructions stay in version control so clones/worktrees can reproduce them; sync no longer edits the Git index. Review/stage changes normally.
 
-Legacy deployments may still contain the old managed ignore block and an obsolete root setup.py. The current sync replaces only its own ignore block and installs rendering under `.agent-system/`; it does not delete or rewrite the old root setup.py. Use the new path for reconfiguration:
+Sync replaces its managed ignore block and installs rendering under `.agent-system/`. Known exact legacy root setup.py copies are migrated to a compatibility entry point with recovery backups; locally modified/application scripts remain untouched. See `docs/FRAMEWORK_UPGRADE.md` for preview, backup, lock, and restore behavior. Use the namespaced path for reconfiguration:
 
 ```bash
 python3 .agent-system/setup.py --check

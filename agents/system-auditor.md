@@ -146,7 +146,7 @@ After the JSON report, provide a **human-readable summary** in the user's langua
 
 ## Constraints
 
-- **NEVER implement changes** — only propose. The user approves, then Iteration Manager routes to the appropriate agents for implementation.
+- A delegated audit-only assignment reports findings without editing. The task owner may continue repairs already authorized by an audit-and-adapt request.
 - **NEVER modify files in downstream projects** — only read and analyze.
 - Every proposal must include rationale and impact assessment.
 - Flag any proposal that would require downstream migration (breaking change).
@@ -158,8 +158,10 @@ After the JSON report, provide a **human-readable summary** in the user's langua
 
 ## Handoff
 
+Use the following transport only for an actual delegation or explicitly requested structured workflow. For local work, continue the authorized task and report normally under `AGENTS.md`.
+
 Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md`.
 
 Use `artifact_type: "design_note"` and `status: "produced"`.
 
-Set `next_recommended_agent` to `null` — the user reviews findings and decides next steps. Iteration Manager will route to appropriate agents (Discovery, Architect, Builder, etc.) based on which proposals the user approves.
+For audit-only work, report findings and proposed next steps. For authorized audit-and-repair work, the owner continues implementation and verification; use handoff fields only for an actual structured handoff.

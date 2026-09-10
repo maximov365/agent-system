@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "baseURL": "http://127.0.0.1:4317",
+  "server": {
+    "cwd": "client",
+    "command": [
+      "npm",
+      "run",
+      "dev",
+      "--",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "4317",
+      "--strictPort"
+    ]
+  },
+  "locale": "ru-RU",
+  "timezone": "UTC",
+  "fixedTime": "2026-09-10T09:00:00Z",
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "mobile": true
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000
+    }
+  ],
+  "journeys": [
+    {
+      "id": "empty-and-theme",
+      "fixtures": [
+        {
+          "path": "/api/workouts",
+          "body": []
+        }
+      ],
+      "steps": [
+        {
+          "type": "waitFor",
+          "role": "button",
+          "name": "Начать тренировку"
+        },
+        {
+          "type": "capture",
+          "name": "idle-dark"
+        },
+        {
+          "type": "click",
+          "selector": ".icon-btn"
+        },
+        {
+          "type": "capture",
+          "name": "idle-light"
+        },
+        {
+          "type": "click",
+          "role": "button",
+          "name": "История"
+        },
+        {
+          "type": "expectText",
+          "selector": ".empty",
+          "contains": "Пока пусто"
+        },
+        {
+          "type": "capture",
+          "name": "history-empty"
+        }
+      ]
+    },
+    {
+      "id": "history-detail",
+      "fixtures": [
+        {
+          "path": "/api/workouts",
+          "body": [
+            {
+              "id": 1,
+              "started_at": "2026-09-10T08:00:00Z",
+              "ended_at": "2026-09-10T08:32:00Z",
+              "duration_seconds": 1920,
+              "notes": "Контрольная тренировка"
+            }
+          ]
+        },
+        {
+          "path": "/api/workouts/1",
+          "body": {
+            "id": 1,
+            "started_at": "2026-09-10T08:00:00Z",
+            "ended_at": "2026-09-10T08:32:00Z",
+            "duration_seconds": 1920,
+            "notes": "Контрольная тренировка"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": "waitFor",
+          "role": "button",
+          "name": "Начать тренировку"
+        },
+        {
+          "type": "click",
+          "role": "button",
+          "name": "История"
+        },
+        {
+          "type": "waitFor",
+          "selector": ".history-row"
+        },
+        {
+          "type": "capture",
+          "name": "history-list"
+        },
+        {
+          "type": "click",
+          "selector": ".history-row"
+        },
+        {
+          "type": "waitFor",
+          "role": "button",
+          "name": "Редактировать"
+        },
+        {
+          "type": "click",
+          "role": "button",
+          "name": "Редактировать"
+        },
+        {
+          "type": "fill",
+          "selector": "textarea",
+          "value": "Проверка длинной заметки: техника, восстановление и следующий подход."
+        },
+        {
+          "type": "capture",
+          "name": "edit-notes"
+        },
+        {
+          "type": "click",
+          "role": "button",
+          "name": "Отмена"
+        },
+        {
+          "type": "expectText",
+          "selector": ".notes-text",
+          "contains": "Контрольная тренировка"
+        }
+      ]
+    }
+  ],
+  "allowedOrigins": [
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com"
+  ]
+}

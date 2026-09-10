@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#123a3b">
+  <title>Лавка у маяка — Lantern Market</title>
+  <link rel="icon" href="assets/runtime/lantern.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="world" aria-hidden="true"></div><div class="world-shade" aria-hidden="true"></div>
+  <div class="page">
+    <header>
+      <a class="brand" href="./" aria-label="Лавка у маяка, начало"><img src="assets/runtime/lantern.svg" alt=""><span>LANTERN<br>MARKET</span></a>
+      <div class="header-right"><span class="edition">ТИХАЯ ГАВАНЬ · ВЕЧЕР № 01</span><button id="sound" class="outline" aria-pressed="true">Звук включён</button></div>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="game-title">
+        <p class="eyebrow"><span></span> МАЛЕНЬКАЯ ИГРА ДЛЯ ХОРОШЕГО ВЕЧЕРА</p>
+        <h1 id="game-title">Лавка <br>у <em>маяка.</em></h1>
+        <p class="story">В гавани зажигаются огни. <br>Собери последние заказы для соседей — <br>до закрытия осталась всего минута.</p>
+        <div class="intro-actions"><button class="primary" id="start">Открыть лавку <span aria-hidden="true">↗</span></button><p class="start-note">Три товара. Один заказ. Немного заботы.</p></div>
+        <div class="session-actions" hidden><button class="outline" id="pause">Пауза</button><p class="session-note" id="session-note">У тебя отлично получается.</p></div>
+        <div class="best"><span class="small-star" aria-hidden="true">✦</span><span>ЛУЧШИЙ ВЕЧЕР</span><strong id="best">0</strong><span>очков</span></div>
+      </section>
+      <section class="counter" aria-label="Игровой прилавок">
+        <div class="hud"><div><span class="label">ДО ЗАКРЫТИЯ</span><strong id="time">01:00</strong></div><div><span class="label">ТВОЙ СЧЁТ</span><strong id="score">000</strong></div><div><span class="label">ЗАКАЗЫ</span><strong id="orders">00</strong></div></div>
+        <div class="time-track" role="progressbar" aria-label="Оставшееся время" aria-valuemin="0" aria-valuemax="60" aria-valuenow="60"><div id="time-fill"></div></div>
+        <div class="receipt">
+          <div class="receipt-heading"><div><p class="label">СПИСОК ПОКУПОК</p><h2 id="customer">Соседка Анна</h2></div><span class="order-no" id="order-number">№ 001</span></div>
+          <div class="order-items" id="order-items"></div>
+          <div class="receipt-footer"><span id="order-status">Собери всё из списка</span><span id="order-count">0 / 3</span></div>
+        </div>
+        <div class="shelf-heading"><span class="label">НА ПРИЛАВКЕ СЕГОДНЯ</span><span>Нажми на нужный товар</span></div>
+        <div class="inventory" id="inventory"></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite">Открой лавку, чтобы принять первый заказ.</div>
+      </section>
+    </main>
+    <footer><span>СОБРАНО С ТЕПЛОМ <span aria-hidden="true">✦</span> У САМОГО МОРЯ</span><span>Клавиши <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> · <kbd>Esc</kbd> пауза</span></footer>
+  </div>
+  <dialog id="pause-dialog" aria-labelledby="pause-title"><p class="eyebrow">МОЖНО НЕ СПЕШИТЬ</p><h2 id="pause-title">Море подождёт.</h2><p>Смена на паузе. Заказы и время сохранены.</p><button class="primary" id="resume">Вернуться к заказам ↗</button></dialog>
+  <dialog id="result-dialog" aria-labelledby="result-title"><div class="result-mark" aria-hidden="true">✦</div><p class="eyebrow">ФОНАРИ УЖЕ ГОРЯТ</p><h2 id="result-title">Хороший был вечер.</h2><p id="result-summary"></p><div class="result-score"><strong id="final-score">0</strong><span>очков заботы</span></div><button class="primary" id="retry">Ещё один вечер ↗</button><button class="text-button" id="back">Вернуться в лавку</button></dialog>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

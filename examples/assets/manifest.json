@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "reward-star",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "A readable reward badge for a compact game HUD",
+      "author": "Project-authored vector source",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "sources/reward-star.svg",
+      "source_sha256": "9e6e9289e1ed0843d56dbd59151d35e30dbae97ac34c24c5937f002b7e1b43c4",
+      "exports": [
+        {
+          "path": "runtime/reward-star.svg",
+          "sha256": "9e6e9289e1ed0843d56dbd59151d35e30dbae97ac34c24c5937f002b7e1b43c4",
+          "max_bytes": 1024
+        }
+      ]
+    }
+  ]
+}

@@ -64,7 +64,7 @@ Do not suggest stylistic changes unless they improve clarity or safety.
 ## Status definitions
 
 - **APPROVED** — implementation is correct, no changes needed
-- **APPROVED WITH MINOR CHANGES** — trivial fixes only (typos, formatting, comments); Iteration Manager schedules a follow-up task for anything larger
+- **APPROVED WITH MINOR CHANGES** — only nonblocking findings remain; the task owner fixes accepted issues within scope or records explicitly deferred work
 - **CHANGES REQUIRED** — Builder must revise before proceeding
 
 ---
@@ -194,7 +194,7 @@ If deployment impact was missed by the Architect plan, flag it as a required cha
 
 Verify that if the change affects system behavior:
 
-- Builder proposed task status changes in the handoff block (only Iteration Manager updates `docs/TASKS.md`)
+- Task state reflects verified progress; the current owner may update it after an honest self-review
 - `docs/DECISIONS.md` records significant technical decisions
 - `docs/ARCHITECTURE.md` reflects architectural changes
 

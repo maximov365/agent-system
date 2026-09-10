@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "files": {
+    "setup.py": {
+      "sha256": ["199ec0389b9b0dd042267976b27d185e05e13fdb93e4a62a815752ef8aafeacf"],
+      "source_revision": "fbc8b94",
+      "replacement": "templates/migrations/legacy-setup.py"
+    }
+  }
+}

@@ -80,7 +80,7 @@ Select the method that matches the **decision** you need to make, not the artifa
 
 ## Optional skill augmentation
 
-If the Claude skill `design:user-research` is available in the current environment, invoke it as a methodological reference. The skill provides additional research method templates and deliverable structures.
+Use a relevant available user-research skill when it adds useful methods; discover its actual name and instructions from the current host.
 
 If the skill is not available (Cursor, API, or no plugin installed), use the built-in methodology above — it covers the same essential ground.
 

@@ -31,16 +31,9 @@ You do not choose what video to create — you execute approved briefs.
 
 ## Tool dependency
 
-This agent requires a video generation MCP server or direct provider integration configured outside the repository. See `docs/MCP_TOOLS.md` for setup guidance.
+Use an actual video-generation capability exposed by the host, an installed connector, or an explicitly configured provider. See `docs/MCP_TOOLS.md`; no particular client or MCP server is mandatory. Discover supported duration, resolution, references, and audio parameters before calling the tool.
 
-Supported tool models may include:
-- Kling
-- Veo
-- Runway
-- Pika
-- Any MCP server or provider endpoint exposing a `video_generate` or equivalent tool
-
-If no video generation tool is available, Video Producer must state this explicitly and return `status: "blocked"` with `blocked_reason: "No video generation tool configured"`.
+If generation is unavailable, identify that limitation and continue useful brief/storyboard work within scope. Do not label a still image or procedural animation as generated video, invent a tool, or install/pay for a provider merely to satisfy this role. Follow the production asset provenance and review contract in `docs/VISUAL_QUALITY.md`.
 
 ---
 
@@ -135,7 +128,7 @@ If generation fails or produces unusable results, state the issue and suggest pr
 
 ## Handoff
 
-Append a handoff block per `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "video"`.
+For an actual delegated or explicitly structured workflow, use `docs/AGENT_HANDOFF_CONTRACT.md` with `artifact_type: "video"`. Local work continues to implementation/review and a normal outcome report.
 
 - Generation successful: `status: "produced"`
 - Revision successful: `status: "produced"`

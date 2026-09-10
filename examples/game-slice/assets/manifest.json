@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "harbor-dusk",
+      "revision": 1,
+      "parent": null,
+      "kind": "image",
+      "purpose": "Original seaside environment behind interactive game UI",
+      "author": "Native ImageGen",
+      "license": "Project-generated asset; provider usage terms apply",
+      "created_at": "2026-09-10",
+      "review_status": "reviewed",
+      "source": "assets/sources/harbor-dusk-v1.png",
+      "source_sha256": "b489d576077d653626530bc0c3149eeb1d91abdcff9eeff08955c6727d860115",
+      "exports": [
+        {
+          "path": "assets/runtime/harbor-dusk-v1.png",
+          "sha256": "b489d576077d653626530bc0c3149eeb1d91abdcff9eeff08955c6727d860115",
+          "max_bytes": 4000000,
+          "width": 1536,
+          "height": 1024,
+          "alpha": "opaque"
+        }
+      ],
+      "generation": {
+        "provider": "native-imagegen",
+        "model": null,
+        "prompt": "Use case: stylized-concept\nAsset type: final environment illustration for an original cozy browser game called Lantern Market, a small harbor grocery at dusk. The interactive game UI will be rendered separately in HTML.\nPrimary request: Create a beautifully crafted painterly environment illustration of a tiny seaside market on a stone quay at blue hour, looking across a calm teal harbor to a cream lighthouse and clustered seaside village. Warm hanging paper lanterns, a striped muted coral market canopy, wooden crates of citrus, green bottles, flower sprigs, a little moored fishing boat, distant ochre windows, soft evening clouds. No people needed. The world should feel inviting, specific, and charming, with thoughtful depth and hand-painted detail, like a polished independent cozy game.\nComposition: wide landscape, roughly 3:2. The richly detailed market canopy and produce occupy the far left and lower left. The lighthouse and small town are on the upper right. Keep the middle third mainly quiet dark teal sea and softly lit sky so a paper order board can be overlaid without hiding a main subject. Foreground wood and stone frame the bottom. Detailed illustration that remains clear when dimmed slightly behind UI.\nLighting: luminous amber lanterns against blue-green dusk, warm/cool contrast, soft atmosphere, painterly gouache-like textures, clean readable silhouettes, rich but restrained color.\nConstraints: no writing, letters, logos, watermarks, user interface, buttons, border, or frame. Finished production artwork, not a mockup or screenshot.\n"
+      }
+    },
+    {
+      "id": "bread",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "Original readable market item / identity icon",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/bread.svg",
+      "source_sha256": "b5cbfbaf6fea2997b19d723011c721ab260ae24e755e8f2d68903ae295076af8",
+      "exports": [
+        {
+          "path": "assets/runtime/bread.svg",
+          "sha256": "b5cbfbaf6fea2997b19d723011c721ab260ae24e755e8f2d68903ae295076af8",
+          "max_bytes": 4096
+        }
+      ]
+    },
+    {
+      "id": "orange",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "Original readable market item / identity icon",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/orange.svg",
+      "source_sha256": "53f0452fae41dcec51e0ff56c15373eed7362fd848744abc336799874cf1ab56",
+      "exports": [
+        {
+          "path": "assets/runtime/orange.svg",
+          "sha256": "53f0452fae41dcec51e0ff56c15373eed7362fd848744abc336799874cf1ab56",
+          "max_bytes": 4096
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "Original readable market item / identity icon",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/fish.svg",
+      "source_sha256": "f7a791ee25f6146ac35606d61607b606892f1584ff9633502762dfa7002e5202",
+      "exports": [
+        {
+          "path": "assets/runtime/fish.svg",
+          "sha256": "f7a791ee25f6146ac35606d61607b606892f1584ff9633502762dfa7002e5202",
+          "max_bytes": 4096
+        }
+      ]
+    },
+    {
+      "id": "flowers",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "Original readable market item / identity icon",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/flowers.svg",
+      "source_sha256": "97b96b731e3b2f9c4103648c3d27ec2dfca62a509155630963f2b9d939ce510c",
+      "exports": [
+        {
+          "path": "assets/runtime/flowers.svg",
+          "sha256": "97b96b731e3b2f9c4103648c3d27ec2dfca62a509155630963f2b9d939ce510c",
+          "max_bytes": 4096
+        }
+      ]
+    },
+    {
+      "id": "lantern",
+      "revision": 1,
+      "parent": null,
+      "kind": "vector",
+      "purpose": "Original readable market item / identity icon",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/lantern.svg",
+      "source_sha256": "4719b9306c48444e00e760c1fe9f22f454524a07ee8c6df2024dfde8c18d3b0a",
+      "exports": [
+        {
+          "path": "assets/runtime/lantern.svg",
+          "sha256": "4719b9306c48444e00e760c1fe9f22f454524a07ee8c6df2024dfde8c18d3b0a",
+          "max_bytes": 4096
+        }
+      ]
+    },
+    {
+      "id": "audio-sea",
+      "revision": 1,
+      "parent": null,
+      "kind": "audio",
+      "purpose": "Original procedural game audio: sea",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/make_audio.py",
+      "source_sha256": "c398332bb9ad34946c1458dc8ca9ce9334cf9f42b3675a6a69a4221d233f027e",
+      "exports": [
+        {
+          "path": "assets/runtime/sea.wav",
+          "sha256": "4c3195f4b263b3ba8d35255a2902da710f0d6fd0202bb8c8034ff12840747ca4",
+          "max_bytes": 300000,
+          "max_peak": 0.8,
+          "loop": true,
+          "max_loop_delta": 0.02
+        }
+      ]
+    },
+    {
+      "id": "audio-packed",
+      "revision": 1,
+      "parent": null,
+      "kind": "audio",
+      "purpose": "Original procedural game audio: packed",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/make_audio.py",
+      "source_sha256": "c398332bb9ad34946c1458dc8ca9ce9334cf9f42b3675a6a69a4221d233f027e",
+      "exports": [
+        {
+          "path": "assets/runtime/packed.wav",
+          "sha256": "f0ea2cd10f6a8ae80a5d0951a47e0f1e84af94abf545fafcb927ae56f222e259",
+          "max_bytes": 300000,
+          "max_peak": 0.8,
+          "loop": false,
+          "max_loop_delta": 0.02
+        }
+      ]
+    },
+    {
+      "id": "audio-complete",
+      "revision": 1,
+      "parent": null,
+      "kind": "audio",
+      "purpose": "Original procedural game audio: complete",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/make_audio.py",
+      "source_sha256": "c398332bb9ad34946c1458dc8ca9ce9334cf9f42b3675a6a69a4221d233f027e",
+      "exports": [
+        {
+          "path": "assets/runtime/complete.wav",
+          "sha256": "65e94019c86b0cbec53835a07fca33265b9dc6205abd232754ee328aa5d2200f",
+          "max_bytes": 300000,
+          "max_peak": 0.8,
+          "loop": false,
+          "max_loop_delta": 0.02
+        }
+      ]
+    },
+    {
+      "id": "audio-mistake",
+      "revision": 1,
+      "parent": null,
+      "kind": "audio",
+      "purpose": "Original procedural game audio: mistake",
+      "author": "Project-authored artwork/audio",
+      "license": "MIT (repository LICENSE)",
+      "created_at": "2026-09-10",
+      "review_status": "draft",
+      "source": "assets/sources/make_audio.py",
+      "source_sha256": "c398332bb9ad34946c1458dc8ca9ce9334cf9f42b3675a6a69a4221d233f027e",
+      "exports": [
+        {
+          "path": "assets/runtime/mistake.wav",
+          "sha256": "7fdd39cf1d16bd823e94f5b0411388095213a9467b712a7adf8855b12b387465",
+          "max_bytes": 300000,
+          "max_peak": 0.8,
+          "loop": false,
+          "max_loop_delta": 0.02
+        }
+      ]
+    }
+  ]
+}

@@ -74,3 +74,5 @@ CI runs deterministic regression tests, template validation, and local audit wit
 Claude command templates and launchd reminder scripts remain optional compatibility utilities. `/init-downstream` now delegates to the common initializer. The historical transcript metric adapter is explicit opt-in and cannot estimate Astra cost: default metrics report unavailable usage instead of fabricated zero cost. No Codex private transcript format is assumed.
 
 [Full onboarding](docs/ONBOARDING.md), [execution model](docs/AGENT_EXECUTION_MODEL.md), and [decisions](docs/DECISIONS.md) explain the remaining contracts. This repository is MIT licensed; see [LICENSE](LICENSE).
+
+Optional [project quality profiles](docs/QUALITY_PROFILES.md), [visual runner](docs/VISUAL_RUNNER.md), and [asset tooling](docs/ASSET_LIBRARY.md) make acceptance executable. [Examples](examples/README.md) are isolated development fixtures and are never installed in downstream projects.

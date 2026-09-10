@@ -2,7 +2,7 @@
 
 This document defines the input and output contract for reviews produced by models outside the primary interactive coding session, such as GPT, Kimi, a long-context model, LiteLLM/OpenRouter routes, hosted review services, or local review tools.
 
-External review is a validation layer. It does not replace Iteration Manager, Security Reviewer, Reviewer, Spec Reviewer, or Gatekeeper.
+External review is optional evidence. The current task owner retains responsibility for scope, correctness/security, integration, and completion under `AGENTS.md`. Use another model/provider only when permitted by the task and runtime.
 
 ---
 
@@ -17,10 +17,8 @@ External reviewers are useful when the workflow needs an independent pass over a
 - External reviewers may only produce review reports.
 - External reviewers must not modify files, execute fixes, commit, push, merge, publish, or change task state.
 - External reviewers must not decide workflow routing.
-- `Gatekeeper` decides which external review findings become `must_fix` for non-code artifacts and policy reviews.
-- `Security Reviewer` remains authoritative for security blocking decisions.
-- `Reviewer` remains authoritative for final code approval after considering accepted external findings.
-- Iteration Manager may stop and escalate if external reports conflict with source-of-truth documents or with each other.
+- The task owner validates findings against source evidence and applies relevant Gatekeeper, Security Reviewer, and Reviewer methods locally or through authorized delegation.
+- Resolve conflicting reports using actual evidence and project constraints. Ask only for a material unresolved decision; a reviewer disagreement alone is not a permission gate.
 
 ---
 
@@ -84,31 +82,15 @@ Each finding array contains objects with this shape:
 | `accept_with_fixes` | The work is directionally correct but contains findings that may become blocking after workflow authority review |
 | `reject` | The work appears unsafe, incorrect, or inconsistent with acceptance criteria or architecture constraints |
 
-The external verdict is not a workflow handoff status. Iteration Manager must not route directly from it.
+The external verdict is evidence, not a workflow command. The owner validates its claims before accepting changes.
 
 ---
 
 ## Mapping To Workflow
 
-For code changes:
+Attach the report to task evidence. The owner checks security and correctness findings against the supplied diff and acceptance criteria, fixes accepted blockers, and reruns affected verification. Use the relevant specialist methods without requiring separate role calls. For non-code artifacts, revise and recheck against the original criteria.
 
-1. External review report is attached to the implementation evidence.
-2. `Security Reviewer` reads `security_risks` before its verdict.
-3. `Reviewer` reads the full report and decides which non-security findings are blocking.
-4. If blocking findings are accepted, Reviewer returns `changes_required` through the normal handoff contract.
-
-For non-code artifacts:
-
-1. External review report is attached to the artifact review package.
-2. `Spec Reviewer` may cite it as supporting evidence.
-3. `Gatekeeper` decides which findings become `must_fix`.
-4. Reviser applies accepted `must_fix` items through the normal quality loop.
-
-For conflicting external reports:
-
-- Prefer source-of-truth documents over reviewer opinion.
-- Prefer direct evidence over speculation.
-- Escalate to the user when the conflict would change scope, architecture, security posture, or acceptance criteria.
+Prefer verified project constraints and direct evidence over reviewer opinion. Ask about conflicting scope or constraints only when investigation cannot resolve a material decision. Report reviewer identity and whether the review was independent.
 
 ---
 

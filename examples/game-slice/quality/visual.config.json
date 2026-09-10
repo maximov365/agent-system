@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "baseURL": "http://127.0.0.1:4321",
+  "server": {
+    "command": [
+      "node",
+      "server.mjs"
+    ]
+  },
+  "locale": "ru-RU",
+  "timezone": "UTC",
+  "seed": 42,
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "mobile": true
+    }
+  ],
+  "journeys": [
+    {
+      "id": "full-cycle",
+      "route": "/?evidence=1",
+      "steps": [
+        {
+          "type": "capture",
+          "name": "welcome"
+        },
+        {
+          "type": "click",
+          "selector": "#start"
+        },
+        {
+          "type": "press",
+          "selector": "body",
+          "key": "1"
+        },
+        {
+          "type": "press",
+          "selector": "body",
+          "key": "2"
+        },
+        {
+          "type": "press",
+          "selector": "body",
+          "key": "3"
+        },
+        {
+          "type": "delay",
+          "ms": 800
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "orders": 1,
+            "score": 125
+          }
+        },
+        {
+          "type": "capture",
+          "name": "playing"
+        },
+        {
+          "type": "click",
+          "selector": "#pause"
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "status": "paused"
+          }
+        },
+        {
+          "type": "capture",
+          "name": "paused"
+        },
+        {
+          "type": "click",
+          "selector": "#resume"
+        },
+        {
+          "type": "delay",
+          "ms": 3000
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "status": "playing"
+          }
+        },
+        {
+          "type": "waitFor",
+          "selector": "#retry"
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "status": "finished",
+            "orders": 1
+          }
+        },
+        {
+          "type": "capture",
+          "name": "result"
+        },
+        {
+          "type": "click",
+          "selector": "#retry"
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "status": "playing",
+            "score": 0,
+            "orders": 0,
+            "best_score": 125
+          }
+        },
+        {
+          "type": "click",
+          "selector": "#sound"
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "sound_enabled": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "mistake-feedback",
+      "route": "/?evidence=1",
+      "steps": [
+        {
+          "type": "click",
+          "selector": "#start"
+        },
+        {
+          "type": "press",
+          "selector": "body",
+          "key": "4"
+        },
+        {
+          "type": "probe",
+          "equals": {
+            "mistakes": 1,
+            "score": 0
+          }
+        },
+        {
+          "type": "capture",
+          "name": "mistake"
+        },
+        {
+          "type": "click",
+          "selector": "#pause"
+        }
+      ]
+    }
+  ],
+  "reducedMotion": "no-preference"
+}

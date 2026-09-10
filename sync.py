@@ -3,15 +3,17 @@
 
 import argparse
 import difflib
-import os
+import hashlib
+import json
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 from framework_manifest import (FRAMEWORK_GLOBS, SEED_GLOBS, TEMPLATE_GLOBS,
                                 deployment_sources, seed_sources)
 from setup import has_variables, load_config, render_text
+from sync_transaction import (atomic_write, safe_path, backup_root, project_lock,
+                              apply_batch, restore_plan)
 
 ROOT = Path(__file__).resolve().parent
 VERSION_FILE = ROOT / "VERSION"
@@ -19,7 +21,8 @@ DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 GITIGNORE_MARKER_START = "# >>> agent-system framework (managed by sync.py) >>>"
 GITIGNORE_MARKER_END = "# <<< agent-system framework <<<"
 # Instructions and framework code should survive clone/worktree/CI.
-GITIGNORE_ENTRIES = ["/.templates/", "/.agent/"]
+GITIGNORE_ENTRIES = ["/.templates/", "/.agent/", "/.agent-system/**/node_modules/",
+                     "/.agent-system/**/__pycache__/", "/.agent-system/**/.venv/"]
 
 SEED_CONTENT = {
     "docs/TASKS.md": "# Tasks\n\n| Task ID | Title | Status | Priority | Complexity |\n|---|---|---|---|---|\n",
@@ -41,22 +44,9 @@ def collect_seed_files() -> list[Path]:
     return sorted(seed_sources(ROOT).values())
 
 
-def safe_path(target: Path, rel: Path) -> Path:
-    if rel.is_absolute() or ".." in rel.parts:
-        raise ValueError(f"Invalid destination path: {rel}")
-    cursor = target
-    for part in rel.parts:
-        cursor = cursor / part
-        if cursor.is_symlink():
-            raise ValueError(f"Refusing symlink in destination: {cursor}")
-        if cursor.exists() and cursor != target / rel and not cursor.is_dir():
-            raise ValueError(f"Not a directory: {cursor}")
-    if cursor.exists() and not cursor.is_file():
-        raise ValueError(f"Destination is not a regular file: {cursor}")
-    return cursor
-
-
 def is_template(rel: Path) -> bool:
+    if rel.parts and rel.parts[0] == ".agent-system":
+        return False
     if rel.parts and rel.parts[0] == "agents" and rel.suffix == ".md":
         return True
     return any(rel.match(pattern) for pattern in TEMPLATE_GLOBS)
@@ -105,15 +95,21 @@ def plan_sync(target: Path, render: bool) -> dict[Path, bytes]:
             text = raw.decode()
             rendered = render_text(text, config) if has_variables(text) else text
             pending[rel] = rendered.encode() if render else raw
-            # Refresh even for templates that became static: old Jinja backups
-            # must not resurrect removed instructions on the next re-render.
-            pending[Path(".templates") / rel] = raw
+            # Canonical source survives clone and supersedes any previous version.
+            pending[Path(".agent-system/templates") / rel] = raw
         else:
             pending[rel] = raw
     for rel, src in seeds.items():
         if not (target / rel).exists():
             content = SEED_CONTENT.get(str(rel), src.read_text())
             pending[rel] = (render_text(content, config) if has_variables(content) else content).encode()
+    # Only exact known framework copies are migrated; app/custom scripts survive.
+    migrations = json.loads((ROOT / "migrations/legacy-files.json").read_text())
+    for name, rule in migrations["files"].items():
+        rel = Path(name)
+        legacy = safe_path(target, rel)
+        if legacy.exists() and hashlib.sha256(legacy.read_bytes()).hexdigest() in rule["sha256"]:
+            pending[rel] = safe_path(ROOT, Path(rule["replacement"])).read_bytes()
     pending[Path(".gitignore")] = gitignore_content(target)
     pending[Path(".agent-system-version")] = (get_version() + "\n").encode()
     for rel in pending:
@@ -121,23 +117,8 @@ def plan_sync(target: Path, render: bool) -> dict[Path, bytes]:
     return pending
 
 
-def atomic_write(path: Path, data: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    mode = path.stat().st_mode & 0o777 if path.exists() else 0o644
-    tmp = None
-    try:
-        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".agent-sync-", delete=False) as f:
-            tmp = Path(f.name)
-            f.write(data)
-        tmp.chmod(mode)
-        os.replace(tmp, path)
-    finally:
-        if tmp is not None and tmp.exists():
-            tmp.unlink()
-
-
 def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False,
-             render: bool = False) -> bool:
+             render: bool = False, backup_dir: Path | None = None) -> bool:
     target = target.resolve()
     try:
         if not target.is_dir():
@@ -158,13 +139,15 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False,
         if dry_run or show_diffs:
             print("  Preview only; no files or Git index entries changed.")
             return True
-        # Version is written last; a filesystem failure cannot advertise success.
-        for rel, data in changes.items():
-            if rel != Path(".agent-system-version"):
-                atomic_write(safe_path(target, rel), data)
-        if Path(".agent-system-version") in changes:
-            atomic_write(safe_path(target, Path(".agent-system-version")), changes[Path(".agent-system-version")])
+        root = backup_root(target, backup_dir)
+        with project_lock(target, root):
+            current = plan_sync(target, render)
+            if current != pending:
+                raise ValueError("Project/configuration changed during sync preflight; retry preview")
+            backup = apply_batch(target, current, root=root, writer=atomic_write, version=get_version())
         print("  Sync complete. Review and stage changes normally; Git index was not modified.")
+        if backup:
+            print(f"  Recovery backup: {backup}")
         return True
     except (OSError, ValueError) as exc:
         print(f"Sync failed: {exc}", file=sys.stderr)
@@ -172,6 +155,26 @@ def cmd_sync(target: Path, dry_run: bool = False, show_diffs: bool = False,
     except Exception as exc:
         # Jinja/YAML exceptions are reported without executing downstream code.
         print(f"Sync validation failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return False
+
+
+def cmd_restore(target: Path, backup: Path, dry_run: bool = False) -> bool:
+    target = target.resolve()
+    try:
+        if target == ROOT.resolve() or not target.is_dir():
+            raise ValueError("Choose an existing downstream target")
+        if dry_run:
+            pending, _ = restore_plan(target, backup)
+            print(f"Restore preview: {target}; {len(pending)} recorded paths; no writes")
+            return True
+        root = backup_root(target)
+        with project_lock(target, root):
+            pending, modes = restore_plan(target, backup)
+            reverse = apply_batch(target, pending, root=root, modes=modes, version="restore")
+        print(f"Restore complete. Reverse-operation backup: {reverse or 'no changes'}")
+        return True
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"Restore failed: {exc}", file=sys.stderr)
         return False
 
 
@@ -211,15 +214,23 @@ def main() -> None:
     target = parser.add_mutually_exclusive_group(required=True)
     target.add_argument("--target", type=Path)
     target.add_argument("--all", action="store_true", dest="sync_all")
+    parser.add_argument("--restore", type=Path, help="Restore a recovery record for --target; refuses newer edits")
+    parser.add_argument("--backup-dir", type=Path, help="Store recovery records outside the target")
     parser.add_argument("--render", action="store_true", help="Render in memory before copying")
     preview = parser.add_mutually_exclusive_group()
     preview.add_argument("--dry-run", action="store_true")
     preview.add_argument("--diff", action="store_true")
     args = parser.parse_args()
-    if args.sync_all:
+    if args.restore:
+        if args.sync_all or args.render or args.diff or args.backup_dir:
+            parser.error("--restore requires --target and supports only --dry-run")
+        ok = cmd_restore(args.target, args.restore, args.dry_run)
+    elif args.sync_all:
+        if args.backup_dir:
+            parser.error("--backup-dir requires a single --target")
         ok = cmd_sync_all(args.render, args.dry_run, args.diff)
     else:
-        ok = cmd_sync(args.target, args.dry_run, args.diff, args.render)
+        ok = cmd_sync(args.target, args.dry_run, args.diff, args.render, args.backup_dir)
     if not ok:
         sys.exit(1)
 

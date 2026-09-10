@@ -99,7 +99,7 @@ Recommend High Impact × High Evidence × Low Effort first.
 
 ## Optional skill augmentation
 
-If the Claude skill `design:research-synthesis` is available in the current environment, invoke it as a methodological reference. The skill provides additional templates for opportunity mapping and segment description.
+Use a relevant available research-synthesis skill when useful; discover its actual name and instructions from the current host.
 
 If the skill is not available (Cursor, API, or no plugin installed), use the built-in methodology above — it covers the same essential ground.
 

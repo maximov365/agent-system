@@ -1,6 +1,6 @@
 # Tasks
 
-<!-- Task backlog managed by Iteration Manager. -->
+<!-- Task backlog maintained by the current task owner. -->
 <!-- See docs/TASK_TEMPLATE.md for the task proposal format. -->
 <!-- See docs/TASK_BACKLOG_AUTOMATION.md for committed fields, schema, and lifecycle rules. -->
 
@@ -17,3 +17,11 @@
 | TASK-009 | Marketing Agent — strategy, campaigns, launch kits | completed | medium | small |
 | TASK-010 | Illustrator tool-agent + MCP integration + Designer visual briefs | completed | medium | small |
 | TASK-011 | Codex / GPT-6 Astra audit, portable execution, visual/game contracts, and safe deployment tooling | completed | high | large |
+| TASK-012 | Remove remaining workflow and task-ownership contradictions | completed | high | medium |
+| TASK-013 | Recoverable sync and safe legacy migration | completed | high | large |
+| TASK-014 | Executable visual verification | completed | high | large |
+| TASK-015 | Asset library and production validators | completed | high | medium |
+| TASK-016 | Optional integration example and runtime evidence | completed | high | large |
+| TASK-017 | Project-specific quality profiles | completed | high | medium |
+| TASK-018 | Paired Astra workflow evaluation | completed | high | large |
+| TASK-019 | Verified downstream commits and publication | in_progress | high | large |

@@ -56,7 +56,8 @@ class FrameworkTests(unittest.TestCase):
             if option == "--diff":
                 self.assertIn("Trial Project", result.stdout)
                 self.assertIn("+# Agent System — Trial Project", result.stdout)
-                self.assertNotIn("+# Agent System — {{ project.name }}", result.stdout)
+                rendered_diff = result.stdout.split("+++ new/AGENTS.md\n", 1)[1].split("--- old/", 1)[0]
+                self.assertNotIn("+# Agent System — {{ project.name }}", rendered_diff)
 
     def test_all_diff_honors_preview(self):
         before = snapshot(self.project)
@@ -73,8 +74,21 @@ class FrameworkTests(unittest.TestCase):
         self.assertNotIn(Path(".github/workflows/agent-quality.yml"), seeds)
         self.assertIn(Path(".agent-system/setup.py"), framework)
         self.assertTrue(is_framework_change("agents/deleted-role.md"))
+        self.assertFalse(is_framework_change("docs/TASKS.md"))
+        self.assertFalse(is_framework_change("docs/DECISIONS.md"))
         self.assertTrue(is_framework_change("agents/discovery-modes/deleted-mode.md"))
         self.assertIn(Path("AGENTS.md"), deployment_sources(self.base))
+
+    def test_examples_and_optional_dependencies_never_ship_to_projects(self):
+        sources = deployment_sources(ROOT) | seed_sources(ROOT)
+        self.assertFalse(any("examples" in source.relative_to(ROOT).parts for source in sources.values()))
+        self.assertTrue(self.sync(render=True))
+        self.assertFalse((self.project / "examples").exists())
+        self.assertFalse((self.project / "assets").exists())
+        self.assertFalse((self.project / "node_modules").exists())
+        requirements = (ROOT / "requirements-framework.txt").read_text().lower()
+        self.assertNotIn("pillow", requirements)
+        self.assertNotIn("playwright", requirements)
 
     def test_preserves_project_files_and_git_index(self):
         protected = {
@@ -109,6 +123,17 @@ class FrameworkTests(unittest.TestCase):
             if sync.is_template(rel):
                 self.assertFalse(setup.has_variables((self.project / rel).read_text()), str(rel))
         self.assertIn("Trial Project", (self.project / "agents/builder.md").read_text())
+
+    def test_clone_without_ignored_cache_can_reconfigure(self):
+        import shutil
+        self.assertTrue(self.sync(render=True))
+        clone = self.base / "clone"
+        shutil.copytree(self.project, clone, ignore=shutil.ignore_patterns(".templates", ".agent"))
+        (clone / "project.config.yaml").write_text('project: {name: "After Clone"}\n')
+        result = self.command(clone / ".agent-system/setup.py")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("After Clone", (clone / "AGENTS.md").read_text())
+        self.assertTrue((clone / ".agent-system/templates/AGENTS.md").exists())
 
     def test_seed_history_not_inherited_from_framework(self):
         self.assertTrue(self.sync(render=True))

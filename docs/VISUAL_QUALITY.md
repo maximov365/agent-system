@@ -31,6 +31,8 @@ Inspect actual outputs before accepting them: transparent edges/halos, crop, sea
 
 ## Implement, run, inspect, correct
 
+For web apps/browser games, `docs/VISUAL_RUNNER.md` provides an executable capture/journey adapter. Keep its configuration project-owned; preserve the distinction between automatic checks and viewed visual evidence.
+
 1. Build the representative screen/scene using real components and approved assets.
 2. Launch the application through available runtime tools. Exercise the primary journey and affected interactions.
 3. Capture and **view** screenshots at representative desktop/mobile or target device sizes. Record route/scene, state, viewport, scale, and build/revision. A saved file that was never viewed is not visual review.
