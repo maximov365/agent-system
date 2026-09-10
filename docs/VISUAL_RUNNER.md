@@ -39,3 +39,5 @@ To compare approved images, set a project-relative `baselineDir` and `maxDiffRat
 Browser API details: [local server lifecycle](https://playwright.dev/docs/test-webserver), [trace capture](https://playwright.dev/docs/api/class-tracing), and [visual comparison constraints](https://playwright.dev/docs/test-snapshots). Traces from this library runner capture browser operations; step assertions are recorded separately in report.json.
 
 Motion defaults to `reducedMotion: "reduce"` for repeatable screenshots. Use `"no-preference"` explicitly to exercise normal animation; record that setting with evidence. Static captures alone do not validate timing.
+
+The optional browser tooling is tested with Node.js 22 and its locked Playwright version. Install the matching browser with Playwright; an older cached browser is not sufficient. Core framework sync/render remains Python-only.
