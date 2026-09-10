@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10T14:24:20.390800+00:00",
+  "model_requested": "gpt-6-astra",
+  "model_resolved": null,
+  "reasoning_effort": "medium",
+  "framework_base_revision": "850af3ef21cf324b70c83f346e6177bfbbf82bd7",
+  "framework_snapshot_sha256": "e78b307d6f4151d96d61b4c46dff4f4260386e2b3985b67792d960c9549d9ef2",
+  "baseline_revision": "850af3ef21cf324b70c83f346e6177bfbbf82bd7",
+  "condition_sha256": {
+    "baseline": "b02a92b25154b6233c1343f90adf4e3028eb4f051708bf87a353a3cae8d8415e",
+    "candidate": "e78b307d6f4151d96d61b4c46dff4f4260386e2b3985b67792d960c9549d9ef2"
+  },
+  "rendered_condition_sha256": {
+    "baseline": "ea65a090599e28b4fe07b1be776055d9929b9e66de6f62e70d8ff567c5ead3dc",
+    "candidate": "c03bf59a1653b00b3037e51ca960569646f79da5f65e038ff0bc4b65401d22ee"
+  },
+  "entry_words": {
+    "baseline": 927,
+    "candidate": 434
+  },
+  "fixture_sha256": {
+    "pagination": "e6251e8680825f662c9925847d69470cf967d4e314376f6f4ec53a4ed7dac8d5",
+    "authorization": "babb39c2b6958d33ae62eac2b5b7f553ec2129aa6ecaed45b89d27d948be6f7c"
+  },
+  "grader_sha256": {
+    "pagination": "7af43a44d5ae6332a119e2126cbe3b81618a95221494a7cac8dd2301fadb6814",
+    "authorization": "bf615801de62dd45a8d503d02611e9e508b4a187f2fb9d58397965bc2c8312bd"
+  },
+  "repeats": 2,
+  "runs": [
+    {
+      "run_id": "pagination-baseline-1",
+      "task": "pagination",
+      "condition": "baseline",
+      "repeat": 1,
+      "elapsed_seconds": 51.156,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 93851,
+        "cached_input_tokens": 75648,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 990,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 13887,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-candidate-1",
+      "task": "pagination",
+      "condition": "candidate",
+      "repeat": 1,
+      "elapsed_seconds": 54.857,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 86222,
+        "cached_input_tokens": 78464,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1142,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 6,
+      "observed_command_output_chars": 5615,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-baseline-1",
+      "task": "authorization",
+      "condition": "baseline",
+      "repeat": 1,
+      "elapsed_seconds": 94.831,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 169566,
+        "cached_input_tokens": 154752,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2260,
+        "reasoning_output_tokens": 90
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 5,
+      "observed_command_output_chars": 36130,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-candidate-1",
+      "task": "authorization",
+      "condition": "candidate",
+      "repeat": 1,
+      "elapsed_seconds": 74.539,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 117385,
+        "cached_input_tokens": 100608,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1842,
+        "reasoning_output_tokens": 47
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 29296,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-candidate-2",
+      "task": "pagination",
+      "condition": "candidate",
+      "repeat": 2,
+      "elapsed_seconds": 46.21,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 87669,
+        "cached_input_tokens": 79104,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 928,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 10367,
+      "passed": true
+    },
+    {
+      "run_id": "pagination-baseline-2",
+      "task": "pagination",
+      "condition": "baseline",
+      "repeat": 2,
+      "elapsed_seconds": 47.433,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 94180,
+        "cached_input_tokens": 84096,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1078,
+        "reasoning_output_tokens": 0
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 3,
+      "observed_command_output_chars": 2684,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-candidate-2",
+      "task": "authorization",
+      "condition": "candidate",
+      "repeat": 2,
+      "elapsed_seconds": 79.813,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 117245,
+        "cached_input_tokens": 94976,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2056,
+        "reasoning_output_tokens": 75
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 4,
+      "observed_command_output_chars": 55631,
+      "passed": true
+    },
+    {
+      "run_id": "authorization-baseline-2",
+      "task": "authorization",
+      "condition": "baseline",
+      "repeat": 2,
+      "elapsed_seconds": 112.459,
+      "exit_code": 0,
+      "usage": {
+        "input_tokens": 124127,
+        "cached_input_tokens": 106240,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1925,
+        "reasoning_output_tokens": 78
+      },
+      "manual_interventions": 0,
+      "independent_review": false,
+      "checks": {
+        "public": {
+          "passed": true,
+          "exit_code": 0
+        },
+        "held_out": {
+          "passed": true,
+          "exit_code": 0
+        }
+      },
+      "model_completed": true,
+      "observed_command_count": 3,
+      "observed_command_output_chars": 71749,
+      "passed": true
+    }
+  ],
+  "cost_usd": null,
+  "limitations": [
+    "Synthetic Python tasks only; no visual/game model comparison.",
+    "Requested model recorded; CLI JSON may not expose independently resolved model identity.",
+    "User config disabled; host built-in instructions/tools still apply to both conditions.",
+    "No independent reviewer. Subscription token counts are not API dollar cost."
+  ],
+  "runtime": "codex-cli 0.153.4",
+  "release_adjustment": "After freezing this experiment, the release entry explicitly restored all security-boundary and release strict-mode triggers (434 to 438 rendered words). Both synthetic tasks already exercised their intended rigor. Reported timing is for the frozen candidate, not a retest of that clarification.",
+  "snapshot_reproduction": "The v1/v2 patch artifacts reconstruct each exact rendered candidate from its frozen rendered baseline using git apply --unidiff-zero. Reconstruction and digests were verified locally."
+}

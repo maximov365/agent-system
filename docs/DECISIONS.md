@@ -573,3 +573,19 @@ Sync now creates private outside-project before/after recovery records, uses a c
 ## DEC-020 — Clean framework and clone-safe tooling (2026-09-10)
 
 Application examples, their art/audio and developer evidence are optional and excluded from downstream deployment. Project quality profiles are project-owned and opt-in. Original render templates are tracked under `.agent-system/templates/` downstream so a clone can reconfigure; legacy `.templates/` caches are not authoritative. Actual model evaluations use synthetic fixtures, and results never imply general visual or production quality.
+
+## DEC-021 — Task-scoped context and explicit check evidence reuse (2026-09-10)
+
+Keep the task entry compact and load detailed methods for affected surfaces. Project
+quality profiles own verified source/test/reference navigation and commands. Reuse
+of an original successful check is explicit, short-lived and session-scoped; it
+requires reviewed deterministic dependencies and matching content, runtime,
+environment, configuration and integrity evidence. Fresh checks remain the default
+and are required for release/security approval. No downstream check is opted in
+merely because the feature exists. Short checks may be cheaper to rerun than hash.
+
+Two real Astra experiments retain successful and unsuccessful timing outcomes.
+The final frozen candidate averaged 16.5% faster across two synthetic tasks, with
+the gain concentrated in authorization; this is exploratory, not a universal speed
+or quality claim. Model/effort and acceptance remain unchanged. Source release
+1.0.44 passed CI, and all 16 downstream profiles/templates/integrity checks passed.
