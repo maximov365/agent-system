@@ -299,6 +299,9 @@ def main():
                 result['commands_executed'] = True
                 result['journey'] = {'status': 'check_passed' if checked['status'] == 'passed' else 'check_failed',
                                      'check': check_id, 'evidence': str(output), 'exit_code': checked['exit_code']}
+                for check in result['checks']:
+                    if check['id'] == check_id:
+                        check.update(result=checked['status'], evidence=str(output))
                 if checked['status'] != 'passed':
                     result['status'] = 'attention'
             print(json.dumps(result, indent=2))

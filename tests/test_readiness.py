@@ -109,6 +109,7 @@ class ReadinessTests(unittest.TestCase):
         result = json.loads(first.stdout)
         self.assertTrue(result['commands_executed'])
         self.assertEqual(result['journey']['status'], 'check_passed')
+        self.assertEqual(result['checks'][0]['result'], 'passed')
         self.assertEqual(result['visual_review'], 'not_performed')
         evidence = json.loads((Path(result['journey']['evidence']) / 'report.json').read_text())
         self.assertTrue(evidence['executed'])
@@ -117,6 +118,7 @@ class ReadinessTests(unittest.TestCase):
         failed = subprocess.run(command, text=True, capture_output=True)
         self.assertEqual(failed.returncode, 1)
         self.assertEqual(json.loads(failed.stdout)['journey']['exit_code'], 3)
+        self.assertEqual(json.loads(failed.stdout)['checks'][0]['result'], 'failed')
 
 
 if __name__ == '__main__':
