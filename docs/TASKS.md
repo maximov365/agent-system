@@ -33,4 +33,4 @@
 | TASK-025 | Read-only project readiness and explicit launch verification | completed | high | medium |
 | TASK-026 | Focused native skills and shared design craft | completed | high | medium |
 | TASK-027 | Multi-file/UI evaluation fixtures and visual comparison protocol | completed | medium | medium |
-| TASK-028 | Validate, safely propagate and publish readiness/design release | in_progress | high | medium |
+| TASK-028 | Validate, safely propagate and publish readiness/design release | completed | high | medium |

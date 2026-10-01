@@ -1,6 +1,7 @@
 # Readiness and design release — 2026-10-01
 
-Version 1.0.45, based on 84ec177 / 1.0.44. Implementation and review by the same
+Version 1.0.46, based on 84ec177 / 1.0.44. The main implementation is 240ef86;
+5c86c7f keeps the per-check result consistent after explicit verification. Implementation and review by the same
 current task owner; no independent agent or user preference study is claimed.
 
 ## Delivered
@@ -62,3 +63,47 @@ readiness deliberately leaves unobserved model/effort/tier null.
 
 Sources and the reasoning behind adaptation are linked from `docs/MODEL_POLICY.md`,
 `docs/DESIGN_CRAFT.md` and `evals/VISUAL_COMPARISON.md`.
+
+## Verified rollout
+
+All **17 registered projects** received 1.0.46. Rendered framework bytes and
+version markers match; project-owned files and unrelated staged/worktree content
+were preserved. Recovery records remain outside projects. All 17 template checks
+passed, and all **16 existing quality profiles** validated. The newly registered
+`fallout2-remaster` has no project-owned profile; this is recorded as not configured,
+not as a passing application check. No application code or game asset was shipped.
+
+Ten Git projects received isolated local framework commits. Seven existing main
+branches and Unfolda's existing draft PR branch were published. X5Club and Iris
+have no remote; seven projects have no Git repository. No repository or remote
+was invented. Ecom Scout used its verified `ecom-scout` remote because its `origin`
+points at a different project. Unfolda's unpublished local application history
+remains outside the PR. Its local checkout was also updated.
+
+| Project | Final local commit / storage |
+|---|---|
+| voxema | `18a9236d` |
+| unfolda | `78d5f55e` |
+| x5club | `cc2e73d7` |
+| ecom-scout | `19f7bf74` |
+| probey | `50a4942d` |
+| real-estate | `618c63e5` |
+| collective-purch | Files updated; no Git |
+| synthetic_resp | `8c35a994` |
+| beautyrs | Files updated; no Git |
+| tracker_fiz | Files updated; no Git |
+| Iris | `14c0fe63` |
+| game_tsx | Files updated; no Git |
+| disco-system | Files updated; no Git |
+| okr&kpi | `ebc9782b` |
+| astrology | `992af1c7` |
+| xslides | Files updated; no Git |
+| fallout2-remaster | Files updated; no Git |
+
+The main implementation's [GitHub CI](https://github.com/maximov365/agent-system/actions/runs/36840221532)
+passed both Python 3.10/3.14 jobs and the visual runner/grader job. The small report
+consistency fix passed a fresh 62-test local suite and its own
+[GitHub CI](https://github.com/maximov365/agent-system/actions/runs/36840567346). The
+[existing Unfolda PR](https://github.com/maximov365/unfolda/pull/1) remains draft;
+its final framework branch commit is `82a4dd9`. Publication and preservation
+receipts remain in ignored `.agent/validation/readiness-*.json` files.
