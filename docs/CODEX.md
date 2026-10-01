@@ -31,7 +31,12 @@ Codex discovers AGENTS.md guidance along the project path, with closer files ove
 
 Use the actual tools exposed by the host. Native image generation is preferred when available; an MCP server is optional. Use real screenshots and interactions for visual verification, and measure the running application for performance claims. Never report generated art or a viewed screenshot unless the tool actually produced or displayed it.
 
-For reusable procedures, Codex supports skills with progressive loading and repository skills in `.agents/skills/`. Existing `agents/*.md` files are reference methods, not automatically registered native agents or skills. Package a few proven workflows later rather than converting every role into an always-on plugin. [Official skills guide](https://learn.chatgpt.com/docs/build-skills).
+For reusable procedures, Codex supports skills with progressive loading and repository skills in `.agents/skills/`. Existing `agents/*.md` files remain reference methods, not native agents. The framework ships four focused skills: `agent-system-readiness`, `agent-system-design`, `agent-system-design-review`, and `agent-system-upgrade`. They route to shared contracts and do not install engines, hooks or providers. Verify that the current session discovers a skill before claiming to invoke it; reload the session after installation if needed. [Official skills guide](https://learn.chatgpt.com/docs/build-skills).
+
+Use `python3 .agent-system/profile.py doctor` for declared project prerequisites;
+see `docs/PROJECT_READINESS.md` for explicit runtime verification. Diagnostic model
+intent is not the host's effective selection. Optional speed tiers and changing
+client defaults are covered by `docs/MODEL_POLICY.md`.
 
 Use built-in task scheduling only when a user requests recurring work; do not install a launchd reminder as part of ordinary project initialization. Model-specific API features are distinct from Codex desktop capabilities; `docs/MODEL_POLICY.md` covers the boundary.
 

@@ -25,7 +25,12 @@
 | TASK-017 | Project-specific quality profiles | completed | high | medium |
 | TASK-018 | Paired Astra workflow evaluation | completed | high | large |
 | TASK-019 | Verified downstream commits and publication | completed | high | large |
-| TASK-020 | Research and reduce workflow context overhead | done | high | medium |
-| TASK-021 | Project navigation and safe evidence reuse | done | high | large |
-| TASK-022 | Paired efficiency evaluation and regressions | done | high | large |
-| TASK-023 | Publish and propagate efficiency release | done | high | medium |
+| TASK-020 | Research and reduce workflow context overhead | completed | high | medium |
+| TASK-021 | Project navigation and safe evidence reuse | completed | high | large |
+| TASK-022 | Paired efficiency evaluation and regressions | completed | high | large |
+| TASK-023 | Publish and propagate efficiency release | completed | high | medium |
+| TASK-024 | Current contracts, optional speed policy and Python compatibility | completed | high | medium |
+| TASK-025 | Read-only project readiness and explicit launch verification | completed | high | medium |
+| TASK-026 | Focused native skills and shared design craft | completed | high | medium |
+| TASK-027 | Multi-file/UI evaluation fixtures and visual comparison protocol | completed | medium | medium |
+| TASK-028 | Validate, safely propagate and publish readiness/design release | in_progress | high | medium |

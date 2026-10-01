@@ -20,6 +20,26 @@ sys.path.insert(0, str(ROOT))
 import setup
 from sync import is_template
 
+TASKS = {
+    'pagination': {'public': [sys.executable, '-m', 'unittest', 'discover', '-v'], 'grader': 'pagination.py'},
+    'authorization': {'public': [sys.executable, '-m', 'unittest', 'discover', '-v'], 'grader': 'authorization.py'},
+    'multifile': {'public': [sys.executable, '-m', 'unittest', 'discover', '-v'], 'grader': 'multifile.py'},
+    'ui-filter': {'public': ['node', '--test', 'test/filter.test.mjs'], 'grader': 'ui-filter.mjs'},
+}
+
+
+def write_files(root, files):
+    for rel, data in files.items():
+        target = root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+
+
+def fixture_files(name):
+    root = ROOT / 'evals/fixtures' / name
+    return {str(p.relative_to(root)): p.read_bytes() for p in root.rglob('*')
+            if p.is_file() and not any(part in {'__pycache__', '.agent', 'node_modules'} for part in p.relative_to(root).parts)}
+
 
 def digest(files):
     h = hashlib.sha256()
@@ -85,12 +105,10 @@ def main():
     parser.add_argument('--timeout', type=int, default=240, choices=range(30, 601))
     parser.add_argument('--output', required=True)
     parser.add_argument('--baseline-ref', help='Compare a trusted git revision against the current framework instead of plain')
+    parser.add_argument('--tasks', nargs='+', choices=sorted(TASKS), default=['pagination', 'authorization'])
     parser.add_argument('--run', action='store_true', help='Authorize actual model calls; otherwise only validate fixtures')
     args = parser.parse_args()
-    fixtures = {}
-    for name in ['pagination', 'authorization']:
-        fixtures[name] = {str(p.relative_to(ROOT/'evals/fixtures'/name)): p.read_bytes()
-                          for p in (ROOT/'evals/fixtures'/name).rglob('*') if p.is_file()}
+    fixtures = {name: fixture_files(name) for name in dict.fromkeys(args.tasks)}
     framework = framework_files(ROOT)
     before_revision, before_files = baseline_files(args.baseline_ref) if args.baseline_ref else (None, {})
     conditions = ['baseline', 'candidate'] if args.baseline_ref else ['plain', 'framework']
@@ -106,9 +124,11 @@ def main():
                 'rendered_condition_sha256': {name: digest(files) for name, files in rendered.items()},
                 'entry_words': {name: len(files.get('AGENTS.md', b'').split()) for name, files in rendered.items()},
                 'fixture_sha256': {name:digest(files) for name,files in fixtures.items()},
-                'grader_sha256': {name:hashlib.sha256((ROOT/'evals/graders'/f'{name}.py').read_bytes()).hexdigest() for name in fixtures},
+                'grader_sha256': {name:hashlib.sha256((ROOT/'evals/graders'/TASKS[name]['grader']).read_bytes()).hexdigest() for name in fixtures},
+                'visual_runner_sha256': hashlib.sha256((ROOT/'tools/visual/run.mjs').read_bytes()).hexdigest() if 'ui-filter' in fixtures else None,
                 'repeats': args.repeats, 'runs': [], 'cost_usd': None,
-                'limitations': ['Synthetic Python tasks only; no visual/game model comparison.',
+                'limitations': ['Synthetic fixtures; browser checks and screenshots do not establish design quality.',
+                  'UI captures require separate recorded visual review; no automated aesthetic score.',
                   'Requested model recorded; CLI JSON may not expose independently resolved model identity.',
                   'User config disabled; host built-in instructions/tools still apply to both conditions.',
                   'No independent reviewer. Subscription token counts are not API dollar cost.']}
@@ -131,7 +151,7 @@ def main():
             for condition in order:
                 run_id=f'{task}-{condition}-{repeat+1}';work=root/run_id
                 shutil.copytree(root/f'{condition}-snapshot',work)
-                for rel,data in files.items():(work/rel).write_bytes(data)
+                write_files(work, files)
                 subprocess.run(['git','init','-q',str(work)],check=True)
                 prompt=(work/'task.txt').read_text()
                 argv=[args.codex,'exec','--ephemeral','--ignore-user-config','--sandbox','workspace-write',
@@ -154,10 +174,18 @@ def main():
                 folder=output/run_id;folder.mkdir()
                 (folder/'events.jsonl').write_text(out);(folder/'stderr.log').write_text(err)
                 (folder/'final.txt').write_text('\n'.join(messages))
-                if (work/'core.py').is_file():shutil.copyfile(work/'core.py',folder/'core.py')
-                for label,command in [('public',[sys.executable,'-m','unittest','discover','-v']),
-                                      ('held_out',[sys.executable,str(ROOT/'evals/graders'/f'{task}.py'),str(work)])]:
-                    rc,stdout,stderr=invoke(command,work,30)
+                # Keep edited fixture files, including nested modules, for review.
+                for rel in files:
+                    source = work / rel
+                    if source.is_file() and not source.is_symlink():
+                        write_files(folder / 'solution', {rel: source.read_bytes()})
+                grader = ROOT / 'evals/graders' / TASKS[task]['grader']
+                held_out = ['node' if grader.suffix == '.mjs' else sys.executable, str(grader), str(work)]
+                if task == 'ui-filter':
+                    held_out.append(str(folder / 'browser'))
+                    record['visual_review'] = 'pending'
+                for label,command in [('public',TASKS[task]['public']), ('held_out',held_out)]:
+                    rc,stdout,stderr=invoke(command,work,120 if task == 'ui-filter' else 30)
                     record['checks'][label]={'passed':rc==0,'exit_code':rc}
                     (folder/f'{label}.log').write_text(stdout+stderr)
                 record['observed_command_count']=len(commands)

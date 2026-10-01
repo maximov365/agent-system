@@ -35,3 +35,11 @@ observations. See `ART_DIRECTION.md` and the framework review report.
 Source artwork, exports, generation provenance, and original procedural audio
 are under `assets/`. Evidence output stays in the ignored `.agent/` directory.
 No example CI, package, asset, server, or test is added to downstream projects.
+
+## Launch diagnostics
+
+From the framework root, `python3 tools/profiles/profile.py doctor --project examples/game-slice`
+inspects prerequisites without starting anything. Add `--verify-launch` to run the
+existing browser journeys with an owned local server. The default port 4321 must
+be free; keep an already open user session separate. This optional example and its
+profile are never installed as downstream application code.

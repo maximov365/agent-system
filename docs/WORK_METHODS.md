@@ -10,6 +10,8 @@ and applicable project constraints take priority over generic examples.
 | Product or architecture | Relevant PRD, ARCHITECTURE and ARCHITECTURE_GUARDRAILS sections |
 | Real processing stage | docs/PIPELINE_CONTRACTS.md |
 | UI, art, animation | docs/VISUAL_QUALITY.md and the project's brand/components/assets |
+| Composition, type, color or motion decision | Relevant section of docs/DESIGN_CRAFT.md |
+| Local startup or missing tool/dependency | quality/profile.json; docs/PROJECT_READINESS.md |
 | Game logic/interaction | docs/GAME_DEVELOPMENT.md |
 | Analytics | Project event contract; agents/analytics-architect.md and analytics-validator.md when needed |
 | Security boundary | Project threat/authorization contracts; agents/security-reviewer.md when deeper review helps |

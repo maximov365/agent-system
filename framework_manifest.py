@@ -6,14 +6,18 @@ FRAMEWORK_GLOBS = [
     "agents/**/*.md", "AGENTS.md", "CLAUDE.md", ".cursor/rules.md",
     "docs/AGENT_HANDOFF_CONTRACT.md", "docs/AGENT_EXECUTION_MODEL.md",
     "docs/CODING_RULES.md", "docs/CODEX.md", "docs/VISUAL_QUALITY.md",
-    "docs/GAME_DEVELOPMENT.md", "docs/MODEL_POLICY.md",
+    "docs/GAME_DEVELOPMENT.md", "docs/MODEL_POLICY.md", "docs/PROJECT_READINESS.md",
     "docs/MODEL_GATEWAY_SETUP.md", "docs/EXTERNAL_REVIEW_CONTRACT.md",
     "docs/SANDBOX_POLICY.md", "docs/PULL_REQUEST_CONTRACT.md",
     "docs/TASK_BACKLOG_AUTOMATION.md", "docs/ARCHITECTURE_CHECKLIST.md",
     "docs/TASK_TEMPLATE.md", "docs/ONBOARDING.md", "docs/MCP_TOOLS.md",
     "docs/CLAUDE_SKILLS.md", "docs/MAST_MAPPING.md", "docs/FRAMEWORK_UPGRADE.md", "docs/VISUAL_RUNNER.md", "docs/ASSET_LIBRARY.md", "docs/QUALITY_PROFILES.md", "docs/WORK_METHODS.md",
-    "evals/README.md", "evals/tasks/*.md", "evals/expected/*.yaml",
+    "evals/README.md",
+    "evals/VISUAL_COMPARISON.md", "evals/tasks/*.md", "evals/expected/*.yaml",
     "templates/codex/config.toml",
+    "docs/DESIGN_CRAFT.md",
+    ".agents/skills/agent-system-*/SKILL.md",
+    ".agents/skills/agent-system-*/agents/openai.yaml",
 ]
 
 # Project-owned once created. Never include these in FRAMEWORK_GLOBS.
@@ -28,6 +32,7 @@ SEED_GLOBS = [
 # Framework code lives in its own namespace downstream, avoiding app setup.py.
 TOOL_DESTINATIONS = {
     "tools/profiles/profile.py": ".agent-system/profile.py",
+    "tools/profiles/readiness.py": ".agent-system/readiness.py",
     "setup.py": ".agent-system/setup.py",
     "framework_manifest.py": ".agent-system/framework_manifest.py",
     "requirements-framework.txt": ".agent-system/requirements.txt",

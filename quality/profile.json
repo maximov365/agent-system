@@ -1,54 +1,151 @@
 {
   "schema_version": 1,
-  "kinds": ["tooling"],
-  "targets": ["Python 3.10+", "Node 22+ for optional visual tooling"],
+  "kinds": [
+    "tooling"
+  ],
+  "targets": [
+    "Python 3.10+",
+    "Node 22+ for optional visual tooling"
+  ],
   "navigation": {
-    "source": ["framework_manifest.py", "sync.py", "sync_transaction.py", "setup.py", "tools", "agents"],
-    "tests": ["tests", "tools/visual/test", "evals/fixtures", "evals/graders"],
-    "references": ["requirements-framework.txt", "requirements-dev.txt", ".github/workflows/agent-quality.yml", "docs/WORK_METHODS.md"]
+    "source": [
+      "framework_manifest.py",
+      "sync.py",
+      "sync_transaction.py",
+      "setup.py",
+      "tools",
+      "agents"
+    ],
+    "tests": [
+      "tests",
+      "tools/visual/test",
+      "evals/fixtures",
+      "evals/graders"
+    ],
+    "references": [
+      "requirements-framework.txt",
+      "requirements-dev.txt",
+      ".github/workflows/agent-quality.yml",
+      "docs/WORK_METHODS.md"
+    ]
   },
   "checks": [
     {
       "id": "unit",
       "status": "configured",
-      "command": [".venv/bin/python", "-m", "unittest", "discover", "-s", "tests", "-v"],
+      "command": [
+        ".venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
       "cwd": ".",
-      "defined_by": ["tests/test_framework.py", "requirements-dev.txt"],
+      "defined_by": [
+        "tests/test_framework.py",
+        "requirements-dev.txt"
+      ],
       "timeout_seconds": 300
     },
     {
       "id": "templates",
       "status": "configured",
-      "command": [".venv/bin/python", "setup.py", "--check"],
+      "command": [
+        ".venv/bin/python",
+        "setup.py",
+        "--check"
+      ],
       "cwd": ".",
-      "defined_by": ["setup.py"],
+      "defined_by": [
+        "setup.py"
+      ],
       "timeout_seconds": 60
     },
     {
       "id": "audit",
       "status": "configured",
-      "command": [".venv/bin/python", "audit.py", "--local", "--json", "--fail-on", "critical"],
+      "command": [
+        ".venv/bin/python",
+        "audit.py",
+        "--local",
+        "--json",
+        "--fail-on",
+        "critical"
+      ],
       "cwd": ".",
-      "defined_by": ["audit.py"],
+      "defined_by": [
+        "audit.py"
+      ],
       "timeout_seconds": 60
     },
     {
       "id": "browser-runner",
       "status": "configured",
-      "command": ["env", "AGENT_VISUAL_TEST_BROWSER=1", "node", "--test", "tools/visual/test/runner.test.mjs"],
+      "command": [
+        "env",
+        "AGENT_VISUAL_TEST_BROWSER=1",
+        "node",
+        "--test",
+        "tools/visual/test/runner.test.mjs"
+      ],
       "cwd": ".",
-      "defined_by": ["tools/visual/test/runner.test.mjs", "tools/visual/package.json"],
+      "defined_by": [
+        "tools/visual/test/runner.test.mjs",
+        "tools/visual/package.json"
+      ],
       "timeout_seconds": 300
     },
     {
       "id": "example-logic",
       "status": "configured",
-      "command": ["node", "--test", "examples/game-slice/test/model.test.mjs"],
+      "command": [
+        "node",
+        "--test",
+        "examples/game-slice/test/model.test.mjs"
+      ],
       "cwd": ".",
-      "defined_by": ["examples/game-slice/test/model.test.mjs"],
+      "defined_by": [
+        "examples/game-slice/test/model.test.mjs"
+      ],
       "timeout_seconds": 60
+    },
+    {
+      "id": "ui-eval-grader",
+      "status": "configured",
+      "command": [
+        "env",
+        "AGENT_VISUAL_TEST_BROWSER=1",
+        "node",
+        "--test",
+        "evals/test_ui_grader.mjs"
+      ],
+      "cwd": ".",
+      "defined_by": [
+        "evals/test_ui_grader.mjs",
+        "evals/graders/ui-filter.mjs",
+        "tools/visual/package.json"
+      ],
+      "timeout_seconds": 180
     }
   ],
   "budgets": [],
-  "notes": ["This profile belongs to the framework checkout and is not deployed to child projects.", "Local Python commands require the documented .venv with requirements-dev.txt.", "Reuse remains disabled: short checks or incomplete dependency closure do not justify enabling it."]
+  "notes": [
+    "This profile belongs to the framework checkout and is not deployed to child projects.",
+    "Local Python commands require the documented .venv with requirements-dev.txt.",
+    "Reuse remains disabled: short checks or incomplete dependency closure do not justify enabling it."
+  ],
+  "readiness": {
+    "requirements": [
+      {
+        "id": "python-environment",
+        "executable": ".venv/bin/python",
+        "paths": [
+          "requirements-dev.txt"
+        ],
+        "help": "Create .venv with Python 3.10+ and install requirements-dev.txt; presence does not verify packages."
+      }
+    ]
+  }
 }

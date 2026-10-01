@@ -16,6 +16,11 @@ import subprocess
 import sys
 import time
 
+if __package__:
+    from .readiness import validate_readiness, diagnose
+else:
+    from readiness import validate_readiness, diagnose
+
 KINDS = {'web', 'mobile', 'desktop', 'game', 'service', 'content', 'tooling'}
 ID = re.compile(r'^[a-z0-9][a-z0-9_-]{0,79}$')
 MAX_INPUT_FILES = 20000
@@ -99,6 +104,7 @@ def validate(data, root):
         limit = budget.get('limit')
         if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
             raise ValueError('Budget limit must be positive and finite')
+    validate_readiness(data, root, inside)
     return data
 
 
@@ -264,25 +270,45 @@ def run_check(data, root, check_id, output, *, session=None, reuse_from=None, fr
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['validate', 'summary', 'run'])
+    parser.add_argument('action', choices=['validate', 'summary', 'run', 'doctor'])
     parser.add_argument('--project', default='.')
     parser.add_argument('--profile', default='quality/profile.json')
     parser.add_argument('--check')
     parser.add_argument('--output')
     parser.add_argument('--session', help='Task-scoped ID; needed to record reusable evidence')
+    diagnostics = parser.add_mutually_exclusive_group()
+    diagnostics.add_argument('--probe', action='store_true', help='Doctor: request the declared loopback HTTP URL')
+    diagnostics.add_argument('--verify-launch', action='store_true', help='Doctor: execute the declared launch verification check fresh')
     reuse = parser.add_mutually_exclusive_group()
     reuse.add_argument('--reuse-from', help='Explicit original evidence directory; mismatch runs fresh')
     reuse.add_argument('--fresh', action='store_true', help='Always execute; required for release/security approval')
     args = parser.parse_args()
     try:
+        if (args.probe or args.verify_launch) and args.action != 'doctor':
+            raise ValueError('Probe/verify-launch are doctor options')
         root = Path(args.project).resolve()
         data = validate(json.loads(inside(root, args.profile).read_text()), root)
+        if args.action == 'doctor':
+            result = diagnose(data, root, inside, probe=args.probe)
+            if args.verify_launch:
+                check_id = data.get('readiness', {}).get('launch', {}).get('verification_check')
+                if not check_id:
+                    raise ValueError('Launch verification requires a configured verification_check')
+                output = inside(root, args.output or '.agent/evidence/quality/' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
+                checked = run_check(data, root, check_id, output, fresh=True)
+                result['commands_executed'] = True
+                result['journey'] = {'status': 'check_passed' if checked['status'] == 'passed' else 'check_failed',
+                                     'check': check_id, 'evidence': str(output), 'exit_code': checked['exit_code']}
+                if checked['status'] != 'passed':
+                    result['status'] = 'attention'
+            print(json.dumps(result, indent=2))
+            return 1 if result['status'] == 'attention' else 0
         if args.action == 'validate':
             print(json.dumps({'valid': True, 'kinds': data['kinds'], 'checks': len(data['checks']), 'executed': False}))
             return 0
         if args.action == 'summary':
             print(json.dumps({'kinds': data['kinds'], 'targets': data['targets'],
-                              'navigation': data.get('navigation', {}),
+                              'navigation': data.get('navigation', {}), 'readiness': data.get('readiness', {}),
                               'checks': [{k: c[k] for k in ['id', 'status', 'command', 'cwd', 'reason'] if k in c}
                                          for c in data['checks']], 'executed': False}, indent=2))
             return 0

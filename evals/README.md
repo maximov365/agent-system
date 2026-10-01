@@ -55,3 +55,17 @@ remain local ignored artifacts; publish only the reviewed numeric record.
 
 Execution options were verified against local CLI help and the
 [official non-interactive Codex documentation](https://learn.chatgpt.com/docs/non-interactive-mode).
+
+Select `--tasks multifile ui-filter` for a change spanning query/service/API and a
+small browser interface. Defaults remain the original two tasks. The UI grader
+requires the optional visual dependencies and Chromium installed for
+`tools/visual`; it owns a temporary server on a free loopback port and saves
+desktop/mobile initial, filtered, empty and keyboard states. Its checks cover
+real controls and text rendering, not aesthetics. A timeout or unavailable
+browser is a failed/unavailable check, never a visual approval. Nested fixture
+files are preserved under each run's `solution/`; full temporary workspaces also
+retain newly created files. Only reviewed numeric records should be published.
+
+The grader regression suite uses deliberately broken and known repaired fixtures.
+These tests validate evaluation machinery, **not model performance**. Use the
+[visual comparison protocol](VISUAL_COMPARISON.md) before making design claims.

@@ -589,3 +589,19 @@ The final frozen candidate averaged 16.5% faster across two synthetic tasks, wit
 the gain concentrated in authorization; this is exploratory, not a universal speed
 or quality claim. Model/effort and acceptance remain unchanged. Source release
 1.0.44 passed CI, and all 16 downstream profiles/templates/integrity checks passed.
+
+## DEC-022 — Readiness evidence and focused design methods (2026-10-01)
+
+Add optional project readiness to the existing quality profile. Plain diagnostics
+are read-only; HTTP probing and fresh execution of an existing project journey
+are explicit. Configured intent, executable presence, responding HTTP, successful
+assertions and reviewed visuals remain separate evidence. Reuse the existing
+server lifecycle instead of introducing another process manager.
+
+Ship four short native skills backed by shared portable methods. Preserve local
+skills and project-owned brand/token documents; no external skill engine, hooks,
+provider or automatic delegation is added. Adapt practical layout/type/color/motion
+techniques without universal style bans. Compact research instructions now follow
+the actual runtime and current primary sources instead of a Claude-first calendar.
+New synthetic multi-file/UI fixtures and a visual comparison protocol expand the
+evaluation machinery; grader tests are not evidence of model/design improvement.

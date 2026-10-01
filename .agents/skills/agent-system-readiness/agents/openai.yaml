@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project readiness"
+  short_description: "Diagnose project startup and prerequisite gaps"
+  default_prompt: "Use $agent-system-readiness to diagnose this project and verify its supported launch."

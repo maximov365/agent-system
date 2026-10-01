@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "kinds": [
+    "game",
+    "web"
+  ],
+  "targets": [
+    "desktop keyboard",
+    "mobile touch"
+  ],
+  "navigation": {
+    "source": [
+      "game.mjs",
+      "model.mjs",
+      "index.html"
+    ],
+    "tests": [
+      "test"
+    ],
+    "references": [
+      "README.md",
+      "quality/visual.config.json"
+    ]
+  },
+  "checks": [
+    {
+      "id": "logic",
+      "status": "configured",
+      "command": [
+        "node",
+        "--test",
+        "test/model.test.mjs"
+      ],
+      "cwd": ".",
+      "defined_by": [
+        "package.json",
+        "test/model.test.mjs"
+      ],
+      "timeout_seconds": 60
+    },
+    {
+      "id": "browser",
+      "status": "configured",
+      "command": [
+        "node",
+        "../../tools/visual/run.mjs",
+        "--project",
+        "."
+      ],
+      "cwd": ".",
+      "defined_by": [
+        "quality/visual.config.json"
+      ],
+      "timeout_seconds": 180
+    }
+  ],
+  "budgets": [],
+  "readiness": {
+    "requirements": [
+      {
+        "id": "node",
+        "executable": "node",
+        "help": "Use Node 22+; install the optional framework visual dependencies and Chromium for the browser check."
+      }
+    ],
+    "launch": {
+      "command": [
+        "node",
+        "server.mjs"
+      ],
+      "cwd": ".",
+      "defined_by": [
+        "server.mjs",
+        "package.json"
+      ],
+      "url": "http://127.0.0.1:4321/",
+      "expected_text": "Открыть лавку",
+      "verification_check": "browser"
+    }
+  },
+  "notes": [
+    "Isolated framework example; this profile and game are not deployed to child projects.",
+    "Browser verification owns its server; stop your manually launched example first or use an isolated copy with a separate port."
+  ]
+}

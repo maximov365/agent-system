@@ -42,12 +42,23 @@ for assumptions and measurement limits.
 
 ## High-quality applications and games
 
+- [Design craft](docs/DESIGN_CRAFT.md): composition, typography, semantic color, purposeful motion and specific critique, adapted to the project's own identity.
 - [Visual production](docs/VISUAL_QUALITY.md): art direction, references, asset briefs/provenance, runtime screenshots, interaction checks, accessibility, and performance evidence.
 - [Game production](docs/GAME_DEVELOPMENT.md): playable vertical slice, simulation/presentation boundaries, animation/audio, frame-time budgets, state/save flows, and real playtesting.
 - [Model policy](docs/MODEL_POLICY.md): Astra defaults, API boundaries, model tiers, and honest cost/quality measurement.
 - [Tool capabilities](docs/MCP_TOOLS.md): native tools first; optional verified provider integrations.
 
 The framework provides a process and acceptance contracts. Final artistic quality, game feel, and commercial readiness still need product-specific iteration and player/user evidence.
+
+Four narrow native skills are shipped in `.agents/skills/`: readiness, design,
+design review and framework upgrade. They route to shared methods; they do not
+install providers or change model settings. Discoverability depends on the host's
+loaded skill catalog. See the [Codex guide](docs/CODEX.md).
+
+[Project readiness](docs/PROJECT_READINESS.md) separates prerequisites, an HTTP
+response, an executed journey and visual review. Run `python3 .agent-system/profile.py doctor`
+inside a configured child project for read-only diagnostics. Launch verification
+is explicit and reuses the project's own check command.
 
 ## Configuration and ownership
 

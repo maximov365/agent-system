@@ -6,6 +6,11 @@ creates or overwrites it; adopt one explicitly after inspecting the application.
 Read it before choosing validation for a task. A profile does not authorize a
 deployment, message, destructive command, paid service, or unrelated test run.
 
+Optional `readiness` records prerequisites and a local launch contract. Use
+`profile.py doctor` for read-only diagnostics and explicit `--verify-launch` for
+a real project check. See `docs/PROJECT_READINESS.md` for the schema and evidence
+boundaries. Readiness never enables check reuse or configures a model.
+
 Supported kinds are `web`, `mobile`, `desktop`, `game`, `service`, `content`, and `tooling`;
 a project may combine them. Avoid forcing games and apps into a generic data
 pipeline. Retain real processing boundaries even when their names are generic.

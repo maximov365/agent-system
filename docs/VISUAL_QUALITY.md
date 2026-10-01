@@ -2,6 +2,11 @@
 
 Use this contract for UI, illustration, visual effects, and animation. The goal is a coherent, usable product with evidence from the actual implementation. Role methods are optional; these acceptance checks are part of standard visual work.
 
+For concrete composition, typography, color, detail and motion decisions, read only
+the relevant section of `docs/DESIGN_CRAFT.md`. Record durable choices in the
+project's existing brand/design-system document; `docs/BRAND.md` is an optional
+passport seed. Do not create competing sources of design truth.
+
 ## Establish a direction
 
 Read the product goal, audience, existing brand, and reference images before editing. For a new visual identity, make a compact art-direction note: mood, composition, silhouette/shape language, typography, palette, materials, lighting, motion, and explicit avoid-list. Separate references for quality, layout, and mood; explain what each contributes. Preserve the user's identity and existing design system.

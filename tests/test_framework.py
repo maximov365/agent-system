@@ -126,6 +126,31 @@ class FrameworkTests(unittest.TestCase):
                 self.assertFalse(setup.has_variables((self.project / rel).read_text()), str(rel))
         self.assertIn("Trial Project", (self.project / "agents/builder.md").read_text())
 
+    def test_deployed_readiness_and_native_skills_preserve_project_ownership(self):
+        custom = self.project / '.agents/skills/custom/SKILL.md'
+        custom.parent.mkdir(parents=True)
+        custom.write_text('Project skill\n')
+        brand = self.project / 'docs/BRAND.md'
+        brand.parent.mkdir()
+        brand.write_text('Existing identity and tokens\n')
+        profile = self.project / 'quality/profile.json'
+        profile.parent.mkdir()
+        profile.write_text(json.dumps({'schema_version': 1, 'kinds': ['tooling'],
+                                      'targets': ['test'], 'checks': [{'id': 'app', 'status': 'unavailable',
+                                      'reason': 'No application in this isolated deployment fixture'}], 'budgets': []}))
+        self.assertTrue(self.sync(render=True))
+        result = self.command(self.project / '.agent-system/profile.py', 'doctor',
+                              '--project', self.project)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(json.loads(result.stdout)['commands_executed'])
+        self.assertEqual(custom.read_text(), 'Project skill\n')
+        self.assertEqual(brand.read_text(), 'Existing identity and tokens\n')
+        import re
+        for skill in self.project.glob('.agents/skills/agent-system-*/SKILL.md'):
+            self.assertTrue((skill.parent / 'agents/openai.yaml').is_file())
+            for reference in re.findall(r'\]\((\.\./[^)]+)\)', skill.read_text()):
+                self.assertTrue((skill.parent / reference).is_file(), reference)
+
     def test_clone_without_ignored_cache_can_reconfigure(self):
         import shutil
         self.assertTrue(self.sync(render=True))

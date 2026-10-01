@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design review"
+  short_description: "Critique and polish the running interface"
+  default_prompt: "Use $agent-system-design-review to assess this interface against its design intent."

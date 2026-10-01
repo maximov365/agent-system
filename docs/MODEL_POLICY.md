@@ -1,6 +1,6 @@
 # Model policy
 
-Verified target: **GPT-6 Astra**, model identifier `gpt-6-astra`, 2026-09-10. This is the requested target for Codex use. Model access and selectable effort are determined by the current client/account; do not silently substitute a different model.
+Verified target: **GPT-6 Astra**, model identifier `gpt-6-astra`, 2026-10-01. This is the requested target for Codex use. Model access and selectable effort are determined by the current client/account; do not silently substitute a different model.
 
 ## Runtime baseline
 
@@ -24,7 +24,7 @@ These are recommendations. Preserve the user's model/effort setting unless a cha
 
 For an API-backed downstream (not merely using Codex): use `gpt-6-astra` and Responses for tool calling. Remove unsupported `temperature`, `top_p`, and `top_logprobs`; inspect logprob options too. Migrate `none`/`minimal` effort to `low`; otherwise preserve effective effort. The published model page lists low, medium, high, xhigh, and max. Verify client-specific options separately. This repository does not implement an API harness.
 
-Source: [official Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) and [model specification](https://developers.openai.com/api/docs/models/gpt-6-astra), checked 2026-09-10.
+Source: [official Astra guidance](https://developers.openai.com/api/docs/guides/latest-model) and [model specification](https://developers.openai.com/api/docs/models/gpt-6-astra), checked 2026-10-01.
 
 ## Optional multiple models
 
@@ -41,3 +41,27 @@ A model change cannot grant permission to publish, merge, send messages, access 
 Record exact model/runtime, effort when observable, task, elapsed time, meaningful defects, interventions, and actual usage when available. Keep unknown usage/cost as null, not zero. Subscription usage is not an API invoice. Compare models on the same tasks and acceptance criteria before claiming quality or cost improvements.
 
 Historical provider price tables and access claims from August 2026 were removed from active policy: they were time-sensitive, duplicated role guidance, and were not an executable router. History remains in git and decision logs.
+
+## Optional speed tiers
+
+Keep Standard unless the user chooses a faster tier within the available budget.
+Fast and Ultrafast change serving speed and usage, not the requested model or
+reasoning effort. Availability depends on client, account, workspace and rollout.
+Never infer an enabled tier from this policy or install another API harness for it.
+
+As checked on 2026-10-01, Codex Fast consumes included usage at 2.5 times Standard;
+Astra Ultrafast consumes it at 8 times Standard and is limited to eligible plans.
+Purchased-credit rates differ. The advertised up-to-8x Ultrafast improvement is
+**token generation speed**, not end-to-end task completion. Verify current
+[Codex speed and eligibility](https://learn.chatgpt.com/docs/agent-configuration/speed)
+before selecting it. The [API Ultrafast tier](https://developers.openai.com/api/docs/guides/ultrafast-mode)
+is a separate billing/configuration surface with regional processing constraints.
+
+Compare the same tasks, effort, acceptance and environment; record requested and
+observed tier separately, with unknown observations left null. Include failures,
+retries, interventions and usage alongside elapsed time. New cheaper models such
+as GPT-6.1 Sol are comparison candidates, not automatic Astra replacements.
+
+The [official changelog](https://learn.chatgpt.com/docs/changelog) records changing
+client defaults and retirements. Do not rely on an unpinned client default to keep
+Astra. Check retirement applicability separately for ChatGPT sign-in and API keys.

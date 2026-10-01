@@ -11,11 +11,15 @@ permissions:
 jobs:
   framework-audit:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
       - name: Install framework dependencies
         run: python -m pip install -r requirements-dev.txt
       - name: Regression tests
@@ -42,3 +46,7 @@ jobs:
         run: node --test tools/visual/test/runner.test.mjs
       - name: Test isolated reference game logic
         run: node --test examples/game-slice/test/model.test.mjs
+      - name: Verify UI evaluation grader against broken and repaired fixtures
+        env:
+          AGENT_VISUAL_TEST_BROWSER: "1"
+        run: node --test evals/test_ui_grader.mjs

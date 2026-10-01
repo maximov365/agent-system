@@ -8,10 +8,10 @@ No model/effort downgrade, new provider, automatic delegation or reduced accepta
 
 | Task | Acceptance | Status |
 |---|---|---|
-| TASK-020 Research and lightweight entry | Primary sources + measured local observations; compact entry retains authority, security, review, completion and visual requirements | done |
-| TASK-021 Project navigation and check evidence | Source-verified maps, concise summary, opt-in same-session evidence reuse, invalidate inputs/config/environment/runtime/time/corruption, fresh checks by default | done |
-| TASK-022 Compare and verify | Frozen before/after Astra runs, unchanged graders/model/effort, meaningful cache negative tests, real project timing and existing UI evidence; no unsupported quality claim | done |
-| TASK-023 Release and propagate | Verified source release, safe downstream update, isolated commits preserving other work, existing GitHub destinations and Unfolda PR updated | done |
+| TASK-020 Research and lightweight entry | Primary sources + measured local observations; compact entry retains authority, security, review, completion and visual requirements | completed |
+| TASK-021 Project navigation and check evidence | Source-verified maps, concise summary, opt-in same-session evidence reuse, invalidate inputs/config/environment/runtime/time/corruption, fresh checks by default | completed |
+| TASK-022 Compare and verify | Frozen before/after Astra runs, unchanged graders/model/effort, meaningful cache negative tests, real project timing and existing UI evidence; no unsupported quality claim | completed |
+| TASK-023 Release and propagate | Verified source release, safe downstream update, isolated commits preserving other work, existing GitHub destinations and Unfolda PR updated | completed |
 
 Cache correctness is a design boundary: only declared deterministic, side-effect-free
 local checks can reuse evidence. Missing dependency declarations or external state

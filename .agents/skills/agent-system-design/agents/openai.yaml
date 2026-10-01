@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design direction"
+  short_description: "Shape coherent screens from product context"
+  default_prompt: "Use $agent-system-design to establish and implement the visual direction for this screen."

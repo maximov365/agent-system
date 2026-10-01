@@ -1,0 +1,4 @@
+interface:
+  display_name: "Framework upgrade"
+  short_description: "Preview and verify child framework updates"
+  default_prompt: "Use $agent-system-upgrade to update the requested child projects and preserve local work."

@@ -18,6 +18,11 @@ For games inspect readability in motion, pivots/animation seams, camera/input fe
 
 Each finding states severity, affected element/state, expected versus observed behavior, evidence, and a concrete correction. Report source-code issues separately from observed visual defects.
 
+Use `docs/DESIGN_CRAFT.md` to distinguish task clarity, composition and craft from
+technical correctness. Prioritize root causes and preserve product identity.
+Stylistic preferences alone are not release-blocking defects; an automatic
+anti-pattern detector is not evidence that a design is bad or a review independent.
+
 - `APPROVED`: relevant visual evidence inspected, acceptance met, no material unresolved defects.
 - `APPROVED WITH MINOR NOTES`: acceptance met; non-blocking issues explicitly listed.
 - `CHANGES REQUIRED`: material visual/usability/accessibility issue remains.
