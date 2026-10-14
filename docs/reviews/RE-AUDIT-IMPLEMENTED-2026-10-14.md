@@ -80,10 +80,21 @@ timeout sensitivity were corrected and rechecked; failures were not hidden.
 
 ## Release status
 
-Local implementation and propagation are complete. Root publication and fresh
-Ubuntu 24.04/26.04 CI verification are pending at this checkpoint; replace this
-paragraph with observed run results after completion. Child workspaces remain
-local modifications; this task does not publish unrelated application work.
+Published to the framework's main branch: implementation `e61ba3d` and CI
+follow-up `6d859f0` (1.0.48). Both fresh runs at the latter revision succeeded:
+
+- [Ubuntu 24.04 CI](https://github.com/maximov365/agent-system/actions/runs/38551834997)
+- [Ubuntu 26.04 CI](https://github.com/maximov365/agent-system/actions/runs/38551835392)
+
+Each run passed Python 3.10/3.14, template validation, warning-strict local audit,
+actual Chromium runner tests, example logic and the isolated UI grader. Logs
+confirm the respective runner images; the deprecated-action warning disappeared.
+Keep Ubuntu 24.04 as the explicit default; 26.04 is now a verified option.
+
+All 18 local downstreams are at 1.0.48; final sync plans have zero changes.
+Child workspaces remain local modifications, with existing staging preserved;
+this task does not publish unrelated application work. No game/application code
+was added to the deployed framework.
 
 ## Remaining work
 
@@ -109,11 +120,13 @@ Ignored local evidence: `.agent/audit/2026-10-14/`. Key records include
 `ui-grader-frozen.log`, `local-release.json`, `downstreams-release.json`,
 `skills-observed.json`, `launch-verification.json`,
 `launch-verification-x5club.json`, `tracker-verification.json`,
-`game-verification.json`, `baseline-integrity.json` and `rollout.json`.
+`game-verification.json`, `baseline-integrity.json`, `rollout.json`,
+`readiness-final.json` and `ci-ubuntu24-final`/`ci-ubuntu26-final` logs and JSON.
 
 Before rollout, all downstream framework bytes were compared with the trusted
 1.0.46 baseline. Each sync and profile edit used a recoverable transaction.
-`rollout.json`, `readiness-adoption.json` and `profile-adjustments.json` record exact
+`rollout.json`, `rollout-ci-followup.json`, `readiness-adoption.json` and
+`profile-adjustments.json` record exact
 backup directories under the sibling `.agent-system-backups` directory. Git
 staged bytes were checked for preservation. Recovery must use the verified
 transaction preview, respecting later edits; never reset a dirty child repository.

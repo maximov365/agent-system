@@ -39,12 +39,18 @@ sync transaction's verified recovery; never reset a dirty project.
 - Browser/reference/readiness/evaluation changes implemented and self-reviewed.
 - Local release checks: 67 Python tests; six browser-runner tests, one UI-grader
   test (including its frozen copy) and five example logic tests passed.
-- All 18 downstreams safely updated to 1.0.47. Their project-owned readiness
+- All 18 downstreams safely updated to 1.0.48. Their project-owned readiness
   contracts were added separately with recovery backups; Git indexes preserved.
 - Seven HTTP launch identities verified; tracker interaction verification and six
   isolated game journeys passed. Iris has no frontend lockfile/dependencies.
 - Root audit: 0 critical/0 warnings. Downstream audit: 0 critical/1 warning (Iris).
-- Pending release step: publish root and verify the pinned Ubuntu 24.04 baseline
-  and explicit Ubuntu 26.04 compatibility job. Record results in the dated review.
+- Published root implementation e61ba3d and CI follow-up 6d859f0. CI on both
+  Ubuntu 24.04 (38551834997) and Ubuntu 26.04 (38551835392) passed all jobs.
+  The observed Node 20 deprecation warning is fixed with verified, SHA-pinned
+  upstream action releases. Version-only follow-up safely propagated to all 18.
+- Final sync plans have zero changes. Root has only the pre-existing untracked
+  worktree/log/archive artifacts; downstream application changes remain preserved.
+- Implementation complete. The dated review records remaining application setup
+  and experimental validation work separately from this framework release.
 - Deferred experiments are not release failures: neutral design A/B comparisons,
   actual model/tier measurements and real-device/motion review remain unperformed.

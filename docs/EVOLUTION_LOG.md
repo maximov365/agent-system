@@ -903,3 +903,9 @@ runtimes. Updated checkout/setup-python/setup-node to verified official releases
 pinned exact commit SHAs, and retained the Node 22 application-test target.
 Downstreams receive only the updated framework version marker from this follow-up;
 their application CI workflows are project-owned.
+
+Final 1.0.48 verification: both Ubuntu 24.04 and 26.04 CI runs passed Python
+3.10/3.14 and browser/grader/example checks, without the deprecated-action warning.
+All 18 local downstreams match 1.0.48; root audit remains clean and Iris is the
+single downstream readiness warning. The dated implementation report links the
+exact CI runs and records remaining unperformed application/design experiments.
