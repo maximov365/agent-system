@@ -1,6 +1,6 @@
 # Audit implementation — 2026-10-14
 
-Scope: agent-system 1.0.46 (`5f5299a`) to 1.0.47 and 18 registered local
+Scope: agent-system 1.0.46 (`5f5299a`) to 1.0.48 and 18 registered local
 downstreams. Implements the confirmed findings from the
 [October 9 audit](RE-AUDIT-2026-10-09.md). Owner self-review; no delegated or
 independent reviewer. Existing application sources and unrelated staged work were
@@ -29,6 +29,10 @@ preserved. Examples remain isolated verification fixtures, outside deployment.
 5. **CI stability:** explicit Ubuntu 24.04 baseline, optional workflow dispatch on
    26.04, bounded jobs, Python 3.10/3.14 and real Chromium checks. Python CI creates
    the environment declared by the root profile; local audit fails on warnings.
+   CI exposed deprecated Node 20 action runtimes. Release 1.0.48 updates checkout
+   to 7.0.1, setup-python to 7.0.0 and setup-node to 7.1.0, pinned to verified
+   upstream commit SHAs. The application test runtime remains Node 22; automatic
+   package-manager caching stays disabled.
 6. **Codex/evaluation:** refreshed optional Sol/Astra speed guidance; retained Astra
    and no automatic paid tier/provider switch. Documented project-scoped skill
    discovery. Paired evaluation freezes grader sources as well as task inputs and
@@ -44,7 +48,7 @@ preserved. Examples remain isolated verification fixtures, outside deployment.
 | Template validation | Passed |
 | Root audit | 0 critical, 0 warnings, 3 informational |
 | Downstream audit | 18 projects; 0 critical, 1 warning, 43 informational |
-| Local deployment | All 18 at 1.0.47, no framework integrity drift reported |
+| Local deployment | All 18 at 1.0.48, no framework integrity drift reported |
 | Readiness adoption | 18 valid profiles with explicit launch applicability |
 | Native skill discovery | Four framework skills enabled in root and each downstream, zero errors |
 | HTTP launch identity | Seven passed; Iris skipped for missing prerequisites |
@@ -127,3 +131,8 @@ transaction preview, respecting later edits; never reset a dirty child repositor
 - [CoVe paper](https://arxiv.org/abs/2309.11495) and
   [MAST paper](https://arxiv.org/abs/2503.13657): methodological references,
   not measured effectiveness of this framework.
+
+- [GitHub Actions Node 20 deprecation](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)
+  and verified releases: [checkout 7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1),
+  [setup-python 7.0.0](https://github.com/actions/setup-python/releases/tag/v7.0.0),
+  [setup-node 7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0).

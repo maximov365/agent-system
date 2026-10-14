@@ -896,3 +896,10 @@ aesthetic quality and real-device performance remain distinct evidence levels.
 See [implementation, evidence and remaining work](reviews/RE-AUDIT-IMPLEMENTED-2026-10-14.md)
 for the release/CI record and limitations. This is owner self-review; no independent
 review or new model/design A/B result is claimed.
+
+
+CI follow-up in 1.0.48: actual GitHub runs exposed deprecated Node 20 action
+runtimes. Updated checkout/setup-python/setup-node to verified official releases,
+pinned exact commit SHAs, and retained the Node 22 application-test target.
+Downstreams receive only the updated framework version marker from this follow-up;
+their application CI workflows are project-owned.
