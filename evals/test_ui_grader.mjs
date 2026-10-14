@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {grade} from './graders/ui-filter.mjs';
 
 test('UI grader rejects broken search, missing clear action and form reload; accepts working controls',
@@ -21,7 +23,22 @@ test('UI grader rejects broken search, missing clear action and form reload; acc
         document.querySelector('form').addEventListener('submit', event => event.preventDefault());
         document.querySelector('#clear').addEventListener('click', () => {input.value=''; render(); input.focus();});
       `);
-      const fixed = await grade(root, path.join(root, '.agent/fixed'));
+      // Exercise the paired runner's isolated grader and explicit dependency path.
+      const snapshot = path.join(root, '.agent/grading-snapshot');
+      for (const relative of ['evals/graders/ui-filter.mjs', 'tools/visual/run.mjs',
+        'tools/visual/package.json', 'tools/visual/package-lock.json']) {
+        const destination = path.join(snapshot, relative);
+        fs.mkdirSync(path.dirname(destination), {recursive: true});
+        fs.copyFileSync(new URL(`../${relative}`, import.meta.url), destination);
+      }
+      const fixedOutput = path.join(root, '.agent/fixed');
+      const result = JSON.parse(execFileSync(process.execPath,
+        [path.join(snapshot, 'evals/graders/ui-filter.mjs'), root, fixedOutput],
+        {encoding: 'utf8', timeout: 60_000, env: {...process.env,
+          AGENT_NODE_MODULES: process.env.AGENT_NODE_MODULES ||
+            fileURLToPath(new URL('../tools/visual/node_modules', import.meta.url))}}));
+      assert.equal(result.checks_passed, true);
+      const fixed = JSON.parse(fs.readFileSync(path.join(fixedOutput, 'report.json'), 'utf8'));
       assert.equal(fixed.checks_passed, true, JSON.stringify(fixed));
       assert.equal(fixed.visual_review, 'pending');
       assert.equal(fixed.journeys.length, 2);

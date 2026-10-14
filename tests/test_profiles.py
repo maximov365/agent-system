@@ -19,7 +19,7 @@ class ProfileTests(unittest.TestCase):
         (self.root / 'check.py').write_text('print("checked")\n')
         self.data = {'schema_version': 1, 'kinds': ['web'], 'targets': ['test browser'],
                      'checks': [{'id': 'unit', 'status': 'configured', 'command': [sys.executable, 'check.py'],
-                                 'defined_by': ['check.py'], 'timeout_seconds': 1}]}
+                                 'defined_by': ['check.py'], 'timeout_seconds': 5}]}
 
     def test_validation_never_runs_and_rejects_false_readiness(self):
         (self.root / 'check.py').write_text('raise RuntimeError("must not run")\n')
@@ -44,6 +44,7 @@ class ProfileTests(unittest.TestCase):
         (self.root / 'check.py').write_text('raise SystemExit(7)\n')
         self.assertEqual(run_check(self.data, self.root, 'unit', self.root / 'failed')['exit_code'], 7)
         (self.root / 'check.py').write_text('import time; time.sleep(10)\n')
+        self.data['checks'][0]['timeout_seconds'] = 1
         self.assertEqual(run_check(self.data, self.root, 'unit', self.root / 'timeout')['status'], 'timed_out')
         self.assertEqual(json.loads((self.root / 'timeout/report.json').read_text())['visual_review'], 'not_performed')
 
@@ -79,7 +80,7 @@ class ProfileTests(unittest.TestCase):
     def test_reuse_is_explicit_and_does_not_execute_or_renew_evidence(self):
         self.enable_reuse()
         first = run_check(self.data, self.root, 'unit', self.root / 'first', session='task-1')
-        self.assertTrue(first['reusable'])
+        self.assertTrue(first['reusable'], first)
         with patch('tools.profiles.profile.subprocess.Popen', wraps=subprocess.Popen) as execute:
             reused = run_check(self.data, self.root, 'unit', self.root / 'reuse', session='task-1', reuse_from=self.root / 'first')
             execute.assert_not_called()
@@ -131,7 +132,7 @@ class ProfileTests(unittest.TestCase):
         executable.write_text('#!/bin/sh\nprintf first\n'); executable.chmod(0o755)
         self.data['checks'][0]['command'] = ['./verify']
         first = run_check(self.data, self.root, 'unit', self.root / 'first', session='task-1')
-        self.assertTrue(first['reusable'])
+        self.assertTrue(first['reusable'], first)
         executable.write_text('#!/bin/sh\nprintf second\n')
         second = run_check(self.data, self.root, 'unit', self.root / 'second', session='task-1', reuse_from=self.root / 'first')
         self.assertTrue(second['executed'])

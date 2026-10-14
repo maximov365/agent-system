@@ -841,3 +841,58 @@ Zero content loss — everything moved, nothing deleted. Load-when semantics are
 ---
 
 
+## AI Landscape Re-audit — 2026-10-09
+
+**Scope:** framework 1.0.46, 18 registered downstreams, Codex/Astra, design and
+browser evidence; developments since the October 1 review plus the imminent CI
+runner migration. Research and verification by the current task owner.
+
+**Report:** [Findings, primary sources and acceptance criteria](reviews/RE-AUDIT-2026-10-09.md).
+
+Fresh checks: 62 Python and 10 Node/browser/grader/example tests passed. All four
+framework skills were discovered and enabled by the installed Codex runtime in
+all 18 downstreams. Root audit has zero warnings; the downstream audit has 72
+warnings caused by four references per project to one absent research-log file.
+All downstreams remain at 1.0.46; none has adopted the new readiness section.
+
+A new isolated reproduction confirms that the browser runner's `tap` action sends
+mouse input and no touch-start event; actual touchscreen input passes on the same
+fixture. Prioritize that fix, deployed references, the CI OS baseline, and project
+readiness adoption. Then improve motion evidence and complete the pending visual
+A/B comparison. Skill installation alone is not measured design improvement.
+
+October 8 Sol 6.1 Ultrafast and October 6 Decisions API beta warrant selective
+guidance or project-specific experiments. Preserve Astra and optional speed tiers;
+do not add a compulsory router or another design bundle. Existing videos can be
+improved using Playwright 1.64 controls. GitHub's ubuntu-latest migration starts
+October 19. The report links the official notices and separates vendor claims
+from locally observed results.
+
+**Decision status:** proposed; no implementation, rollout, paid model comparison,
+commit or publication in this audit. Local generated evidence remains ignored.
+
+
+## Targeted audit implementation — 2026-10-14
+
+Release 1.0.47 addresses the confirmed October 9 defects: actual touch input,
+bounded asynchronous browser assertions, indexed motion/video evidence, active
+Markdown/skill references and project-specific readiness. Removed unsupported
+review-effect percentages and obsolete mandatory orchestration claims. Updated
+verified speed guidance without changing the requested Astra model or enabling
+paid tiers. Evaluation graders are frozen before runs; unknown model/tier/skill
+observations remain unknown.
+
+Local verification: 67 Python tests and 12 Node/browser/grader/example tests
+passed; seven frontend/mockup launch identities and tracker interactions were
+checked. Six isolated game journeys passed, including actual touchscreen input.
+No example application code was added to the framework deployment.
+
+All 18 downstreams now have explicit readiness declarations and local 1.0.47
+framework files, with transaction backups and preserved Git indexes. Root audit
+has zero warnings; downstream audit has one actionable Iris warning (missing
+frontend lockfile and installed dependencies). HTTP availability, skill discovery,
+aesthetic quality and real-device performance remain distinct evidence levels.
+
+See [implementation, evidence and remaining work](reviews/RE-AUDIT-IMPLEMENTED-2026-10-14.md)
+for the release/CI record and limitations. This is owner self-review; no independent
+review or new model/design A/B result is claimed.

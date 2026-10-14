@@ -36,7 +36,10 @@ function localURL(value) {
 export function validateConfig(config, project) {
   if (config.schema_version !== 1) throw Error('Unsupported visual config schema');
   localURL(config.baseURL);
+  if (config.timeoutMs !== undefined && (!Number.isInteger(config.timeoutMs) || config.timeoutMs < 1 || config.timeoutMs > 60000)) throw Error('timeoutMs must be 1..60000');
   if (config.reducedMotion !== undefined && !['reduce', 'no-preference'].includes(config.reducedMotion)) throw Error('Invalid reducedMotion');
+  if (config.video !== undefined && typeof config.video !== 'boolean') throw Error('video must be boolean');
+  if (config.videoFps !== undefined && (!config.video || !Number.isInteger(config.videoFps) || config.videoFps < 1 || config.videoFps > 60)) throw Error('videoFps requires video and an integer 1..60');
   if (config.maxDiffRatio !== undefined && (!Number.isFinite(config.maxDiffRatio) || config.maxDiffRatio < 0 || config.maxDiffRatio > 1)) throw Error('maxDiffRatio must be 0..1');
   for (const origin of config.allowedOrigins || []) {
     const url = new URL(origin);
@@ -48,6 +51,7 @@ export function validateConfig(config, project) {
   for (const view of config.viewports) {
     if (!idPattern.test(view.name) || ids.has(view.name)) throw Error('Invalid/duplicate viewport name');
     ids.add(view.name);
+    for (const flag of ['mobile', 'touch']) if (view[flag] !== undefined && typeof view[flag] !== 'boolean') throw Error(`Viewport ${flag} must be boolean`);
     for (const dim of ['width', 'height']) if (!Number.isInteger(view[dim]) || view[dim] < 200 || view[dim] > 4096) throw Error('Invalid viewport dimension');
   }
   ids.clear();
@@ -63,8 +67,20 @@ export function validateConfig(config, project) {
       if (!types.has(step.type)) throw Error(`Unsupported step: ${step.type}`);
       if (step.type === 'capture') {
         if (!idPattern.test(step.name) || captures.has(step.name)) throw Error('Invalid/duplicate capture name');
+        if (step.animations !== undefined && !['allow', 'disabled'].includes(step.animations)) throw Error('Invalid capture animations');
         captures.add(step.name);
       }
+      if (step.type === 'tap') {
+        const coordinates = step.x !== undefined || step.y !== undefined;
+        const target = step.selector || step.role || step.text !== undefined;
+        if (coordinates === !!target) throw Error('tap requires coordinates or one locator target');
+        for (const view of config.viewports) {
+          if (!(view.touch ?? view.mobile)) throw Error(`tap requires a touch-enabled viewport: ${view.name}`);
+          if (coordinates && (!Number.isFinite(step.x) || !Number.isFinite(step.y) || step.x < 0 || step.y < 0 || step.x >= view.width || step.y >= view.height)) throw Error(`tap coordinates must fit viewport: ${view.name}`);
+        }
+      }
+      if (step.type === 'expectText' && typeof step.contains !== 'string') throw Error('expectText requires contains text');
+      if (step.type === 'expectCount' && (!Number.isInteger(step.count) || step.count < 0)) throw Error('expectCount requires a nonnegative integer');
       if (step.type === 'delay' && (!Number.isFinite(step.ms) || step.ms < 0 || step.ms > 10000)) throw Error('Delay must be 0..10000 ms');
     }
     if (!captures.size) throw Error('Journey must capture at least one state');
@@ -106,10 +122,25 @@ function locator(page, step) {
   return page.locator(step.selector);
 }
 
+async function eventually(read, matches, describe, timeoutMs) {
+  const deadline = performance.now() + timeoutMs;
+  let actual;
+  do {
+    try { actual = await read(Math.max(1, deadline - performance.now())); }
+    catch (error) { if (error.name !== 'TimeoutError') throw error; }
+    if (matches(actual)) return;
+    if (performance.now() >= deadline) break;
+    await pause(Math.min(50, deadline - performance.now()));
+  } while (performance.now() < deadline);
+  throw Error(describe(actual));
+}
+
 export async function run(config, {project, output}) {
   validateConfig(config, project);
   if (fs.existsSync(output)) throw Error('Evidence output already exists; choose a new run directory');
   const deps = dependencies();
+  const [major, minor] = deps.version.split('.').map(Number);
+  if (config.videoFps !== undefined && !(major > 1 || (major === 1 && minor >= 64))) throw Error('videoFps requires Playwright 1.64 or newer; install the locked dependencies');
   fs.mkdirSync(output, {recursive: true});
   let server, browser, serverLog;
   const report = {schema_version: 1, started_at: new Date().toISOString(), project: path.basename(project),
@@ -139,13 +170,15 @@ export async function run(config, {project, output}) {
     for (const viewport of config.viewports) for (const journey of config.journeys) {
       const name = `${viewport.name}--${journey.id}`;
       const result = {id: name, route: journey.route || '/', viewport, fixtures: (journey.fixtures || []).length,
-        captures: [], actions: [], errors: [], console_errors: [], external_resources: [], probes: [], passed: false};
+        reduced_motion: config.reducedMotion || 'reduce', touch_enabled: viewport.touch ?? !!viewport.mobile,
+        captures: [], recordings: [], actions: [], errors: [], console_errors: [], external_resources: [], probes: [], passed: false};
       report.journeys.push(result);
       const context = await browser.newContext({viewport: {width: viewport.width, height: viewport.height},
-        deviceScaleFactor: viewport.scale || 1, isMobile: !!viewport.mobile, hasTouch: !!viewport.mobile,
+        deviceScaleFactor: viewport.scale || 1, isMobile: !!viewport.mobile, hasTouch: result.touch_enabled,
         locale: config.locale || 'en-US', timezoneId: config.timezone || 'UTC', reducedMotion: config.reducedMotion || 'reduce',
         colorScheme: viewport.colorScheme || 'dark', serviceWorkers: 'block',
-        ...(config.video ? {recordVideo: {dir: path.join(output, 'video'), size: {width: viewport.width, height: viewport.height}}} : {})});
+        ...(config.video ? {recordVideo: {dir: path.join(output, 'video'), size: {width: viewport.width, height: viewport.height},
+          ...(config.videoFps !== undefined ? {fps: config.videoFps} : {})}} : {})});
       const used = new Map();
       await context.route('**/*', async route => {
         const request = route.request(), url = new URL(request.url());
@@ -181,7 +214,7 @@ export async function run(config, {project, output}) {
         let state = seed >>> 0; Math.random = () => { state = (1664525 * state + 1013904223) >>> 0; return state / 4294967296; };
       }, config.seed);
       try {
-        await page.goto(new URL(result.route, config.baseURL).href, {waitUntil: 'networkidle'});
+        await page.goto(new URL(result.route, config.baseURL).href, {waitUntil: 'domcontentloaded'});
         for (const step of journey.steps) {
           const start = performance.now();
           switch (step.type) {
@@ -193,17 +226,21 @@ export async function run(config, {project, output}) {
             case 'delay': await pause(step.ms); break;
             case 'waitFor': await locator(page, step).waitFor({state: step.state || 'visible'}); break;
             case 'expectText': {
-              const element = locator(page, step); await element.waitFor({state: 'visible'});
-              const text = await element.innerText();
-              if (!text.includes(step.contains)) throw Error(`Expected text ${JSON.stringify(step.contains)}; got ${JSON.stringify(text)}`);
+              const element = locator(page, step);
+              await eventually(async timeout => await element.isVisible() ? element.innerText({timeout}) : null,
+                text => typeof text === 'string' && text.includes(step.contains),
+                text => `Expected visible text ${JSON.stringify(step.contains)}; got ${JSON.stringify(text)}`, config.timeoutMs || 5000);
               break;
             }
             case 'expectCount': {
-              const count = await locator(page, step).count();
-              if (count !== step.count) throw Error(`Expected ${step.count} elements, got ${count}`);
+              await eventually(() => locator(page, step).count(), count => count === step.count,
+                count => `Expected ${step.count} elements, got ${count}`, config.timeoutMs || 5000);
               break;
             }
-            case 'tap': await page.mouse.click(step.x, step.y); break;
+            case 'tap':
+              if (step.x !== undefined) await page.touchscreen.tap(step.x, step.y);
+              else await locator(page, step).tap();
+              break;
             case 'probe': {
               const data = await page.evaluate(() => window.__agentEvidence?.snapshot?.() ?? null);
               if (data === null) throw Error('No application evidence snapshot hook');
@@ -216,8 +253,9 @@ export async function run(config, {project, output}) {
             case 'capture': {
               await page.evaluate(() => document.fonts.ready);
               const file = `${name}--${step.name}.png`;
-              const buffer = await page.screenshot({path: path.join(output, file), fullPage: step.fullPage !== false, animations: 'disabled'});
-              const capture = {file, sha256: hash(buffer), baseline: 'not_configured'};
+              const animations = step.animations || (result.reduced_motion === 'reduce' ? 'disabled' : 'allow');
+              const buffer = await page.screenshot({path: path.join(output, file), fullPage: step.fullPage !== false, animations});
+              const capture = {file, sha256: hash(buffer), animations, baseline: 'not_configured'};
               if (config.baselineDir) {
                 const base = inside(project, path.join(config.baselineDir, file));
                 capture.baseline = fs.existsSync(base) ? 'compared' : 'missing';
@@ -243,8 +281,15 @@ export async function run(config, {project, output}) {
         result.errors.push(error.message);
         try { await page.screenshot({path: path.join(output, `${name}--failure.png`)}); } catch {}
       } finally {
-        await context.tracing.stop({path: path.join(output, `${name}--trace.zip`)});
-        await context.close();
+        try { await context.tracing.stop({path: path.join(output, `${name}--trace.zip`)}); }
+        finally { await context.close(); }
+        if (config.video) {
+          const videoPath = await page.video().path();
+          const file = `video/${name}.webm`;
+          fs.renameSync(videoPath, path.join(output, file));
+          result.recordings.push({file, sha256: hash(fs.readFileSync(path.join(output, file))),
+            fps_requested: config.videoFps ?? null, fps_observed: null, review: 'pending'});
+        }
       }
     }
     report.checks_passed = report.journeys.every(j => j.passed);
@@ -260,7 +305,7 @@ export async function run(config, {project, output}) {
     report.finished_at = new Date().toISOString();
     fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    const body = report.journeys.map(j => `<section><h2>${escape(j.id)} · ${j.passed ? 'checks passed' : 'failed'}</h2><pre>${escape(j.errors.concat(j.console_errors).join('\n'))}</pre>${j.captures.map(c => `<figure><img src="${c.file}" alt="${escape(c.file)}"><figcaption>${escape(c.file)}</figcaption></figure>`).join('')}</section>`).join('');
+    const body = report.journeys.map(j => `<section><h2>${escape(j.id)} · ${j.passed ? 'checks passed' : 'failed'}</h2><p>Motion: ${escape(j.reduced_motion)} · touch: ${j.touch_enabled}</p><pre>${escape(j.errors.concat(j.console_errors).join('\n'))}</pre>${j.captures.map(c => `<figure><img src="${c.file}" alt="${escape(c.file)}"><figcaption>${escape(c.file)}</figcaption></figure>`).join('')}${j.recordings.map(v => `<figure><video controls preload="metadata" style="max-width:100%;max-height:760px" src="${v.file}"></video><figcaption><a href="${v.file}">${escape(v.file)}</a> · requested fps: ${v.fps_requested ?? 'default'} · review pending</figcaption></figure>`).join('')}</section>`).join('');
     fs.writeFileSync(path.join(output, 'index.html'), `<!doctype html><html lang="en"><meta charset="utf-8"><title>Visual evidence</title><style>body{font:16px system-ui;background:#111a22;color:#e7eef5;margin:32px}figure{display:inline-block;vertical-align:top;margin:8px}img{max-width:440px;max-height:760px}pre{color:#ffb4a0;white-space:pre-wrap}section{border-top:1px solid #45545c;margin-top:32px}</style><h1>Visual evidence · ${escape(report.project)}</h1><p>Automated checks: ${report.checks_passed ? 'passed' : 'failed'}. Visual review: pending.</p><p>${escape(report.error || '')}</p>${body}</html>`);
   }
   return report;

@@ -53,6 +53,15 @@ records available usage, and applies held-out checks. Existing output directorie
 are refused; runtime failure stops the remaining model calls. Synthetic transcripts
 remain local ignored artifacts; publish only the reviewed numeric record.
 
+Graders and the UI runner source/lockfile are frozen too, so edits during a run
+cannot change the evaluator halfway through a pair. The frozen UI grader uses the
+explicit `AGENT_NODE_MODULES` installation or framework visual dependencies; its
+browser report records actual package/browser versions. Do not reinstall these
+dependencies during a comparison. The record lists skill files per condition,
+but observed skill invocation and service tier remain null unless actual runtime
+evidence is available. This runner does not select a speed tier; do not use its
+results to claim a controlled Standard/Fast/Ultrafast comparison.
+
 Execution options were verified against local CLI help and the
 [official non-interactive Codex documentation](https://learn.chatgpt.com/docs/non-interactive-mode).
 

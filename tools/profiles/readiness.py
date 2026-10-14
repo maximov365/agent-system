@@ -20,8 +20,11 @@ def local_url(value):
 
 def validate_readiness(data, root, inside):
     config = data.get('readiness', {})
-    if not isinstance(config, dict) or set(config) - {'requirements', 'model', 'launch'}:
-        raise ValueError('Readiness supports requirements, model and launch')
+    if not isinstance(config, dict) or set(config) - {'requirements', 'model', 'launch', 'launch_unavailable_reason'}:
+        raise ValueError('Readiness supports requirements, model, launch and launch_unavailable_reason')
+    reason = config.get('launch_unavailable_reason')
+    if 'launch_unavailable_reason' in config and (not isinstance(reason, str) or not reason.strip() or len(reason) > 1000 or 'launch' in config):
+        raise ValueError('Use either a launch contract or a nonempty launch_unavailable_reason (up to 1000 characters)')
     requirements = config.get('requirements', [])
     if not isinstance(requirements, list) or len(requirements) > 30:
         raise ValueError('Readiness needs at most 30 requirements')
@@ -120,6 +123,8 @@ def diagnose(data, root, inside, *, probe=False):
                              'executable': resolved, 'result': 'not_run'})
     launch = config.get('launch')
     launch_report = {'status': 'not_configured'}
+    if config.get('launch_unavailable_reason'):
+        launch_report = {'status': 'unavailable', 'reason': config['launch_unavailable_reason']}
     if launch is not None:
         resolved = executable_path(launch['command'][0], inside(root, launch.get('cwd', '.')))
         launch_report = {**launch, 'status': 'configured' if resolved else 'executable_missing',

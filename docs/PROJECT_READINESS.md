@@ -61,6 +61,12 @@ For native/device projects, declare the relevant build/launch/device checks. Do
 not invent an HTTP endpoint as a substitute. An absent launch contract is visible
 and does not prevent running other configured checks.
 
+For native, command-line, document-only or unimplemented projects, set
+`readiness.launch_unavailable_reason` to explain why no local HTTP launch is
+declared and what the actual next step is. It is mutually exclusive with `launch`.
+Doctor reports `unavailable` with this reason, rather than implying that setup was
+forgotten. Prerequisite inspection still does not establish application readiness.
+
 Opening an ES-module web application via `file://` is not its supported launch.
 Use the documented server URL and exercise the primary action before delivery.
 Keep launch instructions beside the application's entry point; examples remain

@@ -4,13 +4,21 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      runner_os:
+        description: Explicit runner for compatibility verification
+        type: choice
+        default: ubuntu-24.04
+        options: [ubuntu-24.04, ubuntu-26.04]
 
 permissions:
   contents: read
 
 jobs:
   framework-audit:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_os || 'ubuntu-24.04' }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -21,15 +29,18 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install framework dependencies
-        run: python -m pip install -r requirements-dev.txt
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements-dev.txt
       - name: Regression tests
-        run: python -m unittest discover -s tests -v
+        run: .venv/bin/python -m unittest discover -s tests -v
       - name: Validate templates without writing
-        run: python setup.py --check
+        run: .venv/bin/python setup.py --check
       - name: Audit local contracts
-        run: python audit.py --local --json --fail-on critical
+        run: .venv/bin/python audit.py --local --json --fail-on warning
   visual-runner:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_os || 'ubuntu-24.04' }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

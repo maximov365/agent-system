@@ -137,6 +137,7 @@
     "Reuse remains disabled: short checks or incomplete dependency closure do not justify enabling it."
   ],
   "readiness": {
+    "launch_unavailable_reason": "This checkout is development tooling; use its configured unit/browser checks. Application examples have their own launch profiles.",
     "requirements": [
       {
         "id": "python-environment",

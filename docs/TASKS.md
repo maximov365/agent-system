@@ -34,3 +34,7 @@
 | TASK-026 | Focused native skills and shared design craft | completed | high | medium |
 | TASK-027 | Multi-file/UI evaluation fixtures and visual comparison protocol | completed | medium | medium |
 | TASK-028 | Validate, safely propagate and publish readiness/design release | completed | high | medium |
+| TASK-029 | Repair browser input, async checks and motion evidence | completed | high | medium |
+| TASK-030 | Repair reference auditing and outdated workflow claims | completed | high | medium |
+| TASK-031 | Stabilize CI and adopt downstream readiness contracts | in_progress | high | large |
+| TASK-032 | Re-audit, validate and propagate targeted improvements | in_progress | high | large |

@@ -33,6 +33,13 @@ Use the actual tools exposed by the host. Native image generation is preferred w
 
 For reusable procedures, Codex supports skills with progressive loading and repository skills in `.agents/skills/`. Existing `agents/*.md` files remain reference methods, not native agents. The framework ships four focused skills: `agent-system-readiness`, `agent-system-design`, `agent-system-design-review`, and `agent-system-upgrade`. They route to shared contracts and do not install engines, hooks or providers. Verify that the current session discovers a skill before claiming to invoke it; reload the session after installation if needed. [Official skills guide](https://learn.chatgpt.com/docs/build-skills).
 
+Start a task in the intended project directory. A task opened in a parent folder
+does not automatically discover every child's repo-scoped skills. Check the host's
+skill catalog for that project; file presence, discovery/enabled status and actual
+skill invocation are separate observations. Keep host diagnostics opt-in and
+bounded; do not scan private conversation logs or globally install duplicate skills
+to hide a project-scope problem.
+
 Use `python3 .agent-system/profile.py doctor` for declared project prerequisites;
 see `docs/PROJECT_READINESS.md` for explicit runtime verification. Diagnostic model
 intent is not the host's effective selection. Optional speed tiers and changing

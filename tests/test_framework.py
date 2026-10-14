@@ -168,6 +168,53 @@ class FrameworkTests(unittest.TestCase):
         self.assertNotIn("DEC-014", (self.project / "docs/DECISIONS.md").read_text())
         self.assertNotIn("Unfolda", (self.project / "docs/LESSONS_LEARNED.md").read_text())
 
+    def test_active_references_work_after_fresh_deployment_without_root_history(self):
+        self.assertTrue(self.sync(render=True))
+        self.assertFalse((self.project / 'docs/EVOLUTION_LOG.md').exists())
+        warnings = [f for f in audit.check_refs(self.project) if f['severity'] == 'warning']
+        self.assertEqual(warnings, [])
+
+    def test_profile_audit_reports_missing_dependencies_without_running_commands(self):
+        self.assertEqual(audit.check_profiles([self.project])[0]['severity'], 'warning')
+        file = self.project / 'quality/profile.json'; file.parent.mkdir()
+        data = {'schema_version': 1, 'kinds': ['content'], 'targets': ['documents'],
+                'checks': [{'id': 'review', 'status': 'unavailable', 'reason': 'Manual document review'}],
+                'readiness': {'launch_unavailable_reason': 'No application runtime'}}
+        file.write_text(json.dumps(data))
+        with patch('subprocess.Popen', side_effect=AssertionError('No execution')):
+            self.assertEqual(audit.check_profiles([self.project])[0]['severity'], 'info')
+            data['readiness']['requirements'] = [{'id': 'assets', 'paths': ['missing-assets'], 'help': 'Restore the supplied assets.'}]
+            file.write_text(json.dumps(data))
+            report = audit.check_profiles([self.project])[0]
+            self.assertEqual(report['severity'], 'warning')
+            self.assertIn('Restore the supplied assets', report['description'])
+
+    def test_reference_audit_checks_skill_links_deduplicates_and_names_project(self):
+        skill = self.project / '.agents/skills/trial/SKILL.md'
+        skill.parent.mkdir(parents=True)
+        (self.project / 'docs').mkdir()
+        (self.project / 'docs/space name.md').write_text('exists')
+        skill.write_text('''[Missing](../../../absent.md)
+[Again](../../../absent.md)
+[Valid](../../../docs/space%20name.md)
+[Web](https://example.com/unfetched)
+[Anchor](#heading)
+`[Example](../../../not-real.md)`
+```md
+[Code sample](../../../not-real.md)
+```
+[ref]: ../../../missing-reference.md
+''')
+        findings = [f for f in audit.check_refs(self.project) if f['severity'] == 'warning']
+        self.assertEqual(len(findings), 2)
+        self.assertTrue(all(f['project'] == 'project' and f['project_root'] == str(self.project.resolve()) for f in findings))
+        self.assertEqual(findings[0]['occurrences'], 2)
+        other = self.base / 'other'; other.mkdir()
+        (other / 'AGENTS.md').write_text('`docs/missing.md`\n`docs/missing.md`')
+        other_finding = audit.check_refs(other)[0]
+        self.assertIn('other', other_finding['id'])
+        self.assertEqual(other_finding['occurrences'], 2)
+
     def test_invalid_config_has_no_partial_sync(self):
         for invalid in ["null\n", "project: []\n", 'project: {name: "x"}\nanalytics_by_default: "false"\n', "project: [bad\n"]:
             (self.project / "project.config.yaml").write_text(invalid)

@@ -48,9 +48,9 @@ def digest(files):
     return h.hexdigest()
 
 
-def invoke(argv, cwd, timeout, input_text=None):
+def invoke(argv, cwd, timeout, input_text=None, env=None):
     process = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, text=True, start_new_session=True)
+                               stderr=subprocess.PIPE, text=True, start_new_session=True, env=env)
     try:
         out, err = process.communicate(input_text, timeout=timeout)
         return process.returncode, out, err
@@ -96,6 +96,18 @@ def render_snapshot(files, config):
     return rendered
 
 
+def skill_files(files):
+    """Availability in the frozen snapshot is not observed runtime selection."""
+    return sorted(name for name in files if name.startswith('.agents/skills/') and name.endswith('/SKILL.md'))
+
+
+def grading_files(tasks):
+    paths = [Path('evals/graders') / TASKS[name]['grader'] for name in tasks]
+    if 'ui-filter' in tasks:
+        paths += [Path('tools/visual') / name for name in ['run.mjs', 'package.json', 'package-lock.json']]
+    return {str(p): (ROOT / p).read_bytes() for p in paths}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--codex', required=True)
@@ -109,6 +121,7 @@ def main():
     parser.add_argument('--run', action='store_true', help='Authorize actual model calls; otherwise only validate fixtures')
     args = parser.parse_args()
     fixtures = {name: fixture_files(name) for name in dict.fromkeys(args.tasks)}
+    grading = grading_files(fixtures)
     framework = framework_files(ROOT)
     before_revision, before_files = baseline_files(args.baseline_ref) if args.baseline_ref else (None, {})
     conditions = ['baseline', 'candidate'] if args.baseline_ref else ['plain', 'framework']
@@ -117,6 +130,9 @@ def main():
     rendered = {name: render_snapshot(files, config) for name, files in snapshots.items()}
     metadata = {'schema_version': 1, 'date': datetime.now(timezone.utc).isoformat(),
                 'model_requested': args.model, 'model_resolved': None, 'reasoning_effort': args.effort,
+                'service_tier_requested': None, 'service_tier_observed': None,
+                'skill_files_by_condition': {name: skill_files(files) for name, files in rendered.items()},
+                'grading_snapshot_sha256': digest(grading),
                 'framework_base_revision': subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
                 'framework_snapshot_sha256': digest(framework),
                 'baseline_revision': before_revision,
@@ -130,6 +146,7 @@ def main():
                 'limitations': ['Synthetic fixtures; browser checks and screenshots do not establish design quality.',
                   'UI captures require separate recorded visual review; no automated aesthetic score.',
                   'Requested model recorded; CLI JSON may not expose independently resolved model identity.',
+                  'Service tier is not selected by this runner; observed tier and skill invocation stay unknown.',
                   'User config disabled; host built-in instructions/tools still apply to both conditions.',
                   'No independent reviewer. Subscription token counts are not API dollar cost.']}
     if not args.run:
@@ -140,6 +157,8 @@ def main():
     # Separate temporary root avoids inheriting framework AGENTS.md in baseline.
     root = Path(tempfile.mkdtemp(prefix='agent-system-paired-')).resolve()
     metadata['local_workspace'] = str(root)
+    grading_root = root / 'grading-snapshot'
+    write_files(grading_root, grading)
     for condition, files in rendered.items():
         snapshot = root/f'{condition}-snapshot';snapshot.mkdir()
         for rel, data in files.items():
@@ -159,6 +178,7 @@ def main():
                 start=time.monotonic();code,out,err=invoke(argv,work,args.timeout,prompt)
                 record={'run_id':run_id,'task':task,'condition':condition,'repeat':repeat+1,
                         'elapsed_seconds':round(time.monotonic()-start,3),'exit_code':code,'usage':None,
+                        'service_tier_observed':None,'skills_invoked_observed':None,
                         'manual_interventions':0,'independent_review':False,'checks':{},'model_completed':False}
                 messages=[];commands=[];output_chars=0
                 for line in out.splitlines():
@@ -179,13 +199,16 @@ def main():
                     source = work / rel
                     if source.is_file() and not source.is_symlink():
                         write_files(folder / 'solution', {rel: source.read_bytes()})
-                grader = ROOT / 'evals/graders' / TASKS[task]['grader']
+                grader = grading_root / 'evals/graders' / TASKS[task]['grader']
                 held_out = ['node' if grader.suffix == '.mjs' else sys.executable, str(grader), str(work)]
                 if task == 'ui-filter':
                     held_out.append(str(folder / 'browser'))
                     record['visual_review'] = 'pending'
                 for label,command in [('public',TASKS[task]['public']), ('held_out',held_out)]:
-                    rc,stdout,stderr=invoke(command,work,120 if task == 'ui-filter' else 30)
+                    env = None
+                    if label == 'held_out' and task == 'ui-filter':
+                        env = {**os.environ, 'AGENT_NODE_MODULES': os.environ.get('AGENT_NODE_MODULES', str(ROOT/'tools/visual/node_modules'))}
+                    rc,stdout,stderr=invoke(command,work,120 if task == 'ui-filter' else 30,env=env)
                     record['checks'][label]={'passed':rc==0,'exit_code':rc}
                     (folder/f'{label}.log').write_text(stdout+stderr)
                 record['observed_command_count']=len(commands)

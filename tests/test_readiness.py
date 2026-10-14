@@ -63,6 +63,23 @@ class ReadinessTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             diagnose(self.data, self.root, inside, probe=True)
 
+    def test_non_http_projects_report_explicit_launch_limitations(self):
+        self.data['readiness'].pop('launch')
+        self.data['readiness']['launch_unavailable_reason'] = 'Native application requires its device launch procedure.'
+        validate(self.data, self.root)
+        report = diagnose(self.data, self.root, inside)
+        self.assertEqual(report['launch']['status'], 'unavailable')
+        self.assertIn('Native', report['launch']['reason'])
+        self.assertFalse(report['commands_executed'])
+        for reason in ['', None, 'x' * 1001]:
+            self.data['readiness']['launch_unavailable_reason'] = reason
+            with self.assertRaises(ValueError):
+                validate(self.data, self.root)
+        self.data['readiness']['launch_unavailable_reason'] = 'Unavailable'
+        self.data['readiness']['launch'] = {}
+        with self.assertRaises(ValueError):
+            validate(self.data, self.root)
+
     def test_invalid_contracts_and_external_urls_fail_before_execution(self):
         for url in ['file:///index.html', 'https://example.com', 'http://127.0.0.1.evil/',
                     'http://user:secret@localhost/', 'http://0.0.0.0/', 'http://localhost:99999/',

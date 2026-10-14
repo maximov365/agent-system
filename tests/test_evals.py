@@ -4,11 +4,22 @@ import sys
 import tempfile
 from pathlib import Path
 
-from evals.run_paired import ROOT, baseline_files, digest, framework_files, render_snapshot, fixture_files, write_files
+from evals.run_paired import ROOT, baseline_files, digest, framework_files, render_snapshot, fixture_files, write_files, grading_files, skill_files
 import setup
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_frozen_grader_executes_without_live_grader_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            write_files(root / 'grading', grading_files(['multifile']))
+            write_files(root / 'fixture', fixture_files('multifile'))
+            result = subprocess.run([sys.executable, '-B', str(root/'grading/evals/graders/multifile.py'), str(root/'fixture')], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)  # Original fixture is deliberately broken.
+            self.assertNotIn("can't open file", result.stderr)
+            self.assertIn('run.mjs', ' '.join(grading_files(['ui-filter'])))
+            self.assertEqual(skill_files({'.agents/skills/x/SKILL.md': b'a', 'docs/a.md': b'b'}), ['.agents/skills/x/SKILL.md'])
+
     def test_nested_fixture_and_multifile_grader(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

@@ -202,13 +202,13 @@ Follow `docs/MODEL_POLICY.md` for model and effort selection. Match review depth
 
 ## Optional Chain-of-Verification (CoVe) frame
 
-For high-stakes reviews, apply an optional Chain-of-Verification pattern before producing the final JSON. CoVe reduces missed issues by structurally challenging the draft verdict — reported ~23% F1 improvement on factual reasoning tasks (source: `docs/EVOLUTION_LOG.md` F13, 2026-04-24).
+For high-stakes reviews, optionally challenge the draft verdict with targeted verification questions. This adapts [Chain-of-Verification](https://arxiv.org/abs/2309.11495), which studied factual hallucinations; improvement in this framework's code or design reviews has not been measured. Keep useful source checks without adding a compulsory second review loop.
 
 ### When to apply CoVe
 
 Use CoVe when **any** of these is true:
 
-- Artifact is >500 words or covers ≥3 screens/components
+- A disputed factual claim or unclear acceptance criterion could change the verdict
 - Prior iteration produced `must_fix` items the user disputed
 - Artifact touches a sensitive area (security, data flow, pricing, deletion semantics)
 - Quality loop iteration ≥ 2 (subsequent passes need extra rigor)

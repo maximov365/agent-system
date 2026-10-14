@@ -8,8 +8,8 @@ and effort; news about a new default is not authorization to switch them.
 ## Establish the decision
 
 Identify the review period, target environment and concrete opportunity or pain
-point. Inspect affected implementation and the relevant prior entries in
-`docs/EVOLUTION_LOG.md` and decisions; load PRD/architecture only where they answer
+point. Inspect affected implementation, existing research history and relevant
+decisions; load PRD/architecture only where they answer
 an actual scope or compatibility question. Avoid repeating rejected proposals
 without new evidence. No complete documentation inventory is required.
 
@@ -76,8 +76,10 @@ relevant. Compare equivalent representative tasks before claiming improved speed
 or design quality. Browser assertions, screenshots, human review and player tests
 are different evidence; record which actually occurred. Preserve failed results.
 
-Append a concise dated entry to `docs/EVOLUTION_LOG.md` when maintaining framework
-research history. A project-specific review belongs in that project's records.
+Append a concise dated entry to the research log when maintaining research history.
+Use docs/EVOLUTION_LOG.md; if absent, create a project-owned file with a title and
+the first dated entry. A project-specific review belongs in that project's records;
+never copy the framework's historical reviews into a new project.
 For each actionable finding include source URL/date, verified fact, affected
 component, proposed change, acceptance/evidence, effort, risk/rollback and any
 remaining decision. Separate implemented, experimental and deferred items.

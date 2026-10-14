@@ -14,6 +14,7 @@ Checks:
     integrity    Framework file integrity (detect manual edits)
     prompts      Prompt/file size analysis (token estimation)
     refs         Cross-reference validation (dead references)
+    profiles     Project readiness declarations and prerequisite presence
     backlog      Task backlog health
     lessons      Cross-project lessons aggregation
 """
@@ -23,6 +24,8 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
+from collections import Counter
 
 ROOT = Path(__file__).resolve().parent
 VERSION_FILE = ROOT / "VERSION"
@@ -31,7 +34,7 @@ DOWNSTREAM_REGISTRY = ROOT / "downstream.projects"
 from framework_manifest import FRAMEWORK_GLOBS, deployment_sources
 
 
-AVAILABLE_CHECKS = ["version", "integrity", "prompts", "refs", "backlog", "lessons", "contracts"]
+AVAILABLE_CHECKS = ["version", "integrity", "prompts", "refs", "profiles", "backlog", "lessons", "contracts"]
 
 CHARS_PER_TOKEN = 4
 
@@ -204,43 +207,118 @@ HISTORICAL_FILES = {
     "docs/LESSONS_LEARNED.md",
     "docs/DECISIONS.md",
     "docs/KNOWN_PATTERNS.md",
+    "docs/EVOLUTION_LOG.md",
 }
 
 
 def check_refs(root_dir: Path) -> list[dict]:
-    """Check for dead file references in markdown files."""
+    """Check literal root paths and inline/reference Markdown file links in active docs.
+
+    Does not validate remote URLs, anchors, generated paths or Markdown in code
+    blocks. Historical decision/research logs are not active runtime contracts.
+    """
+    root_dir = root_dir.resolve()
     findings = []
     ref_pattern = re.compile(r"`((?:docs|agents|\.cursor)/[A-Za-z0-9_./\-]+\.(?:md|yaml|txt|py))`")
+    link_pattern = re.compile(r'\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+[^)]*)?\)')
+    definition_pattern = re.compile(r'^\s{0,3}\[[^\]]+\]:\s*(?:<([^>]+)>|(\S+))', re.M)
 
     md_files = list(root_dir.glob("agents/**/*.md")) + list(root_dir.glob("docs/*.md"))
     md_files += [root_dir / "AGENTS.md", root_dir / "CLAUDE.md"]
-    md_files = [f for f in md_files if f.exists()]
+    md_files += list(root_dir.glob('.agents/skills/*/SKILL.md'))
+    md_files = sorted({f for f in md_files if f.is_file()})
 
     for md in md_files:
-        text = md.read_text()
-        refs = ref_pattern.findall(text)
         rel_md = str(md.relative_to(root_dir))
-        for ref in refs:
-            target = root_dir / ref
-            if not target.exists():
-                if ref in EXAMPLE_PATHS:
-                    continue
-                if rel_md in HISTORICAL_FILES:
-                    continue
-                findings.append(finding(
-                    f"R-{rel_md}-{ref}", "warning", "dead_reference",
-                    f"Dead reference: {ref} in {rel_md}",
-                    f"File {rel_md} references `{ref}` but that file does not exist.",
-                    [rel_md],
-                    f"Update the reference in {rel_md} or create {ref}.",
-                ))
+        if rel_md in HISTORICAL_FILES:
+            continue
+        text = md.read_text()
+        # Fences and comments can contain example links rather than contracts.
+        text = re.sub(r'<!--.*?-->', '', text, flags=re.S)
+        lines, fence = [], None
+        for line in text.splitlines():
+            marker = re.match(r'^\s{0,3}(`{3,}|~{3,})', line)
+            if marker:
+                value = marker[1]
+                if fence is None:
+                    fence = value
+                elif value[0] == fence[0] and len(value) >= len(fence):
+                    fence = None
+                continue
+            if fence is None:
+                lines.append(line)
+        text = '\n'.join(lines)
+        refs = [(ref, root_dir) for ref in ref_pattern.findall(text)]
+        link_text = re.sub(r'`[^`\n]*`', '', text)
+        for pattern in (link_pattern, definition_pattern):
+            refs.extend((a or b, md.parent) for a, b in pattern.findall(link_text))
+        missing = Counter()
+        for ref, base in refs:
+            try:
+                parsed = urlsplit(ref)
+            except ValueError:
+                missing[(ref, 'invalid link syntax')] += 1
+                continue
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            name = unquote(parsed.path)
+            ref = parsed.path
+            if any(token in name for token in ('{', '}', '*', '<', '>')):
+                continue
+            target = ((root_dir / name.lstrip('/')) if name.startswith('/') else base / name).resolve()
+            if not target.is_relative_to(root_dir):
+                missing[(ref, 'outside project')] += 1
+            elif str(target.relative_to(root_dir)) not in EXAMPLE_PATHS and not target.exists():
+                missing[(ref, 'missing')] += 1
+        for (ref, reason), count in missing.items():
+            item = finding(
+                f"R-{root_dir.name}-{rel_md}-{ref}", "warning", "dead_reference",
+                f"{root_dir.name}: dead reference {ref} in {rel_md}",
+                f"{rel_md} references {ref} ({reason}; {count} occurrence(s)).",
+                [rel_md], f"Correct the active reference in {rel_md}; do not copy unrelated history.",
+            )
+            item.update(project=root_dir.name, project_root=str(root_dir), occurrences=count)
+            findings.append(item)
 
     if not findings:
         findings.append(finding(
-            "R-OK", "info", "dead_reference",
-            "No dead references found",
-            f"All file references in {root_dir.name} are valid.",
+            f"R-{root_dir.name}-OK", "info", "dead_reference",
+            f"{root_dir.name}: no dead references in checked active documents",
+            "Checked literal root paths and local Markdown file links in active docs, agents and skill entries; remote URLs and anchors were not checked.",
         ))
+    return findings
+
+
+def check_profiles(projects: list[Path]) -> list[dict]:
+    """Inspect declared project prerequisites without commands or HTTP probes."""
+    from tools.profiles.profile import validate, inside
+    from tools.profiles.readiness import diagnose
+    findings = []
+    for project in projects:
+        problems = []
+        try:
+            file = inside(project, 'quality/profile.json')
+            if not file.is_file():
+                problems.append('No project-owned quality profile')
+            else:
+                data = validate(json.loads(file.read_text()), project)
+                report = diagnose(data, project, inside)
+                if 'readiness' not in data:
+                    problems.append('Readiness requirements and launch applicability are undeclared')
+                elif report['launch']['status'] == 'not_configured':
+                    problems.append('Declare a launch or explain why local HTTP launch is unavailable')
+                problems.extend(f"Missing prerequisite {r['id']}: {r['help']}" for r in report['requirements'] if r['status'] == 'missing')
+                problems.extend(f"Missing check executable: {r['id']}" for r in report['checks'] if r['status'] == 'executable_missing')
+                if report['launch']['status'] == 'executable_missing':
+                    problems.append('Declared launch executable is missing')
+        except (ValueError, OSError, TypeError, KeyError) as error:
+            problems.append(f'Invalid quality profile: {error}')
+        item = finding(f'P-{project.name}', 'warning' if problems else 'info', 'readiness',
+                       f'{project.name}: ' + ('readiness needs attention' if problems else 'declared readiness inspected'),
+                       '; '.join(problems) if problems else 'Configuration and declared prerequisites inspected; no application command or HTTP probe executed.',
+                       ['quality/profile.json'], 'Use project doctor and repair the reported prerequisite/contract.' if problems else None)
+        item['project'] = project.name
+        findings.append(item)
     return findings
 
 
@@ -403,6 +481,9 @@ def run_audit(projects: list[Path], checks: list[str] = None) -> dict:
 
     if "backlog" in checks and projects:
         all_findings.extend(check_backlog(projects))
+
+    if "profiles" in checks:
+        all_findings.extend(check_profiles([ROOT, *projects]))
 
     if "lessons" in checks and projects:
         lf, cp = check_lessons(projects)

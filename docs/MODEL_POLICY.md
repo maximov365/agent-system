@@ -49,9 +49,11 @@ Fast and Ultrafast change serving speed and usage, not the requested model or
 reasoning effort. Availability depends on client, account, workspace and rollout.
 Never infer an enabled tier from this policy or install another API harness for it.
 
-As checked on 2026-10-01, Codex Fast consumes included usage at 2.5 times Standard;
-Astra Ultrafast consumes it at 8 times Standard and is limited to eligible plans.
-Purchased-credit rates differ. The advertised up-to-8x Ultrafast improvement is
+As checked on 2026-10-14, Codex Fast consumes included usage at 2.5 times Standard;
+Ultrafast supports Astra and GPT-6.1 Sol, consumes it at 8 times Standard and is
+limited to eligible plans/workspaces. Purchased-credit rates differ. Sol Ultrafast
+supports US/European inference residency; Astra Ultrafast supports US only.
+The advertised up-to-8x Astra Ultrafast improvement is
 **token generation speed**, not end-to-end task completion. Verify current
 [Codex speed and eligibility](https://learn.chatgpt.com/docs/agent-configuration/speed)
 before selecting it. The [API Ultrafast tier](https://developers.openai.com/api/docs/guides/ultrafast-mode)

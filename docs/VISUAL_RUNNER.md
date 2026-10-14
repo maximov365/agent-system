@@ -26,6 +26,15 @@ node .agent-system/visual/run.mjs
 
 Steps: `click`, `fill`, `press`, `keyDown`, `keyUp`, `waitFor`, `expectText`, `expectCount`, `tap`, bounded `delay`, `capture`, and `probe`. Prefer role/name locators or stable selectors. A probe reads the optional project-owned `window.__agentEvidence.snapshot()` and can assert scalar `equals` fields; it does not execute arbitrary strings from configuration.
 
+`tap` sends actual touch input. Prefer a role/name or selector; alternatively pass
+`x` and `y` coordinates, which must fit every selected viewport;
+each must have `mobile: true` or explicit `touch: true`. Use separate configs for
+mouse-only and touch journeys rather than silently substituting a mouse click.
+Text/count assertions retry until `timeoutMs` (default 5000, maximum 60000), so
+ordinary asynchronous state changes need no arbitrary sleeps. Navigation waits
+for DOM content, then actions/assertions establish readiness; persistent network
+activity does not block the entire journey.
+
 Journeys use fresh browser contexts, a fixed locale/timezone, optional fixed wall clock/seed, and reduced motion. For deterministic frontend fixtures, list exact API path/method/body responses in the journey. `responses` can supply an ordered series. Unexpected API requests fail when fixtures are active. Fixtures validate the real frontend against controlled service responses; they do not validate backend integration.
 
 External resource requests fail by default. `allowedOrigins` accepts explicit HTTPS origins for required assets and records external dependencies in the report. Prefer project-local fonts/assets for durable baseline comparisons. Credentials, real customer data, and authenticated browser sessions should not be used as fixture inputs.
@@ -39,5 +48,15 @@ To compare approved images, set a project-relative `baselineDir` and `maxDiffRat
 Browser API details: [local server lifecycle](https://playwright.dev/docs/test-webserver), [trace capture](https://playwright.dev/docs/api/class-tracing), and [visual comparison constraints](https://playwright.dev/docs/test-snapshots). Traces from this library runner capture browser operations; step assertions are recorded separately in report.json.
 
 Motion defaults to `reducedMotion: "reduce"` for repeatable screenshots. Use `"no-preference"` explicitly to exercise normal animation; record that setting with evidence. Static captures alone do not validate timing.
+
+Set `video: true` to record each journey, optionally `videoFps: 1..60` with
+Playwright 1.64+. The HTML report embeds the recordings; JSON records filenames,
+hashes, motion/touch settings and requested fps. Observed fps remains unknown;
+recording rate is not a measurement of the application's frame performance.
+Videos from failed journeys are retained too. Captures default to disabled
+animations in reduced-motion mode and allow them in normal-motion mode; a capture
+can explicitly override `animations: "allow" | "disabled"`. Disabling animations
+can fast-forward transitions and affect the recording, so use normal-motion runs
+for motion review and separate stable captures for approved pixel baselines.
 
 The optional browser tooling is tested with Node.js 22 and its locked Playwright version. Install the matching browser with Playwright; an older cached browser is not sufficient. Core framework sync/render remains Python-only.
