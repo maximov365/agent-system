@@ -4,7 +4,7 @@
     "tooling"
   ],
   "targets": [
-    "Python 3.10+",
+    "Python 3.11+",
     "Node 22+ for optional visual tooling"
   ],
   "navigation": {
@@ -145,7 +145,7 @@
         "paths": [
           "requirements-dev.txt"
         ],
-        "help": "Create .venv with Python 3.10+ and install requirements-dev.txt; presence does not verify packages."
+        "help": "Create .venv with Python 3.11+ and install requirements-dev.txt; presence does not verify packages."
       }
     ]
   }

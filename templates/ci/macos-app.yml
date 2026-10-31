@@ -20,6 +20,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 env:
   SCHEME: "MyApp"            # <-- customize
   APP_NAME: "MyApp"          # <-- customize
@@ -29,8 +36,9 @@ jobs:
   test:
     name: Test
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
@@ -44,15 +52,15 @@ jobs:
             -scheme ${{ env.SCHEME }} \
             -destination "platform=macOS" \
             -derivedDataPath .xcode-derived \
-            -resultBundlePath TestResults.xcresult \
-            | xcpretty --color
+            -resultBundlePath TestResults.xcresult
 
   build:
     name: Build
     runs-on: macos-15
+    timeout-minutes: 30
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
@@ -63,17 +71,21 @@ jobs:
             -scheme ${{ env.SCHEME }} \
             -destination "platform=macOS" \
             -archivePath .build/${{ env.APP_NAME }}.xcarchive \
-            -derivedDataPath .xcode-derived \
-            | xcpretty --color
+            -derivedDataPath .xcode-derived
 
-  # Release pipeline — runs only on version tags
+  # Opt in after configuring signing, notarization and release secrets.
+  # Set repository variable ENABLE_APP_RELEASE=true only when configured.
+  # Release pipeline runs on version tags after both validation jobs pass.
   release:
     name: Release
     runs-on: macos-15
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/v')
+    timeout-minutes: 30
+    needs: [test, build]
+    if: startsWith(github.ref, 'refs/tags/v') && vars.ENABLE_APP_RELEASE == 'true'
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Extract version from tag
         id: version
@@ -140,7 +152,7 @@ jobs:
       #     echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2, verified 2026-10-31
         with:
           files: ".build/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.dmg"
           generate_release_notes: true

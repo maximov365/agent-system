@@ -1,0 +1,202 @@
+{
+  "runtime": "codex-cli 0.165.0-alpha.1.2",
+  "effort": "medium",
+  "image_sha256": "112ca38760bdd0f3e29f0018e3baa1dc59bd7c78382f54dabbbd7c526068a0a4",
+  "runs": [
+    {
+      "id": "spec-old",
+      "model_requested": "gpt-6-astra",
+      "model_resolved": null,
+      "elapsed_seconds": 27.43,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 18147,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1032,
+        "reasoning_output_tokens": 71
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "230a8c6b28fe39b7319182cbf189e97ad0620b69dda95a821e9affe2c9811e13"
+    },
+    {
+      "id": "spec-new",
+      "model_requested": "gpt-6-astra",
+      "model_resolved": null,
+      "elapsed_seconds": 16.38,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 15054,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 338,
+        "reasoning_output_tokens": 0
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "4b4e10398077c679024621732d146d7f64f0d21c9d1e1fcbe221ba205a18e3dc"
+    },
+    {
+      "id": "spec-adapter",
+      "model_requested": "gpt-6-astra",
+      "model_resolved": null,
+      "elapsed_seconds": 31.33,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 15965,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1027,
+        "reasoning_output_tokens": 132
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "09779d1da4efba8272b3d2f30e9efa43bf990aad8f70352fcca0ff82e75f8bfb"
+    },
+    {
+      "id": "visual-gpt-6-astra-1",
+      "model_requested": "gpt-6-astra",
+      "model_resolved": null,
+      "elapsed_seconds": 8.81,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 16032,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 97,
+        "reasoning_output_tokens": 0
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "55ece8bb8c0e29666f27a18754fe4eababb6fcdd9ad3d895b72420bb96e9e755"
+    },
+    {
+      "id": "visual-gpt-6.1-terra-1",
+      "model_requested": "gpt-6.1-terra",
+      "model_resolved": null,
+      "elapsed_seconds": 5.39,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 16032,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 101,
+        "reasoning_output_tokens": 0
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "55ece8bb8c0e29666f27a18754fe4eababb6fcdd9ad3d895b72420bb96e9e755"
+    },
+    {
+      "id": "visual-gpt-6.1-terra-2",
+      "model_requested": "gpt-6.1-terra",
+      "model_resolved": null,
+      "elapsed_seconds": 5.33,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 14746,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 97,
+        "reasoning_output_tokens": 0
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "55ece8bb8c0e29666f27a18754fe4eababb6fcdd9ad3d895b72420bb96e9e755"
+    },
+    {
+      "id": "visual-gpt-6-astra-2",
+      "model_requested": "gpt-6-astra",
+      "model_resolved": null,
+      "elapsed_seconds": 8.39,
+      "exit_code": 0,
+      "completed": true,
+      "usage": {
+        "input_tokens": 14746,
+        "cached_input_tokens": 12160,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 106,
+        "reasoning_output_tokens": 0
+      },
+      "tool_calls": 0,
+      "prompt_sha256": "55ece8bb8c0e29666f27a18754fe4eababb6fcdd9ad3d895b72420bb96e9e755"
+    }
+  ],
+  "limitations": [
+    "Synthetic fixtures; owner assessment, not independent review.",
+    "Single spec pair; two visual repeats. No general speed or design-quality claim.",
+    "Resolved model, tier and skill invocation may not be exposed; no API dollar estimate."
+  ],
+  "pixelmatch": {
+    "width": 640,
+    "height": 480,
+    "browser": "156.0.8078.4",
+    "results": [
+      {
+        "name": "baseline",
+        "pixelmatch7_total": 0,
+        "pixelmatch8_total": 0,
+        "pixelmatch8_window32": 0
+      },
+      {
+        "name": "identical",
+        "pixelmatch7_total": 0,
+        "pixelmatch8_total": 0,
+        "pixelmatch8_window32": 0
+      },
+      {
+        "name": "tint",
+        "pixelmatch7_total": 0,
+        "pixelmatch8_total": 0,
+        "pixelmatch8_window32": 0
+      },
+      {
+        "name": "shift",
+        "pixelmatch7_total": 2852,
+        "pixelmatch8_total": 2874,
+        "pixelmatch8_window32": 164
+      },
+      {
+        "name": "missing",
+        "pixelmatch7_total": 7207,
+        "pixelmatch8_total": 7207,
+        "pixelmatch8_window32": 960
+      },
+      {
+        "name": "clip",
+        "pixelmatch7_total": 5190,
+        "pixelmatch8_total": 5191,
+        "pixelmatch8_window32": 960
+      },
+      {
+        "name": "contrast",
+        "pixelmatch7_total": 922,
+        "pixelmatch8_total": 922,
+        "pixelmatch8_window32": 324
+      },
+      {
+        "name": "broken",
+        "pixelmatch7_total": 7429,
+        "pixelmatch8_total": 7430,
+        "pixelmatch8_window32": 960
+      }
+    ]
+  },
+  "fixture_source_sha256": "c05ea8af4c4d502ca10eadb15997f8631f8a17370655f0bb277818e7ab030475",
+  "assessment": {
+    "reviewer": "task owner; not independent",
+    "spec_old_seeded_findings": 5,
+    "spec_new_seeded_findings": 5,
+    "seeded_spec_expectations": 5,
+    "structured_adapter": "JSON parsed; expected top-level keys and all 10 dimensions preserved; mean checked",
+    "visual_findings": {
+      "visual-gpt-6-astra-1": 3,
+      "visual-gpt-6.1-terra-1": 3,
+      "visual-gpt-6.1-terra-2": 3,
+      "visual-gpt-6-astra-2": 3
+    },
+    "seeded_visual_expectations": 3,
+    "visual_review": "Owner viewed broken.png and read all responses; no invented interaction or measurement claims found."
+  }
+}

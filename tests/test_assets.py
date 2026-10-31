@@ -6,6 +6,8 @@ import tempfile
 import unittest
 import wave
 from pathlib import Path
+from unittest.mock import patch
+import PIL
 from PIL import Image, ImageDraw
 
 spec = importlib.util.spec_from_file_location('assetlib', Path(__file__).resolve().parents[1] / 'tools/assets/assetlib.py')
@@ -95,6 +97,49 @@ class AssetTests(unittest.TestCase):
         image = Image.new('RGB', (32, 16), 'gold'); image.save(self.root / 'sheet.png')
         self.entry['exports'][0]['sha256'] = assets.sha(self.root / 'sheet.png')
         self.assertIn('transparent', self.validate()['errors'][0])
+
+    def test_supported_raster_content_and_alpha(self):
+        for suffix, format in [('.png', 'PNG'), ('.jpg', 'JPEG'), ('.jpeg', 'JPEG'), ('.webp', 'WEBP')]:
+            with self.subTest(format=format, suffix=suffix):
+                p = self.root / ('valid' + suffix)
+                Image.new('RGB', (8, 8), 'gold').save(p, format=format)
+                result = assets.inspect_file(p)
+                self.assertEqual((result['width'], result['height']), (8, 8))
+                self.assertFalse(result['has_transparency'])
+        self.assertTrue(assets.inspect_file(self.root / 'sheet.png')['has_transparency'])
+
+    def test_unsupported_or_mismatched_content_cannot_reach_decode(self):
+        for format in ['BMP', 'GIF', 'JPEG']:
+            with self.subTest(format=format):
+                p = self.root / 'disguised.png'
+                Image.new('RGB', (32, 16), 'white').save(p, format=format)
+                with self.assertRaises(OSError): assets.inspect_file(p)
+                with self.assertRaises(OSError): assets.sprite_checks(p, self.entry['sprite'])
+        # JPEG dispatch can identify MPO; the result must still match the selected export.
+        with patch('PIL.Image.open') as opened:
+            opened.return_value.__enter__.return_value.format = 'MPO'
+            with self.assertRaisesRegex(ValueError, 'extension'):
+                assets.inspect_file(self.root / 'sheet.png')
+            opened.return_value.__enter__.return_value.load.assert_not_called()
+
+    def test_old_pillow_is_rejected_before_opening_a_file(self):
+        for version in ['12.2.0', '12.3.0', '13.0.0rc1']:
+            with self.subTest(version=version), patch.object(PIL, '__version__', version), patch('PIL.Image.open') as opened:
+                with self.assertRaisesRegex(ValueError, 'Pillow 13'):
+                    assets.inspect_file(self.root / 'sheet.png')
+                with self.assertRaisesRegex(ValueError, 'Pillow 13'):
+                    assets.sprite_checks(self.root / 'sheet.png', self.entry['sprite'])
+                opened.assert_not_called()
+
+    def test_multiframe_and_oversized_rasters_are_rejected(self):
+        p = self.root / 'animated.png'
+        frames = [Image.new('RGBA', (32, 16), color) for color in ['red', 'blue']]
+        frames[0].save(p, save_all=True, append_images=frames[1:], duration=100, loop=0)
+        for inspect in [lambda: assets.inspect_file(p), lambda: assets.sprite_checks(p, self.entry['sprite'])]:
+            with self.assertRaisesRegex(ValueError, 'multi-frame'): inspect()
+        with patch.object(assets, 'MAX_PIXELS', 16):
+            with self.assertRaisesRegex(ValueError, 'limit'): assets.inspect_file(self.root / 'sheet.png')
+            with self.assertRaisesRegex(ValueError, 'limit'): assets.sprite_checks(self.root / 'sheet.png', self.entry['sprite'])
 
 
 if __name__ == '__main__': unittest.main()

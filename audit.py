@@ -423,6 +423,9 @@ def check_contracts() -> list[dict]:
     from framework_manifest import seed_sources
     from setup import load_config, cmd_render
     findings = []
+    from tools.ci.check import check_paths
+    for problem in check_paths(ROOT):
+        findings.append(finding('C-ci-policy', 'critical', 'contracts', 'CI policy failed', problem))
     sources = deployment_sources(ROOT)
     overlap = sources.keys() & seed_sources(ROOT).keys()
     if overlap:
@@ -446,7 +449,7 @@ def check_contracts() -> list[dict]:
         findings.append(finding("C-validation", "critical", "contracts", "Contract validation failed", str(exc)))
     if not findings:
         findings.append(finding("C-OK", "info", "contracts", "Local contracts valid",
-                                "Ownership, template rendering, and eval prompt coverage passed."))
+                                "Ownership, template rendering, eval prompt coverage, and CI template policy passed."))
     return findings
 
 

@@ -2,7 +2,7 @@
 
 ## New project
 
-Install the framework dependencies in a Python 3.10+ environment. Run the common initializer from the framework:
+Install the framework dependencies in a Python 3.11+ environment. Run the common initializer from the framework:
 
 ```bash
 bash init-downstream.sh "Project Name" /path/to/project

@@ -22,24 +22,32 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 env:
-  PYTHON_VERSION: "3.11"    # <-- customize
-  NODE_VERSION: "20"         # <-- customize
+  PYTHON_VERSION: "3.14"    # <-- customize
+  NODE_VERSION: "24"         # <-- customize
 
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -59,7 +67,8 @@ jobs:
 
   test-backend:
     name: Test Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: lint
     services:
       postgres:
@@ -87,10 +96,10 @@ jobs:
       REDIS_URL: redis://localhost:6379
       # Add other test env vars here
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -105,13 +114,14 @@ jobs:
 
   test-frontend:
     name: Test Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     needs: lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -133,20 +143,22 @@ jobs:
   #
   # deploy-staging:
   #   name: Deploy Staging
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 20
   #   needs: [test-backend, test-frontend]
   #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   #     - name: Deploy to staging
   #       run: echo "Deploy to staging here"
   #
   # smoke-test:
   #   name: Smoke Test
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 20
   #   needs: deploy-staging
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   #     - name: Run smoke tests
   #       run: ./scripts/smoke_test.sh
   #       env:
@@ -154,10 +166,11 @@ jobs:
   #
   # deploy-production:
   #   name: Deploy Production
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 20
   #   needs: smoke-test
   #   environment: production  # requires manual approval in GitHub
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   #     - name: Deploy to production
   #       run: echo "Deploy to production here"

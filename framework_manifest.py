@@ -74,7 +74,7 @@ def framework_change_paths(root: Path) -> set[str]:
     files = set(deployment_sources(root).values()) | set(seed_sources(root).values())
     files.update(root / name for name in ["sync.py", "audit.py", "init-downstream.py",
                                         "init-downstream.sh", "framework_manifest.py", "sync_transaction.py",
-                                        "migrations/legacy-files.json", "templates/migrations/legacy-setup.py", "requirements-dev.txt",
+                                        "migrations/legacy-files.json", "templates/migrations/legacy-setup.py", "requirements-dev.txt", "requirements-audit.txt",
                                         ".github/workflows/agent-quality.yml"])
     files.update(root.glob("tests/*.py"))
     return {str(p.relative_to(root)) for p in files}
@@ -87,9 +87,9 @@ def is_framework_change(name: str) -> bool:
     path = Path(name)
     if path.parts and path.parts[0] == "agents" and path.suffix == ".md":
         return True
-    patterns = FRAMEWORK_GLOBS + SEED_GLOBS + ["agents/*.md", "tests/*.py", "tools/**/*.py", "tools/**/*.mjs", "evals/*.py", "evals/fixtures/**/*", "evals/graders/*.py"]
+    patterns = FRAMEWORK_GLOBS + SEED_GLOBS + ["agents/*.md", "tests/*.py", "tools/**/*.py", "tools/**/*.mjs", "evals/*.py", "evals/experiments/**/*", "evals/fixtures/**/*", "evals/graders/*.py"]
     return (any(path.match(pattern) for pattern in patterns)
             or name in TOOL_DESTINATIONS
             or name in {"sync.py", "audit.py", "init-downstream.py", "init-downstream.sh",
-                        "sync_transaction.py", "migrations/legacy-files.json", "templates/migrations/legacy-setup.py", "requirements-dev.txt",
+                        "sync_transaction.py", "migrations/legacy-files.json", "templates/migrations/legacy-setup.py", "requirements-dev.txt", "requirements-audit.txt",
                         ".github/workflows/agent-quality.yml"})

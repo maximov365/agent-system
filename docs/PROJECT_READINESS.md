@@ -71,3 +71,8 @@ Opening an ES-module web application via `file://` is not its supported launch.
 Use the documented server URL and exercise the primary action before delivery.
 Keep launch instructions beside the application's entry point; examples remain
 optional framework fixtures and are never installed as child application code.
+
+Host authentication/connectivity problems belong to native Codex diagnostics when
+available (`codex doctor --help`), not a new framework host detector. Project doctor
+checks the declared application environment; it does not prove host health or the
+effective model selection. See `docs/CODEX.md`.

@@ -1,0 +1,2 @@
+# Optional release tooling; never required for sync or deployed downstream.
+pip-audit==2.10.1

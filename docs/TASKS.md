@@ -38,3 +38,7 @@
 | TASK-030 | Repair reference auditing and outdated workflow claims | completed | high | medium |
 | TASK-031 | Stabilize CI and adopt downstream readiness contracts | completed | high | large |
 | TASK-032 | Re-audit, validate and propagate targeted improvements | completed | high | large |
+| TASK-033 | Secure raster inspection and supported Python baseline | done | high | medium |
+| TASK-034 | Simplify review methods and refresh CI reference policy | done | high | medium |
+| TASK-035 | Browser maintenance and bounded visual comparisons | done | medium | medium |
+| TASK-036 | Validate and publish maintenance rollout | in_progress | high | medium |

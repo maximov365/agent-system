@@ -2,7 +2,7 @@
 
 The optional `.agent-system/assets/assetlib.py` maintains project-owned `assets/manifest.json`. It records immutable asset ID/revision pairs, parent revisions, source/export paths and hashes, provenance, review status, import settings, and runtime size budgets. It inspects files without editing the artwork.
 
-Install `.agent-system/assets/requirements.txt` into an appropriate environment for raster inspection. The framework developer environment uses `requirements-dev.txt`.
+Install `.agent-system/assets/requirements.txt` into a Python 3.11+ environment for raster inspection. Sync copies requirements, but does not install them into project environments. Raster inspection refuses Pillow older than 13.0.0 or an unrecognized/prerelease version before opening an image. The framework developer environment uses `requirements-dev.txt`.
 
 ```bash
 python3 .agent-system/assets/assetlib.py register --entry assets/new-entry.json
@@ -12,6 +12,8 @@ python3 .agent-system/assets/assetlib.py inspect --file assets/runtime/hero.png
 ```
 
 Each command accepts `--project`; paths in the manifest, `--entry`, and `--output` remain project-relative. JSON output distinguishes passed metadata checks from a required visual/motion review. Catalog defaults to `.agent/assets/index.html` and refuses to overwrite an existing catalog; choose a new output path for each review. Only register mutates the manifest, after validating the complete candidate library. Coordinate writers through normal task ownership.
+
+Raster exports support static PNG, JPEG and WebP only. Decoder selection is restricted before opening; content must match the extension. Animated/multi-frame images require a project-specific adapter or a static sprite sheet. The pixel limit is checked before decoding pixels. These bounds reduce the input surface; they do not replace dependency advisory checks.
 
 ## Entry contract
 

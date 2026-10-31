@@ -11,11 +11,13 @@ import struct
 import sys
 import tempfile
 import wave
+from contextlib import contextmanager
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 sys.dont_write_bytecode = True
-RASTER = {'.png', '.jpg', '.jpeg', '.webp'}
+RASTER = {'.png': 'PNG', '.jpg': 'JPEG', '.jpeg': 'JPEG', '.webp': 'WEBP'}
+MAX_PIXELS = 16_777_216
 KINDS = {'image', 'sprite', 'texture', 'vector', 'audio', 'model'}
 ID = re.compile(r'^[a-z0-9][a-z0-9_-]{0,79}$')
 
@@ -40,14 +42,33 @@ def sha(path):
     return digest.hexdigest()
 
 
+@contextmanager
+def open_raster(path):
+    """Decode only a supported static export with a patched Pillow installation."""
+    import PIL
+    from PIL import Image
+    version = re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:\.post\d+)?', PIL.__version__)
+    if not version or tuple(map(int, version.groups())) < (13, 0, 0):
+        raise ValueError('Raster inspection requires Pillow 13.0.0+; install the asset requirements in Python 3.11+')
+    expected = RASTER.get(path.suffix.lower())
+    if expected is None:
+        raise ValueError('Raster exports must use PNG/JPEG/WebP')
+    # Restrict decoder selection before opening; a filename alone is not a format boundary.
+    with Image.open(path, formats=[expected]) as image:
+        if image.format != expected:
+            raise ValueError('Raster content does not match its declared extension')
+        if image.width * image.height > MAX_PIXELS:
+            raise ValueError('Inspection limit is 16,777,216 pixels per image; use a target-specific large-texture adapter')
+        if getattr(image, 'n_frames', 1) != 1:
+            raise ValueError('Animated/multi-frame files require a project-specific adapter; export a static sprite sheet')
+        image.load()
+        yield image
+
+
 def inspect_file(path):
     result = {'bytes': path.stat().st_size, 'sha256': sha(path), 'extension': path.suffix.lower()}
     if path.suffix.lower() in RASTER:
-        from PIL import Image
-        with Image.open(path) as image:
-            if image.width * image.height > 16_777_216:
-                raise ValueError('Inspection limit is 16,777,216 pixels per image; use a target-specific large-texture adapter')
-            image.load()
+        with open_raster(path) as image:
             rgba = image.convert('RGBA')
             low, high = rgba.getchannel('A').getextrema()
             result.update(width=image.width, height=image.height, mode=image.mode,
@@ -108,7 +129,6 @@ def inspect_file(path):
 
 
 def sprite_checks(path, spec):
-    from PIL import Image
     width, height, count = spec['frame_width'], spec['frame_height'], spec['frame_count']
     if any(type(v) is not int or v <= 0 for v in [width, height, count]):
         raise ValueError('Sprite frame dimensions/count must be positive integers')
@@ -117,7 +137,7 @@ def sprite_checks(path, spec):
     pivot = spec.get('pivot')
     if not isinstance(pivot, list) or len(pivot) != 2 or not 0 <= pivot[0] <= width or not 0 <= pivot[1] <= height:
         raise ValueError('Sprite needs a pivot within the frame')
-    with Image.open(path) as image:
+    with open_raster(path) as image:
         if image.width % width or image.height % height or image.width // width * (image.height // height) != count:
             raise ValueError('Sprite sheet dimensions do not match the declared complete frame grid')
         rgba = image.convert('RGBA')

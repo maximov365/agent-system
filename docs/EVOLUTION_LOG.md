@@ -909,3 +909,31 @@ Final 1.0.48 verification: both Ubuntu 24.04 and 26.04 CI runs passed Python
 All 18 local downstreams match 1.0.48; root audit remains clean and Iris is the
 single downstream readiness warning. The dated implementation report links the
 exact CI runs and records remaining unperformed application/design experiments.
+
+## News and simplification audit — 2026-10-31
+
+Reviewed 1.0.48 at ef4b5b7 against official releases since October 14. Root
+structural audit/render checks pass and all 18 local deployments match; Iris
+retains its prerequisite warning. These checks do not detect dependency advisories
+or stale role semantics. No full regression suite/model comparison was rerun.
+
+Highest priority: installed/pinned Pillow 12.2.0 falls within newly published
+critical advisory ranges, patched in 13.0.0. Upgrade alongside the supported
+Python baseline (3.10 is EOL). A benign BMP named .png also demonstrated that the
+asset inspector's suffix allowlist does not restrict content-detected decoders;
+restrict formats before decoding. Exploitation was not tested or claimed.
+
+Finish simplifying active review methods: remove the residual Claude 5 effort
+recommendation and make JSON/Gatekeeper/Reviser handoffs explicit adapter behavior.
+Refresh old CI reference templates (Node 20/old Actions), add coverage for their
+policy and dependency review, and take the relevant Playwright 1.64.1 bugfix.
+Native Codex doctor can cover host diagnostics without another custom subsystem.
+
+Terra visual reasoning and pixelmatch 8 are controlled comparison candidates;
+keep Astra, current visual baselines and four focused skills until measured
+results justify changes. New API caching/Decisions/voice capabilities remain
+project-specific options. The app updater returned busy, not an available update.
+
+[Report, primary sources, acceptance and limitations](reviews/NEWS-AUDIT-2026-10-31.md).
+Status: recommendations only; no runtime/dependency/model change, rollout, commit
+or publication in this research pass.

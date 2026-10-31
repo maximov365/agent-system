@@ -6,7 +6,7 @@ The September 2026 adaptation replaces mandatory routing ceremony with risk-base
 
 ## Quick start
 
-Prerequisites: Python 3.10+, Git, and an available coding-agent client. In the framework repository:
+Prerequisites: Python 3.11+, Git, and an available coding-agent client. In the framework repository:
 
 ```bash
 python3 -m venv .venv
@@ -90,7 +90,18 @@ downstream changes, which must be applied explicitly. Installed scheduler jobs
 remain untouched. Known legacy framework `setup.py` files migrate to a wrapper
 only after an exact-hash match; customized/application scripts are preserved.
 
-CI runs deterministic regression tests, template validation, and local audit without needing a machine-specific downstream registry. [Evals](evals/README.md) define model/process comparisons; writing an eval prompt is not a completed benchmark.
+CI runs deterministic regression tests, template validation, and local audit without needing a machine-specific downstream registry. The offline audit checks both CI reference templates for pinned actions, supported Python/Node declarations, explicit runner families, permissions and timeouts. It is not an application build or a general workflow security analyzer. Current defaults are Python 3.11/3.14 and Node 24; manual CI dispatch can exercise Python 3.15 and Ubuntu 26.04.
+
+For a framework release or dependency change, run an explicit advisory check in an isolated tooling environment:
+
+```bash
+python3 -m venv .agent/advisory-venv
+.agent/advisory-venv/bin/python -m pip install -r requirements-audit.txt
+.agent/advisory-venv/bin/python -m pip_audit --strict -r requirements-dev.txt
+npm audit --prefix tools/visual --omit=dev
+```
+
+These network checks also run on main-branch pushes and manual CI dispatch. They check known advisories for resolved Python requirements and locked visual dependencies, not every installed downstream environment. Recheck runtime support dates and action releases during maintenance; do not add network research to ordinary task startup. [Evals](evals/README.md) define model/process comparisons; writing an eval prompt is not a completed benchmark.
 
 ## Legacy and limitations
 

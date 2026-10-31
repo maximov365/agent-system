@@ -67,3 +67,13 @@ as GPT-6.1 Sol are comparison candidates, not automatic Astra replacements.
 The [official changelog](https://learn.chatgpt.com/docs/changelog) records changing
 client defaults and retirements. Do not rely on an unpinned client default to keep
 Astra. Check retirement applicability separately for ChatGPT sign-in and API keys.
+
+## Optional comparison target
+
+GPT-6.1 Terra (`gpt-6.1-terra`) can be evaluated as an explicitly selected alternative
+for visual reasoning/code work when available. Its documented image input and text
+output do not make it an image-generation or video tool. Keep Astra as this
+framework's requested default; a small synthetic comparison does not justify a
+universal switch. Compare the same inputs, effort, actual findings and exposed
+usage/elapsed time before a workload-specific change.
+[Official Terra model reference](https://developers.openai.com/api/docs/models/gpt-6.1-terra).

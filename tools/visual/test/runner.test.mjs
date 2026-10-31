@@ -5,6 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import net from 'node:net';
 import crypto from 'node:crypto';
+import http from 'node:http';
+import https from 'node:https';
+import {execFileSync} from 'node:child_process';
+import {chromium} from 'playwright';
 import {run, validateConfig, inside} from '../run.mjs';
 
 const base = () => ({schema_version: 1, baseURL: 'http://127.0.0.1:4319',
@@ -157,4 +161,69 @@ test('real browser: interactions, capture, error detection, baseline mismatch an
       assert.equal(fs.existsSync(path.join(root, 'diff', capture.file.replace('.png', '--diff.png'))), true);
       // Every run starts its own server on the same port: a leaked process breaks the next run.
     } finally { fs.rmSync(root, {recursive: true, force: true}); }
+  });
+
+test('real browser: allowed HTTPS origin, CORS redirect and blocked origin',
+  {skip: process.env.AGENT_VISUAL_TEST_BROWSER !== '1'}, async () => {
+    const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'visual-origins-'));
+    const servers = [];
+    const oldExecutable = process.env.AGENT_BROWSER_EXECUTABLE;
+    try {
+      const key = path.join(root, 'key.pem'), cert = path.join(root, 'cert.pem');
+      execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes',
+        '-keyout', key, '-out', cert, '-days', '1', '-subj', '/CN=localhost'], {stdio: 'ignore'});
+      const certificate = new crypto.X509Certificate(fs.readFileSync(cert));
+      const spki = crypto.createHash('sha256').update(certificate.publicKey.export({type: 'spki', format: 'der'})).digest('base64');
+      // Trust only this ephemeral fixture certificate, only in this browser process.
+      // No trust-store changes or production runner TLS exceptions.
+      const wrapper = path.join(root, 'browser');
+      const quote = s => "'" + s.replaceAll("'", "'\\''") + "'";
+      const probe = await chromium.launchServer({headless: true});
+      const executable = probe.process().spawnfile;
+      await probe.close();
+      fs.writeFileSync(wrapper, `#!/bin/sh\nexec ${quote(executable)} --ignore-certificate-errors-spki-list=${quote(spki)} "$@"\n`, {mode: 0o700});
+      process.env.AGENT_BROWSER_EXECUTABLE = wrapper;
+      let appOrigin;
+      const observed = [];
+      const api = https.createServer({key: fs.readFileSync(key), cert: fs.readFileSync(cert)}, (req, res) => {
+        observed.push([req.method, req.url]);
+        res.setHeader('Access-Control-Allow-Origin', appOrigin);
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'x-fixture');
+        if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+        if (req.url === '/start') { res.writeHead(307, {Location: '/finish'}); return res.end(); }
+        res.end('Allowed redirect completed');
+      });
+      servers.push(api);
+      await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
+      const apiOrigin = `https://127.0.0.1:${api.address().port}`;
+      const app = http.createServer((req, res) => {
+        res.setHeader('Content-Type', 'text/html');
+        res.end(`<!doctype html><output>Waiting</output><script>
+          fetch('${apiOrigin}/start',{method:'POST',headers:{'x-fixture':'1'},body:'fixture'})
+          .then(r=>r.text()).then(text=>document.querySelector('output').textContent=text)
+          .catch(()=>document.querySelector('output').textContent='Blocked');</script>`);
+      });
+      servers.push(app);
+      await new Promise(resolve => app.listen(0, '127.0.0.1', resolve));
+      appOrigin = `http://127.0.0.1:${app.address().port}`;
+      const config = {...base(), baseURL: appOrigin, allowedOrigins: [apiOrigin],
+        journeys: [{id: 'cors', steps: [
+          {type: 'expectText', selector: 'output', contains: 'Allowed redirect completed'},
+          {type: 'capture', name: 'result'}]}]};
+      const success = await run(config, {project: root, output: path.join(root, 'allowed')});
+      assert.equal(success.checks_passed, true, JSON.stringify(success));
+      assert.ok(observed.some(([method, url]) => method === 'POST' && url === '/finish'));
+      assert.ok(success.journeys[0].external_resources.includes(`${apiOrigin}/start`));
+      config.allowedOrigins = [];
+      config.journeys[0].steps[0].contains = 'Blocked';
+      const blocked = await run(config, {project: root, output: path.join(root, 'blocked')});
+      assert.equal(blocked.checks_passed, false);
+      assert.match(blocked.journeys[0].errors.join(' '), /External request blocked/);
+    } finally {
+      if (oldExecutable === undefined) delete process.env.AGENT_BROWSER_EXECUTABLE;
+      else process.env.AGENT_BROWSER_EXECUTABLE = oldExecutable;
+      for (const server of servers) await new Promise(resolve => server.close(resolve));
+      fs.rmSync(root, {recursive: true, force: true});
+    }
   });

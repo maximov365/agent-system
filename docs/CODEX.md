@@ -40,6 +40,13 @@ skill invocation are separate observations. Keep host diagnostics opt-in and
 bounded; do not scan private conversation logs or globally install duplicate skills
 to hide a project-scope problem.
 
+For host issues, use native `codex doctor` only when supported by the installed
+client; inspect `codex doctor --help` before selecting flags. Newer CLI releases
+provide `--network-only`, which older bundled clients may lack. This is an opt-in
+host diagnostic, not a per-task prerequisite. Update a desktop-bundled CLI through
+the desktop app rather than replacing its binary.
+[Official release notes](https://learn.chatgpt.com/docs/changelog).
+
 Use `python3 .agent-system/profile.py doctor` for declared project prerequisites;
 see `docs/PROJECT_READINESS.md` for explicit runtime verification. Diagnostic model
 intent is not the host's effective selection. Optional speed tiers and changing
