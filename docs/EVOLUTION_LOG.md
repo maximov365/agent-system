@@ -937,3 +937,30 @@ project-specific options. The app updater returned busy, not an available update
 [Report, primary sources, acceptance and limitations](reviews/NEWS-AUDIT-2026-10-31.md).
 Status: recommendations only; no runtime/dependency/model change, rollout, commit
 or publication in this research pass.
+
+
+## Maintenance implementation — 2026-10-31
+
+Implemented 1.0.49 in 4837fc4 after the user approved the news-audit work. Pillow
+13.0.0 plus decoder/content/frame/version guards close the identified raster
+boundary; Python baseline is 3.11+. Playwright is 1.64.1. CI/reference templates
+use supported defaults, pinned actions, scoped permissions and offline policy
+checks; explicit release dependency-advisory checks remain separate from task startup.
+
+Three normal review methods now preserve active model/effort and emit focused
+findings; legacy structured adapters are optional. Their combined word count fell
+59%, with five of five planted spec problems detected in one old/new pair. The
+new method avoided an unnecessary escalation/handoff. An explicit spec-adapter
+call preserved JSON fields. This small result does not guarantee general speed
+or quality. Astra/Terra each found all three visible fixture defects in two runs;
+keep Astra as default. Pixelmatch 8 showed no compelling advantage in the bounded
+comparison; retain 7.2 and existing baselines. No new design skill or model gateway.
+
+Local 76 Python and 13 JavaScript checks passed, as did template rendering, offline
+audit, actionlint and advisory checks. Published code CI passed on Ubuntu 24.04
+and 26.04, Python 3.11/3.14/3.15 and Node 24. All 18 local downstream framework
+installations were updated with verified recovery backups and preserved project
+files/Git staging. Application environments were not implicitly migrated: two
+retain older Pillow, which the new framework raster guard refuses.
+
+[Implementation, measurements, CI links and limitations](reviews/MAINTENANCE-2026-10-31.md).

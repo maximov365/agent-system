@@ -37,4 +37,17 @@ Revert workflow/instruction changes independently of the security fix if needed.
 
 ## Checkpoint
 
-- Baseline inspected; implementation in progress.
+- Implementation complete in 4837fc4 (1.0.49), published to main.
+- 76 Python / 13 JavaScript checks, render, offline audit, actionlint and explicit
+  dependency advisory checks passed locally. Seven bounded model calls completed;
+  keep Astra and pixelmatch 7 defaults. See the dated implementation report.
+- All 18 downstreams updated with applied recovery manifests; exact rendered
+  framework match, protected project files and pre-existing Git staging preserved.
+  Child application changes were neither staged nor published.
+- Root Pillow installed at 13.0.0. Two application venvs retain old Pillow; no
+  dedicated framework dependency environments existed. New raster guard rejects
+  those old versions; application upgrades need their own compatibility checks.
+- Remote CI passed for code commit 4837fc4: Ubuntu 24.04/Python 3.11+3.14
+  (41190564771), Ubuntu 26.04/Python 3.11+3.15 (41190564806). Both include
+  Node 24 browser tests and dependency advisories. Implementation/rollout complete;
+  dated report records evidence and the separate application-environment limitation.

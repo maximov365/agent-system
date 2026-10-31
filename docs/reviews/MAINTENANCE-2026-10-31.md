@@ -105,7 +105,8 @@ real-device variability, broad raster noise, alpha sprites or complex scenes.
 
 ## Verification and rollout
 
-Local verification: 76 Python tests; 13 actual browser/UI-grader/game-logic checks;
+Local verification: 76 Python tests; 13 JavaScript checks including real-browser
+journeys, the UI grader, preflight negatives and game logic;
 template rendering; offline audit with zero warnings/critical findings; actionlint
 1.7.12 on all three workflows/templates; git whitespace check. Shellcheck/pyflakes
 were disabled in actionlint; these are not claimed. pip-audit 2.10.1 found no known
@@ -124,7 +125,20 @@ The macOS/web templates received static validation; no real macOS app signing,
 notarization or reference web/API deployment was performed. Desktop app update
 availability was not established; bundled CLI was not replaced.
 
-Publication, downstream transaction verification and remote CI results will be
-recorded after completion. Recovery uses per-project sync backups; never restore
-vulnerable raster processing as a workaround. Revert non-security guidance/CI
-changes independently if needed.
+Published code commit [4837fc4](https://github.com/maximov365/agent-system/commit/4837fc43dec5d1304bcaab0623e1d9f6984ff560).
+Remote CI passed on [Ubuntu 24.04 / Python 3.11 and 3.14](https://github.com/maximov365/agent-system/actions/runs/41190564771)
+and [Ubuntu 26.04 / Python 3.11 and 3.15](https://github.com/maximov365/agent-system/actions/runs/41190564806).
+Both runs include Node 24 browser tests and dependency advisories.
+
+All 18 local downstreams now have version 1.0.49, with 23 managed paths changed in
+each. Verified exact rendered framework bytes, all 18 render checks and applied
+recovery manifests, protected config/profile/product/CI files and pre-existing
+Git staging. The final cross-project audit has zero critical findings and one
+pre-existing readiness warning: a child frontend still needs its initial dependency
+installation and reviewed lockfile. This is application setup, not framework drift.
+The root repository was published; dirty child repositories were not
+staged or pushed as part of this rollout. Private per-project details/backups and
+raw diagnostic/model logs remain in local ignored evidence.
+
+Recovery uses per-project sync backups; never restore vulnerable raster processing
+as a workaround. Revert non-security guidance/CI changes independently if needed.
